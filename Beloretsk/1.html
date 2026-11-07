@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Белорецкий район</title>
+    <style>
+    :root {
+        --bg-color: #f8f9fa;
+        --text-color: #333;
+        --card-bg: rgba(255, 255, 255, 0.92); 
+        --card-border: rgba(255, 255, 255, 0.6);
+        --heading-color: #2c3e50;
+        --subheading-color: #555;
+        --shadow: 0 10px 40px rgba(0,0,0,0.15);
+        
+        --bg-speed: 60s; 
+        --lighting-cycle: 40s;      
+        --brightness-max: 1.6;      
+        --brightness-min: 0.4;      
+        --brightness-normal: 1;     
+    }
+
+    body.dark {
+        --bg-color: #1a1a2e;
+        --text-color: #eee;
+        --card-bg: rgba(30, 30, 46, 0.92);
+        --card-border: rgba(255, 255, 255, 0.15);
+        --heading-color: #ffd166;
+        --subheading-color: #a0a0a0;
+        --shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    body {
+        margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color); background-color: var(--bg-color); box-sizing: border-box; min-height: 100vh;
+        /* Запрещаем горизонтальный скролл на телефонах */
+        overflow-x: hidden; 
+    }
+
+    .card-wrapper {
+        position: relative; width: 100%; min-height: 100vh; overflow: hidden; isolation: isolate; 
+    }
+    
+    .bg-layer {
+        position: absolute; inset: 0; background-image: url('blank.jpg'); 
+        background-size: cover; background-position: center; z-index: 0;
+        transform: scale(1.15);
+        animation: 
+            bgFlight var(--bg-speed) ease-in-out infinite alternate,
+            bgLighting var(--lighting-cycle) ease-in-out infinite;
+        will-change: transform, filter;
+    }
+
+    @keyframes bgFlight {
+        0% { transform: scale(1.15) translateX(0%); }
+        100% { transform: scale(1.15) translateX(-3%); }
+    }
+
+    @keyframes bgLighting {
+        0%   { filter: brightness(var(--brightness-normal)); }
+        12.5% { filter: brightness(var(--brightness-max)); }    
+        62.5% { filter: brightness(var(--brightness-normal)); } 
+        75%  { filter: brightness(var(--brightness-min)); }    
+        100% { filter: brightness(var(--brightness-normal)); } 
+    }
+
+    .clouds-layer {
+        position: absolute; inset: 0; z-index: 1; pointer-events: none;
+        background: rgba(0, 0, 0, 0.05); contain: strict; 
+    }
+
+    .cloud { position: absolute; top: 0; left: 0; will-change: transform; transform: translateZ(0); }
+    .cloud-part { position: absolute; background: radial-gradient(circle at 35% 35%, #ffffff, #dcdcdc); border-radius: 50%; }
+    .cloud-back { filter: blur(40px); opacity: 0.5; }
+    .cloud-mid { filter: blur(25px); opacity: 0.75; }
+
+    .content-wrapper {
+        position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+        text-align: center; padding: 40px 20px; max-width: 900px; margin: 0 auto;
+    }
+
+    .gerb {
+        width: 100px; height: auto; margin-bottom: 15px;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+        background: rgba(255,255,255,0.9); border-radius: 50%; padding: 10px;
+    }
+
+    h1 { 
+        color: var(--heading-color); margin: 0 0 5px 0; font-size: 32px; 
+        font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); 
+    }
+    
+    h2 { 
+        color: var(--subheading-color); font-size: 18px; font-weight: normal; 
+        margin-top: 0; margin-bottom: 20px; text-shadow: 0 1px 5px rgba(0,0,0,0.3); 
+    }
+    
+    p.main-desc { 
+        line-height: 1.6; max-width: 700px; font-size: 16px; 
+        color: var(--subheading-color); text-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        margin-bottom: 30px; background: var(--card-bg); 
+        padding: 20px 30px; border-radius: 16px; border: 1px solid var(--card-border); 
+        box-shadow: var(--shadow);
+    }
+
+    .attraction {
+        display: flex; gap: 20px; background: var(--card-bg);
+        border: 1px solid var(--card-border); padding: 20px; border-radius: 16px; box-shadow: var(--shadow);
+        max-width: 850px; width: 100%; text-align: left; box-sizing: border-box; margin-bottom: 30px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer; position: relative;
+    }
+
+    .attraction:hover { transform: translateY(-5px); box-shadow: 0 15px 50px rgba(0,0,0,0.2); }
+    
+    .attraction img { width: 250px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; }
+    
+    .attraction-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    
+    .attraction-info h3 { 
+        margin-top: 0; color: var(--heading-color); font-size: 20px; 
+        font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,0.2); 
+    }
+    
+    .attraction-info > p { 
+        color: var(--subheading-color); font-weight: normal;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 15px; font-size: 14.5px; line-height: 1.5;
+    }
+
+    .attraction-details {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, margin-top 0.4s ease;
+        margin-top: 0;
+        color: var(--subheading-color);
+        font-size: 14px;
+        line-height: 1.6;
+        border-top: 1px solid transparent;
+    }
+
+    /* ИСПРАВЛЕНИЕ: Увеличили высоту, чтобы длинный текст не обрезался на телефонах */
+    .attraction.expanded .attraction-details {
+        max-height: 2000px; 
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top-color: var(--card-border);
+    }
+
+    .attraction.expanded .attraction-details p {
+        margin-bottom: 0;
+        color: var(--subheading-color);
+    }
+
+    .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+    .btn {
+        display: inline-block; padding: 10px 12px; border-radius: 8px; text-decoration: none;
+        font-weight: 600; font-size: 13px; transition: background 0.2s, transform 0.1s;
+        color: #fff; text-align: center; flex: 1; min-width: 120px; border: none; cursor: pointer;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-route { background: #0984e3; } .btn-route:hover { background: #74b9ff; }
+    .btn-bus { background: #e17055; } .btn-bus:hover { background: #fab1a0; }
+    .btn-train { background: #00b894; } .btn-train:hover { background: #55efc4; }
+
+    .attraction::after {
+        content: "▼ нажмите, чтобы раскрыть";
+        position: absolute; bottom: 8px; right: 20px;
+        font-size: 11px; color: var(--subheading-color);
+        opacity: 0.6; transition: opacity 0.2s;
+    }
+    .attraction.expanded::after { content: "▲ свернуть"; }
+
+    .carousel-container {
+        width: 100%; max-width: 850px; text-align: left; background: var(--card-bg);
+        border: 1px solid var(--card-border); padding: 20px; border-radius: 16px; box-shadow: var(--shadow);
+    }
+    
+    .carousel-container h3 { 
+        color: var(--heading-color); font-weight: 800; font-size: 20px; 
+        text-shadow: 0 1px 4px rgba(0,0,0,0.2); margin-top: 0; margin-bottom: 15px; 
+    }
+
+    .carousel { display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 15px; }
+    .carousel::-webkit-scrollbar { height: 6px; }
+    .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    .carousel::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+    
+    .carousel img {
+        height: 180px; width: 260px; flex-shrink: 0; object-fit: cover; border-radius: 10px;
+        scroll-snap-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s;
+    }
+    .carousel img:hover { transform: scale(1.02); }
+
+    /* ==========================================
+       МОБИЛЬНАЯ АДАПТАЦИЯ (СМАРТФОНЫ)
+       ========================================== */
+    @media (max-width: 768px) {
+        .content-wrapper { padding: 20px 15px; } /* Меньше отступы по краям */
+        
+        h1 { font-size: 26px; }
+        h2 { font-size: 16px; }
+        
+        p.main-desc { padding: 15px 20px; font-size: 15px; }
+        
+        .attraction { 
+            flex-direction: column; 
+            padding: 15px; 
+            padding-bottom: 35px; /* Место для подсказки внизу */
+        }
+        
+        .attraction img { width: 100%; height: 200px; }
+        
+        .buttons { flex-direction: column; gap: 10px; }
+        
+        /* УВЕЛИЧИВАЕМ КНОПКИ ДЛЯ УДОБНОГО НАЖАТИЯ ПАЛЬЦЕМ */
+        .btn { 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 14px 12px; 
+            font-size: 15px; 
+        }
+        
+        .attraction::after { right: 15px; bottom: 10px; font-size: 10px; }
+
+        /* На телефонах немного уменьшаем нагрузку на GPU */
+        .cloud-back { filter: blur(30px); }
+        .cloud-mid { filter: blur(20px); }
+    }
+</style>
+</head>
+<body>
+
+    <div class="card-wrapper">
+        <div class="bg-layer"></div>
+        <div class="clouds-layer" id="clouds-container"></div>
+
+        <div class="content-wrapper">
+            <img src="gerb.jpg" alt="Герб Белорецкого района" class="gerb">
+
+            <h1>Белорецкий район</h1>
+            <h2>Жемчужина Уральских гор</h2>
+            
+            <p class="main-desc">Белорецкий район — один из самых живописных в Башкортостане. Здесь находятся высочайшие вершины Южного Урала, кристально чистые озера и густые хвойные леса. Это идеальное место для активного туризма, сплавов и треккинга.</p>
+
+            <!-- ========== КАРТОЧКА 1: АЙГИР ========== -->
+            <div class="attraction" id="card-aygir">
+                <img src="aygir.jpg" alt="Скалы Айгир">
+                <div class="attraction-info">
+                    <div>
+                        <h3>Достопримечательность: Айгир</h3>
+                        <p>Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами. Идеальная точка для похода выходного дня.</p>
+                    </div>
+                    <!-- Подробное описание (скрыто) -->
+                    <div class="attraction-details">
+                        <p>Айгир — это не просто скалы, а настоящая «Мекка» для туристов Южного Урала. Здесь, на северном склоне хребта Караташ, возвышаются знаменитые «Зубы Шурале» (их также называют Орлиными скалами). С высоты около 689 метров открывается захватывающая панорама на изгиб реки Малый Инзер и окрестные горные хребты. Рядом с горой течёт одноимённый водопад, особенно красивый весной и летом. Место овеяно легендами: по одной из них, название происходит от башкирского «айғыр» — «жеребец». Сюда приезжают ради рассветов, фотосессий и треккинга — маршруты подходят как для новичков, так и для опытных путешественников.</p>
+                    </div>
+                    <div class="buttons">
+                        <a href="https://yandex.ru/maps/?rtext=~Айгир&rtt=auto" target="_blank" class="btn btn-route">🚗 На машине</a>
+                        <a href="https://автовокзалы-рб.рф" target="_blank" class="btn btn-bus">🚌 На автобусе</a>
+                        <a href="https://ticket.rzd.ru/" target="_blank" class="btn btn-train">🚆 На поезде</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== КАРТОЧКА 2: АБЗАКОВО ========== -->
+            <div class="attraction" id="card-abzakovo">
+                <img src="Abzakovo.jpg" alt="Горнолыжный комплекс Абзаково">
+                <div class="attraction-info">
+                    <div>
+                        <h3>Горнолыжный комплекс «Абзаково»</h3>
+                        <p>Один из самых современных курортов Башкортостана, расположенный у подножия хребта Крыкты-Тау. Зимой здесь катаются на лыжах и сноуборде, а летом — гуляют, отдыхают у воды и посещают аквапарк. «Уральская Швейцария» — так называют это место за красоту гор и высокий уровень сервиса.</p>
+                    </div>
+                    <div class="attraction-details">
+                        <p>Курорт «Абзаково» работает круглый год и предлагает 13 трасс общей протяжённостью около 18 км с перепадом высот до 320 метров. Трассы проходят через лесной массив, поэтому катание сопровождается потрясающими видами на горы. Для профессионалов подготовлены склоны, соответствующие стандартам FIS. Пять современных подъёмников доставляют на вершины до 5000 человек в час, а система искусственного заснеживания гарантирует стабильное покрытие. Помимо горнолыжного спорта, здесь есть аквапарк, спа-комплекс, зоопарк, хаски-город и развлекательный центр. Опытные инструкторы помогут новичкам, а пункты проката, кафе и медпункт работают прямо у подъёмников.</p>
+                    </div>
+                    <div class="buttons">
+                        <a href="https://yandex.ru/maps/?rtext=~Абзаково&rtt=auto" target="_blank" class="btn btn-route">🚗 На машине</a>
+                        <a href="https://автовокзалы-рб.рф" target="_blank" class="btn btn-bus">🚌 На автобусе</a>
+                        <a href="https://ticket.rzd.ru/" target="_blank" class="btn btn-train">🚆 На поезде</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== КАРТОЧКА 3: ИНЗЕРСКИЕ ЗУБЧАТКИ ========== -->
+            <div class="attraction" id="card-inzer">
+                <img src="Inzerskie-zubchatki.jpg" alt="Инзерские зубчатки">
+                <div class="attraction-info">
+                    <div>
+                        <h3>Инзерские зубчатки</h3>
+                        <p>Живописный горный хребет в междуречье Большого Инзера и Тирляна. Главная особенность — скальный цирк из причудливых скал-«зубцов» высотой до 35 метров. Пейзажи настолько необычны, что напоминают декорации к фильму «Аватар». Одно из самых красивых и загадочных мест Южного Урала.</p>
+                    </div>
+                    <div class="attraction-details">
+                        <p>Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды. Путь к хребту начинается через кордон Миселя, где нужно перейти вброд холодную горную реку.</p>
+                    </div>
+                    <div class="buttons">
+                        <a href="https://yandex.ru/maps/?rtext=~Инзерские%20зубчатки&rtt=auto" target="_blank" class="btn btn-route">🚗 На машине</a>
+                        <a href="https://автовокзалы-рб.рф" target="_blank" class="btn btn-bus">🚌 На автобусе</a>
+                        <a href="https://ticket.rzd.ru/" target="_blank" class="btn btn-train">🚆 На поезде</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-container">
+                <h3>Галерея</h3>
+                <div class="carousel">
+                    <img src="1.jpg" alt="Фото 1">
+                    <img src="2.jpg" alt="Фото 2">
+                    <img src="3.jpg" alt="Фото 3">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        try {
+            if (window.parent && window.parent !== window && window.parent.document.body.classList.contains('dark-mode')) {
+                document.body.classList.add('dark');
+            }
+        } catch (e) {}
+
+        // ========== РАСКРЫТИЕ КАРТОЧЕК ==========
+        document.querySelectorAll('.attraction').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Если клик был по кнопке-ссылке, не раскрываем карточку
+                if (e.target.closest('.btn')) return;
+                card.classList.toggle('expanded');
+            });
+        });
+
+        // ========== ОБЛАКА ==========
+        const cloudsContainer = document.getElementById('clouds-container');
+        const TARGET_FPS = 30; 
+        const FRAME_TIME = 1000 / TARGET_FPS;
+        
+        const cloudsData = [];
+        let lastRender = 0;
+
+        function createCloud(layerClass, speedMin, speedMax) {
+            const cloud = document.createElement('div');
+            cloud.className = `cloud ${layerClass}`;
+            
+            const topPos = Math.random() * 50 - 10; 
+            const durationMs = (Math.random() * (speedMax - speedMin) + speedMin) * 1000;
+            const delayMs = Math.random() * -durationMs;
+
+            cloud.style.top = `${topPos}%`;
+
+            const numParts = Math.floor(Math.random() * 4) + 3; 
+            let currentLeftOffset = 0;
+
+            for (let i = 0; i < numParts; i++) {
+                const part = document.createElement('div');
+                part.className = 'cloud-part';
+                const size = Math.random() * 600 + 250; 
+                const offsetY = (Math.random() * size * 0.8) - (size * 0.4); 
+
+                part.style.width = `${size}px`;
+                part.style.height = `${size}px`;
+                part.style.top = `${offsetY}px`;
+                part.style.left = `${currentLeftOffset}px`;
+                currentLeftOffset += size * 0.95; 
+                cloud.appendChild(part);
+            }
+
+            cloudsContainer.appendChild(cloud);
+
+            cloudsData.push({
+                element: cloud,
+                durationMs: durationMs,
+                startTime: performance.now() + delayMs
+            });
+        }
+
+        for (let i = 0; i < 5; i++) createCloud('cloud-back', 60, 150);
+        for (let i = 0; i < 7; i++) createCloud('cloud-mid', 100, 200);
+
+        function animateAllClouds(time) {
+            requestAnimationFrame(animateAllClouds);
+
+            if (time - lastRender < FRAME_TIME) return;
+            lastRender = time;
+
+            for (let i = 0; i < cloudsData.length; i++) {
+                const c = cloudsData[i];
+                const elapsed = time - c.startTime;
+                if (elapsed < 0) continue; 
+
+                const progress = (elapsed % c.durationMs) / c.durationMs;
+                const currentX = -100 + 200 * progress;
+                
+                c.element.style.transform = `translate3d(${currentX}vw, 0, 0)`;
+            }
+        }
+
+        requestAnimationFrame(animateAllClouds);
+    </script>
+</body>
+</html>

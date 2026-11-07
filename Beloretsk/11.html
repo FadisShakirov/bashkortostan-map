@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Белорецкий район</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --card-bg: rgba(255, 255, 255, 0.92); 
+            --card-border: rgba(255, 255, 255, 0.6);
+            --heading-color: #2c3e50;
+            --subheading-color: #555;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+            
+            /* СКОРОСТЬ ДВИЖЕНИЯ ФОНА */
+            --bg-speed: 60s; 
+
+            /* ==========================================
+               НАСТРОЙКИ ОСВЕЩЕНИЯ ФОНА (ТЕПЕРЬ ВНУТРИ :root)
+               ========================================== */
+            --lighting-cycle: 40s;      /* Полный цикл (40 секунд) */
+            --brightness-max: 1.6;      /* Максимальная яркость (+60%) */
+            --brightness-min: 0.4;      /* Максимальное затемнение (-60%) */
+            --brightness-normal: 1;     /* Обычное состояние */
+        }
+
+        /* Тёмная тема */
+        body.dark {
+            --bg-color: #1a1a2e;
+            --text-color: #eee;
+            --card-bg: rgba(30, 30, 46, 0.92);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --heading-color: #ffd166;
+            --subheading-color: #a0a0a0;
+            --shadow: 0 10px 40px rgba(0,0,0,0.6);
+        }
+
+        body {
+            margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color); background-color: var(--bg-color); box-sizing: border-box; min-height: 100vh;
+        }
+
+        .card-wrapper {
+            position: relative; width: 100%; min-height: 100vh; overflow: hidden; isolation: isolate; 
+        }
+        
+        /* 1. ФОТОГРАФИЯ (С ЭФФЕКТОМ ПОЛЕТА И ОСВЕЩЕНИЯ) */
+        .bg-layer {
+            position: absolute; 
+            inset: 0; 
+            background-image: url('blank.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            z-index: 0;
+            
+            transform: scale(1.15);
+            
+            /* Запускаем ДВЕ анимации: движение и освещение */
+            animation: 
+                bgFlight var(--bg-speed) ease-in-out infinite alternate,
+                bgLighting var(--lighting-cycle) ease-in-out infinite;
+            
+            will-change: transform, filter;
+        }
+
+        /* Анимация движения (слева направо) */
+        @keyframes bgFlight {
+            0% { transform: scale(1.15) translateX(0%); }
+            100% { transform: scale(1.15) translateX(-3%); }
+        }
+
+        /* ==========================================
+           АНИМАЦИЯ ОСВЕЩЕНИЯ
+           Цикл 40 сек:
+           - 0-5с (0-12.5%): Плавно осветляется
+           - 5-25с (12.5-62.5%): Стоит стандартно
+           - 25-30с (62.5-75%): Плавно темнеет
+           - 30-40с (75-100%): Возвращается к стандарту
+           ========================================== */
+        @keyframes bgLighting {
+            0%   { filter: brightness(var(--brightness-normal)); }
+            7.5% { filter: brightness(var(--brightness-max)); }    /* Пик яркости (через 5 сек) */
+            62.5% { filter: brightness(var(--brightness-normal)); } /* Возврат в норму (через 25 сек) */
+            35%  { filter: brightness(var(--brightness-min)); }    /* Пик темноты (через 30 сек) */
+            100% { filter: brightness(var(--brightness-normal)); } /* Снова в норму (через 40 сек) */
+        }
+
+        /* СЛОЙ ОБЛАКОВ */
+        .clouds-layer {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: rgba(0, 0, 0, 0.05); 
+            contain: strict; 
+        }
+
+        /* ОПТИМИЗИРОВАННЫЕ ОБЛАКА */
+        .cloud {
+            position: absolute; top: 0; left: 0;
+            will-change: transform;
+            transform: translateZ(0); 
+        }
+
+        .cloud-part {
+            position: absolute; background: radial-gradient(circle at 35% 35%, #ffffff, #dcdcdc); border-radius: 50%;
+        }
+
+        .cloud-back { filter: blur(40px); opacity: 0.5; }
+        .cloud-mid { filter: blur(25px); opacity: 0.75; }
+
+        /* КОНТЕНТ */
+        .content-wrapper {
+            position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+            text-align: center; padding: 40px 20px; max-width: 900px; margin: 0 auto;
+        }
+
+        .gerb {
+            width: 100px; height: auto; margin-bottom: 15px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            background: rgba(255,255,255,0.9); border-radius: 50%; padding: 10px;
+        }
+
+        h1 { color: var(--heading-color); margin: 0 0 5px 0; font-size: 32px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        h2 { color: var(--subheading-color); font-size: 18px; font-weight: normal; margin-top: 0; margin-bottom: 20px; text-shadow: 0 1px 5px rgba(0,0,0,0.3); }
+        
+        p.main-desc { 
+            line-height: 1.6; max-width: 700px; font-size: 15px; margin-bottom: 30px; 
+            background: var(--card-bg); padding: 20px 30px; border-radius: 16px; border: 1px solid var(--card-border); box-shadow: var(--shadow);
+        }
+
+        .attraction {
+            display: flex; gap: 20px; background: var(--card-bg);
+            border: 1px solid var(--card-border); padding: 20px; border-radius: 16px; box-shadow: var(--shadow);
+            max-width: 850px; width: 100%; text-align: left; box-sizing: border-box; margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .attraction:hover { transform: translateY(-5px); box-shadow: 0 15px 50px rgba(0,0,0,0.2); }
+        .attraction img { width: 250px; height: 180px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .attraction-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .attraction-info h3 { margin-top: 0; color: var(--heading-color); font-size: 20px; }
+        .attraction-info p { margin-bottom: 15px; font-size: 14px; }
+
+        .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            display: inline-block; padding: 10px 12px; border-radius: 8px; text-decoration: none;
+            font-weight: 600; font-size: 13px; transition: background 0.2s, transform 0.1s;
+            color: #fff; text-align: center; flex: 1; min-width: 120px; border: none; cursor: pointer;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-route { background: #0984e3; } .btn-route:hover { background: #74b9ff; }
+        .btn-bus { background: #e17055; } .btn-bus:hover { background: #fab1a0; }
+        .btn-train { background: #00b894; } .btn-train:hover { background: #55efc4; }
+
+        .carousel-container {
+            width: 100%; max-width: 850px; text-align: left; background: var(--card-bg);
+            border: 1px solid var(--card-border); padding: 20px; border-radius: 16px; box-shadow: var(--shadow);
+        }
+        
+        .carousel-container h3 { color: var(--heading-color); margin-top: 0; margin-bottom: 15px; }
+        .carousel { display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 15px; }
+        .carousel::-webkit-scrollbar { height: 6px; }
+        .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .carousel::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .carousel img {
+            height: 180px; width: 260px; flex-shrink: 0; object-fit: cover; border-radius: 10px;
+            scroll-snap-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s;
+        }
+        .carousel img:hover { transform: scale(1.02); }
+
+        @media (max-width: 700px) {
+            .attraction { flex-direction: column; padding: 15px; }
+            .attraction img { width: 100%; height: 200px; }
+            .buttons { flex-direction: column; }
+            .btn { width: 100%; box-sizing: border-box; }
+            h1 { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-wrapper">
+        <div class="bg-layer"></div>
+        <div class="clouds-layer" id="clouds-container"></div>
+
+        <div class="content-wrapper">
+            <img src="gerb.jpg" alt="Герб Белорецкого района" class="gerb">
+
+            <h1>Белорецкий район</h1>
+            <h2>Жемчужина Уральских гор</h2>
+            <p class="main-desc">Белорецкий район — один из самых живописных в Башкортостане. Здесь находятся высочайшие вершины Южного Урала, кристально чистые озера и густые хвойные леса. Это идеальное место для активного туризма, сплавов и треккинга.</p>
+
+            <div class="attraction">
+                <img src="aygir.jpg" alt="Скалы Айгир">
+                <div class="attraction-info">
+                    <div>
+                        <h3>Достопримечательность: Айгир</h3>
+                        <p>Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами. Идеальная точка для похода выходного дня.</p>
+                    </div>
+                    <div class="buttons">
+                        <a href="#" class="btn btn-route">🚗 На машине</a>
+                        <a href="#" class="btn btn-bus">🚌 На автобусе</a>
+                        <a href="#" class="btn btn-train">🚆 На поезде</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-container">
+                <h3>Галерея</h3>
+                <div class="carousel">
+                    <img src="1.jpg" alt="Фото 1">
+                    <img src="2.jpg" alt="Фото 2">
+                    <img src="3.jpg" alt="Фото 3">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        try {
+            if (window.parent && window.parent !== window && window.parent.document.body.classList.contains('dark-mode')) {
+                document.body.classList.add('dark');
+            }
+        } catch (e) {}
+
+        const cloudsContainer = document.getElementById('clouds-container');
+        const TARGET_FPS = 30; 
+        const FRAME_TIME = 1000 / TARGET_FPS;
+        
+        const cloudsData = [];
+        let lastRender = 0;
+
+        function createCloud(layerClass, speedMin, speedMax) {
+            const cloud = document.createElement('div');
+            cloud.className = `cloud ${layerClass}`;
+            
+            const topPos = Math.random() * 50 - 10; 
+            const durationMs = (Math.random() * (speedMax - speedMin) + speedMin) * 1000;
+            const delayMs = Math.random() * -durationMs;
+
+            cloud.style.top = `${topPos}%`;
+
+            const numParts = Math.floor(Math.random() * 4) + 3; 
+            let currentLeftOffset = 0;
+
+            for (let i = 0; i < numParts; i++) {
+                const part = document.createElement('div');
+                part.className = 'cloud-part';
+                const size = Math.random() * 600 + 250; 
+                const offsetY = (Math.random() * size * 0.8) - (size * 0.4); 
+
+                part.style.width = `${size}px`;
+                part.style.height = `${size}px`;
+                part.style.top = `${offsetY}px`;
+                part.style.left = `${currentLeftOffset}px`;
+                currentLeftOffset += size * 0.95; 
+                cloud.appendChild(part);
+            }
+
+            cloudsContainer.appendChild(cloud);
+
+            cloudsData.push({
+                element: cloud,
+                durationMs: durationMs,
+                startTime: performance.now() + delayMs
+            });
+        }
+
+        for (let i = 0; i < 5; i++) createCloud('cloud-back', 60, 150);
+        for (let i = 0; i < 7; i++) createCloud('cloud-mid', 100, 200);
+
+        function animateAllClouds(time) {
+            requestAnimationFrame(animateAllClouds);
+
+            if (time - lastRender < FRAME_TIME) return;
+            lastRender = time;
+
+            for (let i = 0; i < cloudsData.length; i++) {
+                const c = cloudsData[i];
+                const elapsed = time - c.startTime;
+                if (elapsed < 0) continue; 
+
+                const progress = (elapsed % c.durationMs) / c.durationMs;
+                const currentX = -100 + 200 * progress;
+                
+                c.element.style.transform = `translate3d(${currentX}vw, 0, 0)`;
+            }
+        }
+
+        requestAnimationFrame(animateAllClouds);
+    </script>
+</body>
+</html>
