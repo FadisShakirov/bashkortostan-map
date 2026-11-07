@@ -1713,9 +1713,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardOverlay.style.opacity = '1';
                 cardOverlay.style.pointerEvents = 'auto';
 
-                // 2. Расширяем контейнер до 60%
-                const targetW = window.innerWidth * 0.6;
-                const targetH = window.innerHeight * 0.6;
+                 // 2. Расширяем контейнер (на мобильных — почти на весь экран)
+                const isMobile = window.innerWidth <= 768;
+                const targetW = isMobile ? window.innerWidth * 0.95 : window.innerWidth * 0.6;
+                const targetH = isMobile ? window.innerHeight * 0.85 : window.innerHeight * 0.6;
 
                 box.style.pointerEvents = 'auto'; 
                 box.style.transition = 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
@@ -1724,17 +1725,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 box.style.left = ((window.innerWidth - targetW) / 2) + 'px';
                 box.style.top = ((window.innerHeight - targetH) / 2) + 'px';
 
-                // 3. Настраиваем кнопку закрытия (СНАРУЖИ карточки)
+                // 3. Настраиваем кнопку закрытия
                 closeBtn.style.display = 'flex';
                 closeBtn.style.pointerEvents = 'auto';
                 
-                // Позиционируем справа сверху, за пределами карточки (+20px отступ)
-                closeBtn.style.left = ((window.innerWidth + targetW) / 2 + 20) + 'px'; 
-                closeBtn.style.top = ((window.innerHeight - targetH) / 2 - 20) + 'px';
-                
-                closeBtn.style.background = '#e74c3c'; 
-                closeBtn.style.color = '#fff';
-                closeBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+                if (isMobile) {
+                    // На телефоне кнопка будет внутри экрана, в правом верхнем углу
+                    closeBtn.style.left = 'auto';
+                    closeBtn.style.right = '10px';
+                    closeBtn.style.top = '10px';
+                } else {
+                    // На компьютере кнопка остается снаружи карточки
+                    closeBtn.style.left = ((window.innerWidth + targetW) / 2 + 20) + 'px'; 
+                    closeBtn.style.top = ((window.innerHeight - targetH) / 2 - 20) + 'px';
+                }
 
                 // 4. Убираем подпись с карты
                 title.style.opacity = '0';
