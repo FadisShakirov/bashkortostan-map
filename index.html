@@ -123,6 +123,7 @@
             transition: opacity 0.3s ease !important;
         }
 
+
 </style>
 </head>
 <body>
@@ -4070,6 +4071,41 @@ document.addEventListener('DOMContentLoaded', () => {
         init();
     }
 })();
+
+// ==========================================
+    // АВТОМАТИЧЕСКОЕ ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ПО ВРЕМЕНИ
+    // ==========================================
+    let userManuallyChangedTheme = false; // Флаг, чтобы не мешать пользователю, если он нажмет кнопку сам
+
+    function applyTimeBasedTheme() {
+        // Если пользователь сам нажал на кнопку темы, авторежим отключается
+        if (userManuallyChangedTheme) return;
+
+        const currentHour = new Date().getHours();
+        
+        // Если время от 19:00 до 07:59 — включаем ночь
+        if (currentHour >= 19 || currentHour < 8) {
+            if (!document.body.classList.contains('dark-mode')) {
+                document.body.classList.add('dark-mode');
+                // Если у вас есть кнопка переключения темы, можно менять на ней иконку
+                // const themeBtn = document.getElementById('theme-toggle');
+                // if (themeBtn) themeBtn.textContent = '☀️'; 
+            }
+        } else {
+            // Если время от 08:00 до 18:59 — включаем день
+            if (document.body.classList.contains('dark-mode')) {
+                document.body.classList.remove('dark-mode');
+                // const themeBtn = document.getElementById('theme-toggle');
+                // if (themeBtn) themeBtn.textContent = '🌙';
+            }
+        }
+    }
+
+    // 1. Применяем тему сразу при загрузке страницы
+    applyTimeBasedTheme();
+
+    // 2. Проверяем время каждую минуту (на случай, если вкладка открыта очень долго)
+    setInterval(applyTimeBasedTheme, 60000);
 
 });
 </script>
