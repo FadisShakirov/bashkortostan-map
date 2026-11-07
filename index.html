@@ -106,6 +106,23 @@
       animation-play-state: paused !important;
     }
 
+     /* ==========================================
+           СКРЫВАЕМ ВЕРХНИЕ КНОПКИ ПРИ ОТКРЫТОМ ПОПАПЕ
+           ========================================== */
+        body.popup-active #ai-btn-top,
+        body.popup-active #effects-toggle,
+        body.popup-active #theme-toggle {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            /* Убрали transform, чтобы не было конфликтов с инлайн-стилями */
+            transition: opacity 0.3s ease !important;
+        }
+        
+        /* Плавное возвращение кнопок */
+        #ai-btn-top, #effects-toggle, #theme-toggle {
+            transition: opacity 0.3s ease !important;
+        }
+
 </style>
 </head>
 <body>
@@ -1446,11 +1463,15 @@ document.addEventListener('DOMContentLoaded', () => {
         box.style.opacity = '0';
         setTimeout(() => { backdrop.remove(); box.remove(); closeBtn.remove(); title.remove(); }, 500);
         zoomPopup = null;
+        document.body.classList.remove('popup-active'); 
 
         if (resumeAuto) scheduleAutoPhoto();
     }
 
-        function closeZoomPopup() {
+         function closeZoomPopup() {
+        // СРАЗУ возвращаем кнопки, даже если попап уже начал закрываться
+        document.body.classList.remove('popup-active');
+
         if (!zoomPopup) return;
         const { backdrop, box, closeBtn, title, escHandler } = zoomPopup;
         
@@ -1471,14 +1492,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
         
         zoomPopup = null;
+
+        // Возобновляем анимации
         window.isPaused = false;
         document.body.classList.remove('animations-paused');
         const svgMap = document.getElementById('bashkortostan-map');
         if (svgMap && svgMap.unpauseAnimations) svgMap.unpauseAnimations();
         
-        // И запускаем автопоказ фото заново (если нужно)
         if (typeof scheduleAutoPhoto === 'function') scheduleAutoPhoto();
-       
     }
 
     function openZoomPopup(path) {
@@ -1638,6 +1659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(backdrop); document.body.appendChild(box);
         document.body.appendChild(closeBtn); document.body.appendChild(title);
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('popup-active');
 
         // Плавный зум
         requestAnimationFrame(() => {
