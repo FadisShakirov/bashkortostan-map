@@ -1545,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', () => {
         flipper.style.width = '100%'; flipper.style.height = '100%';
         flipper.style.position = 'relative';
         flipper.style.transformStyle = 'preserve-3d';
-        flipper.style.transition = 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        flipper.style.transition = 'transform 0.45s linear';
 
         // --- ЛИЦЕВАЯ СТОРОНА (Фото) ---
         const frontSide = document.createElement('div');
@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentPhoto++;
-            currentRotation += 360;
+            currentRotation += 180;
             isFront = !isFront;
 
             if (!isFront) {
@@ -1716,19 +1716,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             flipper.style.transform = `rotateY(${currentRotation}deg)`;
-            setTimeout(flipToNext, 600);
+            
+            // ИСПРАВЛЕНИЕ: Таймер теперь ровно 450мс (вровень с CSS), чтобы не было паузы
+            setTimeout(flipToNext, 450); 
         }
 
         function finalFlip() {
             if (!zoomPopup || zoomPopup.isCancelled) return;
 
-            // ФИНАЛЬНЫЙ ПОВОРОТ: 5-е фото продолжает крутиться
+            // ФИНАЛЬНЫЙ ПОВОРОТ
             cardOverlay.style.display = 'block';
             
             currentRotation += 180;
             flipper.style.transform = `rotateY(${currentRotation}deg)`;
 
-            // Ждем завершения поворота (450мс)
+            // ИСПРАВЛЕНИЕ: Ждем ровно 450мс (чтобы карточка не висела пустой)
             setTimeout(() => {
                 if (!zoomPopup || zoomPopup.isCancelled) return;
 
@@ -1753,22 +1755,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeBtn.style.pointerEvents = 'auto';
                 
                 if (isMobile) {
-                    // На телефоне кнопка будет внутри экрана, в правом верхнем углу
                     closeBtn.style.left = 'auto';
                     closeBtn.style.right = '10px';
                     closeBtn.style.top = '10px';
                 } else {
-                    // На компьютере кнопка остается снаружи карточки
                     closeBtn.style.left = ((window.innerWidth + targetW) / 2 + 20) + 'px'; 
                     closeBtn.style.top = ((window.innerHeight - targetH) / 2 - 20) + 'px';
                 }
 
                 // 4. Убираем подпись с карты
                 title.style.opacity = '0';
-            }, 500);
+            }, 450);
         }
 
-        setTimeout(flipToNext, 600);
+        setTimeout(flipToNext, 450);
     }
 
     /* ================================================================
