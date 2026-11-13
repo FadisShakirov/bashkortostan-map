@@ -123,6 +123,35 @@
             transition: opacity 0.3s ease !important;
         }
 
+   /* ================= ПАВЛОВСКОЕ ВОДОХРАНИЛИЩЕ ================= */
+        .water-body {
+            fill: #74b9ff; 
+            fill-opacity: 0.85; 
+            stroke: #0984e3; 
+            stroke-width: 1.5;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            filter: drop-shadow(0px 0px 4px rgba(9, 132, 227, 0.6)); 
+            pointer-events: none; /* Чтобы вода не перекрывала клики по районам */
+        }
+
+ /* ================= ВЕТРОГЕНЕРАТОР ================= */
+        @keyframes spin-rotor {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .wind-rotor {
+            transform-origin: 0px 0px; /* Вращение вокруг центра */
+            animation: spin-rotor 4s linear infinite;
+        }
+
+        /* Остановка при выключенных эффектах */
+        .effects-off .wind-rotor,
+        body.animations-paused .wind-rotor {
+            animation-play-state: paused !important;
+        }
+
 
 </style>
 </head>
@@ -179,6 +208,7 @@
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(-40deg); } 
             }
+
 
         <!-- ===================== Внешний контур ===================== -->
         <path class="cls-1" d="M428.37,181.56l-5.65,4a2.27,2.27,0,0,0-.9,2.92,8.72,8.72,0,0,1,0,6.49,65,65,0,0,0-2.84,9.15c-.94,4.11-3.59,6.9-6.67,9.36a62.58,62.58,0,0,0-4.9,4.58c-2,2-1.64,3.43,1.1,4.14,2.29.59,3.35,1.84,3.23,4.27-.15,2.84.41,5.76-2,8.08-.86.83-.13,1.65.84,2,1.5.48,2.06,1.65,2.47,3,.71,2.29,1.42,4.58,2.17,6.85a3.66,3.66,0,0,1-.28,3.22c-1.83,3.09-3.67,6.17-5.42,9.31-1.09,1.95-2.59,2.19-4.45,1.36a16.85,16.85,0,0,1-3.42-1.72c-4.79-3.76-10.36-2.43-15.71-2.6-1.25,0-1.72.71-2.07,1.87-1.73,5.81-3.49,11.61-5.41,17.36-1.33,4-7,6.62-12,5.72a8.75,8.75,0,0,0-1.4-.3c-.6,0-1.39-.36-1.76.3s.25,1.06.6,1.46c1.42,1.68,1.06,3.23-.28,4.72a8,8,0,0,0-2,5.72c.06,6.32,0,12.64.05,19,0,2.74-1,4.58-3.57,5.58-1.34.51-2.68,1.13-2.66,3s1.26,2.39,2.54,2.81c3.61,1.19,5.13,3.39,4.7,7.34-.36,3.23.2,6.55.06,9.82-.5,11,1,22,.84,33,0,2-.41,3.6-2,4.84-2.36,1.81-2.38,4.68-2.81,7.17a36.19,36.19,0,0,1-4.27,12.36,3.33,3.33,0,0,0-.24,2.55,101.86,101.86,0,0,0,2.46,10.49,10.74,10.74,0,0,1-.81,8.78c-1.56,3-1,5.42,1.22,7.75a31.81,31.81,0,0,1,2.26,3.09c1.33,1.79,1,3.24-.8,4.48a3.16,3.16,0,0,0,.3,5.39c3.7,2.14,3.92,2.37,2.6,6.63-.59,1.93-.18,2.31,1.68,2.45,4.33.32,4.1.74,5.31,4.92,1.35,4.67-1.49,6.83-4.36,9-1.72,1.31-4.1.78-6.07.44-2.45-.43-5.2.28-7.33-1.68-.63-.58-1,.08-1.17.64-.84,3.58-1.64,7.16-2.45,10.75-.19.85.35,1.3.94,1.77,1.38,1.09,2.72,2.22,4.06,3.35,1.7,1.43,2.07,3.3.55,4.83-2.74,2.77-3.17,6-3,9.64.35,7.37-2.47,14.07-4.87,20.82-.49,1.39-1.8,1.42-3,1.43-4.08,0-8.16,0-12.24,0a6.84,6.84,0,0,0-4.25,1.28c-2.27,1.62-4.65,3.1-7,4.61s-4.45.85-5.56-1.82c-2.27-5.45-2.27-5.51-8.23-5.44-2.76,0-5.1-.3-6.05-3.43a2.3,2.3,0,0,0-2.45-1.57c-3.44,0-6.88-.07-10.32,0-2.82.08-4.21,2.79-2.83,5.26,1.49,2.66.66,4.37-2.39,4.84-3.62.56-7.26,1.07-10.89,1.58-.88.13-2.16.23-2,1.27.51,2.92-1.65,4.35-3.12,6.12-3.16,3.8-6.2,7.79-11.3,9.24h-1.92c-3.49,0-4.72-2.31-5.59-5.15-.3-1-1-1.82-1.38-2.79-.71-2-1.64-2.83-3.91-1.81a2.47,2.47,0,0,1-3.66-2c-.71-5.17-4.11-6.94-8.7-7.24a18.47,18.47,0,0,1-11.63-5,9.2,9.2,0,0,0-2-1.34c-3.36-1.75-4.25-4.26-3.67-8.11s3.19-4.73,6.14-5.5c-.06-.3,0-.52-.13-.57-3.47-2.06-3.51-5.07-2.16-8.3,1.73-4.11.36-6.89-3.19-9.22a26.11,26.11,0,0,1-4.49-4.31,3.53,3.53,0,0,0-4.54-.85c-1.67.77-3.36,1.49-5,2.22-4.26,1.83-8.22,1.19-12-1.36a2.74,2.74,0,0,1-1.19-2.93c.63-3.88,1.46-7.54,5-10.17,3.27-2.4,6-5.55,10.29-6.21a1.15,1.15,0,0,0,1.1-1.35c-.76-3.15.45-7.1-3.6-9a2.18,2.18,0,0,1-1-1.57,15.11,15.11,0,0,0-.76-2.77c-1.86-4.21-1.14-7.73,2.59-10.57.6-.46,1.44-1.22.83-2s-1.42.09-2.06.46c-1.38.8-2.72,1.67-4.1,2.48-2.06,1.21-3.51.92-4.91-1.11a50,50,0,0,0-4-5.07c-1.42-1.59-2.53-1.26-3.78-.06a27.94,27.94,0,0,0-3.15,3.29,67.74,67.74,0,0,1-5.26,5.58c-1.06,1.12-2.35,1.52-3.66.64s-1.29-.06-1.54.77c-.82,2.73.29,5.21,1,7.71.81,2.76.48,3.94-1.87,5.47a11.71,11.71,0,0,0-1,.62c-4.28,3.51-8.63,4.6-13.74,1.33-1.92-1.22-4.57-1.29-6.89-1.88a7.75,7.75,0,0,1-5.48-8.37,107.88,107.88,0,0,1,1.9-14.66,2.07,2.07,0,0,0-1-2.23c-2.2-1.85-4.42-3.67-6.58-5.57s-2.59-3.29-.75-5.29c3.64-4,2.47-7.6.07-11.48a2.78,2.78,0,0,0-3.4-1.45c-2.56.64-5.13,1.2-7.66,1.95-3.6,1.06-5.4.36-5.25-3.28.21-5.22-2.49-8.86-4.68-13.13-3.65-7.11-7-14.57-6.6-23,.07-1.52-3.82-6.53-5.15-6.78a1.23,1.23,0,0,0-.87.22c-3.56,2.7-8,1.67-11.94,2.94a1.48,1.48,0,0,1-.92-.18c-3.3-1.53-6-7-5.39-10.66S80.55,345,77,343.7a79.47,79.47,0,0,1-7.52-3.13c-1.85-.88-3.47-1-5.06.41-1.92,1.72-3.66,1.17-5.88.19-4.61-2-6.47-6.18-8.74-10.05-4.28-7.3-8.18-14.81-11.86-22.44a3.55,3.55,0,0,0-2.86-2.27c-1.86-.22-3-1.8-4.46-2.67a15.89,15.89,0,0,1-8.26-12.07c-1.44-8.95-3.28-18-6.9-26.33-2.9-6.7-1.9-13.79-3.41-20.57a1,1,0,0,1,0-.48c2-4.62.23-8.92-1.12-13.25a8.34,8.34,0,0,1-.24-4.28c1.28-5.59,2.41-11.2,3.22-16.88A5.86,5.86,0,0,1,16,206.45c2.36-2.15,4.68-4.35,7.16-6.36,2.88-2.33,3.78-5.63,4.76-8.91A3.85,3.85,0,0,0,27,188a6.28,6.28,0,0,1-.29-6.61c.8-1.59,1-2.77-1.42-2.69a2.27,2.27,0,0,1-2.41-1.92c-.16-.61-.58-1.17-.7-1.78-1.1-5.82-4.52-9.58-10-11.78-2.15-.87-2.54-3.27-3.12-5.18-.9-3-2.56-4.43-5.69-4.28-1.94.09-2.7-1.26-2.83-2.9-.15-1.83,0-3.68,0-5.52s1.16-3.26,2.94-3.05c5.1.61,9.1-1.65,13.06-4.31a5.86,5.86,0,0,1,5.53-.38c1,.36,1.88.9,2.86,1.23a2.53,2.53,0,0,0,3.57-2.59A3.92,3.92,0,0,1,30.13,133c2-1.67,4.14-3.27,6.1-5,2.52-2.25,5.78-2.65,8.78-3.63,2-.64,3.07-1.54,2.62-3.71-.65-3.14,1.41-4.9,3.43-6.62a2.85,2.85,0,0,0,1.11-3.33c-.69-2.47.31-4.32,2.44-5.7,3.35-2.17,6.66-4.43,10-6.65a8.06,8.06,0,0,0,2-1.7c3.18-4.07,3.08-5.1-1.2-7.81a85.72,85.72,0,0,0-8.5-4.93,9.53,9.53,0,0,1-4.88-5,10.47,10.47,0,0,0-4.27-4.7c-2.34-1.54-4.62-3.16-7-4.64a4.47,4.47,0,0,1-2.2-4.23c0-.72,0-1.44,0-2.16,0-4.19.21-4.53,4.49-4.46,2.39,0,3.33-1.08,3.5-3.24,0-.24,0-.48.08-.72.67-4.64,2.14-5.28,6.29-2.72.14.08.26.18.4.27,5,3.1,5.52,2.9,7.7-2.65a4,4,0,0,0,.16-.45c2-8.1,7.85-12.94,14.68-16.84,1.3-.74,2.4-1.85,3.94-2.24.94-.24.74-1.09.58-1.81-.26-1.17-.53-2.34-.77-3.51a6.92,6.92,0,0,1,4.93-8.26A3.27,3.27,0,0,0,87.11,14a29.47,29.47,0,0,0,1.07-3.43C88.72,6.51,91.5,4,94.3,1.46,96,0,97,.24,98.29,2.17c1.95,2.92,4,5.74,6.11,8.58a2.27,2.27,0,0,0,1,.93C111,13.11,115,17,118.83,20.86c1.64,1.64,3.07,2.53,5.36,1.23a38.08,38.08,0,0,1,4.9-1.93c3-1.17,4.47-.9,5.9,2,1.23,2.51,2.82,3.09,5.26,2.29a3.5,3.5,0,0,1,1.4-.28c2.95.32,4.78-1.14,6.14-3.58a5.72,5.72,0,0,1,4.64-3c6.41-.66,12-3.78,17.84-6.09,4-1.58,5.24-1.15,6.25,3.16a24.88,24.88,0,0,0,6.62,12.23c1.05,1.06,1.89,1.33,3.1.63,2.47-1.41,5-2.52,8-2.05.81.13,1.06-.51,1.43-1,1.46-2.09,3-4.14,4.43-6.25a3.74,3.74,0,0,1,4.32-1.72c2.18.49,4.4.8,6.59,1.22,2.42.46,3.5,2,2.42,4.1-1.33,2.55-.52,4.07,1.3,6,5.85,6.22,12,12.16,17.47,18.74,1,1.18,1.88,1.48,3.24.53,1.76-1.24,3.69-2.24,5.49-3.42,1.45-.95,3.05-.82,4.64-.84,3.51,0,4.83-1.67,3.54-4.86-1-2.46-.64-4.21,1.36-5.92a21.73,21.73,0,0,0,3.48-3.93c1.55-2.18,3.87-3,6.18-3.85,2.94-1.05,4.44.07,4.5,3.16a9.42,9.42,0,0,1,0,1.68,8.32,8.32,0,0,0,3.52,8.56c2.08,1.54,2.21,3.53,1.66,5.77a11.47,11.47,0,0,1-.45,1.86c-.88,2.07-.35,3.64,1.7,4.5a3.89,3.89,0,0,0,5.12-1.88,4.72,4.72,0,0,1,4.17-2.75A42.71,42.71,0,0,0,289.77,44c1.61-.44,2.52.58,3.28,1.82,1.69,2.77,6.26,3.41,8.5,1,1.91-2,3.93-2,6.32-1.13,3.42,1.32,6.89,2.51,10.33,3.78a2.64,2.64,0,0,0,3.31-1.09c1.59-2,3.26-3.93,5-5.82a5.68,5.68,0,0,1,8.88.63,8.74,8.74,0,0,0,6.15,4c3,.59,5.79,2.22,8.53,3.7,3.57,1.93,4.22,1.74,6.23-1.74,1-1.79,2.06-3.54,2-5.79-.06-2.45,1.49-3.59,4-2.94,2.08.55,4.08,1.39,6.1,2.14,2.3.86,4.41,1.66,6.45-.84,1.24-1.51,3.11-.77,4,1,2.55,4.9,1.09,9.57-.69,14.22-.68,1.78-2.48,1.63-3.9,1.75s-1.77.6-1.3,1.93a34.88,34.88,0,0,0,1,3.44c2.89,6,1.23,11.14-3,15.81-.21.23-.4.49-.71.89,2,1.15,4.22.93,6.26,1.32,3.54.67,4.25,1.42,3,4.79-1.05,2.75-1.58,5.23.21,7.85.65,1,1.15,1.59,2.44,1.38a21.46,21.46,0,0,1,3.59-.09c3.56,0,3.64,0,4.37,3.51.22,1.06.75,1.26,1.69,1.09,1.57-.28,3.15-.54,4.73-.72a4.59,4.59,0,0,1,4.79,2.53c.91,1.78-.28,3.29-1.51,4.69A99,99,0,0,1,389.37,117a3.87,3.87,0,0,1-4.86.53,3,3,0,0,0-3.73.41c-1.94,1.48-4,2.53-6.65,1.89-1.79-.43-3.28,1.85-2.3,3.51,2.47,4.14,1.22,5.52-1.5,8.35-2.43,2.53-4.75,5.17-7,7.83a3.64,3.64,0,0,1-2.89,1.38,68,68,0,0,1-14.5-1.52c-.68-.13-1.44-.69-1.9.21s.24,1.49.88,2a22.05,22.05,0,0,0,2.53,1.81c2,1.11,2.3,2.88,1.1,4.42-2.64,3.4-2.05,6.37.48,9.41a22.87,22.87,0,0,1,1.62,2.65,4.36,4.36,0,0,1-.52,5.9c-1.78,1.93-3.67,3.71-4.25,6.49-.3,1.44-1.74,1.78-3.2,2-6.28,1.12-11.47-1.69-16.72-4.38-1.45-.74-1.61-2.15-1.43-3.54.4-3.12-.4-5.48-3.63-6.63a2.22,2.22,0,0,1-1.51-2.5c.53-2.45-1.26-3.42-2.78-4.18-2.37-1.19-3.28,1.3-4.56,2.5s.27,1.57.92,2.15c1.76,1.58,1.3,3.5.67,5.31s-1.57,3.5-2.31,5.27c-.86,2-1.92,3.95-1.18,6.4a3.08,3.08,0,0,1-2.14,3.81c-1.79.69-3.61,1.31-5.36,2.08a4.35,4.35,0,0,1-4.88-.84c-5-4.12-5-6.88.09-11.11,2.25-1.86,2.66-6,.45-8-3.2-2.83-2.12-6.37-1.74-9.62.21-1.76,2.4-2.11,4-1.37,2.38,1.13,3.08-.94,4.32-1.95.43-.35.17-.91-.2-1.26-2.09-2-3.86-4.28-6.28-5.91a12.45,12.45,0,0,0-8.11-2.32c-3,.22-6.08,0-9.11.07-3.33.11-6.56.1-9.22-2.37a2.39,2.39,0,0,0-2.46-.56,53.23,53.23,0,0,0-13.56,6.43c-2.57,1.76-2.8,4.37-.87,6.83,2.32,3,2,4.3-1.31,6.14-1.63.91-3.75,1.17-4.58,3.22-.24.59-.7,1.32-.53,1.8,1.22,3.45,2,7.09,3.86,10.28.25.42.91.61,1.4.87,2.28,1.21,2.7,2.84,1.37,5.1-1.45,2.48-2.86,5-4.27,7.49-.31.55-.82,1.21-.38,1.78,1.92,2.48,3,5.74,6.09,7.16q6.44,2.94,12.92,5.73a3.81,3.81,0,0,1,2.24,3.66c.08,1.46.54,1.74,1.92,1.36,3.73-1,3.81-1,4.8,2.6.53,1.94,1.47,3.34,3.47,3.87,3.7,1,5.09,3.37,4.8,7.14-.16,2.14-.05,4.42,3.22,4.44,1.33,0,2.12,1.33,2.86,2.37,1.26,1.75,2.45,3.55,3.73,5.29,1.44,2,2.84,2.12,4.54.38,2.67-2.74,5.34-5.49,7.85-8.38s6.17-3.58,9.36-5.16c1.64-.81,3.43-1.31,5.1-2.07a4.69,4.69,0,0,1,5.87,1.07c2.52,2.57,5.14,5,7.73,7.53,2,1.9,6.13.82,6.37-1.9.46-5,3.05-7.51,7.91-8.24s8.35-3.49,11.24-7.16c2.08-2.64,4.41-3,7.39-1.72,1.82.79,3.83,1.13,5.72,1.78,1.53.53,2.66.18,2.83-1.46.26-2.67,2.13-4,4-5.34a42.79,42.79,0,0,0,8.71-8.5c1.74-2.14,1.57-4.78,2.2-7.21,1-3.68,3.49-6.13,6.33-8.31,1.06-.81,2.3-.21,3.4.34,2.78,1.4,5.61,2.73,8.34,4.21a3.15,3.15,0,0,0,3.75-.07c2.74-2,5.71-2.11,8.9-1.09a19.07,19.07,0,0,0,4,.41A25.26,25.26,0,0,1,428.37,181.56Z"></path>
@@ -398,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // ✈️ Настройки самолета
         planeIntervalMs: 50000,  
         planeDurationMs: 25000,   
-        planeScale: 1.2,         
+        planeScale: 1.0,         
         planeEndScale: 0.2,       
         planeCurvature: 0.3      
     };
@@ -2639,22 +2669,151 @@ document.addEventListener('DOMContentLoaded', () => {
         return g;
     }
 
-    // --- ЛОГИКА ПОЯВЛЕНИЯ И ЕСТЕСТВЕННОГО ДВИЖЕНИЯ ---
+     // --- ЛОГИКА ПОЯВЛЕНИЯ И ЕСТЕСТВЕННОГО ДВИЖЕНИЯ ---
     let isAnimalVisible = false;
 
     function spawnRandomAnimal() {
-    if (!effectsEnabled) return;
+        if (!effectsEnabled) return;
         if (isAnimalVisible || zoomPopup || currentDistrict) return;
 
         const availableAnimals = Object.keys(CONFIG.animals);
         const animalType = availableAnimals[Math.floor(Math.random() * availableAnimals.length)];
         const animalCfg = CONFIG.animals[animalType];
         
-        const randomDistrictName = animalCfg.districts[Math.floor(Math.random() * animalCfg.districts.length)];
-        const path = Array.from(allDistricts).find(p => p.dataset.districtName === randomDistrictName);
-        if (!path) return;
+        let pathsToRoam = [];
+        
+        // Универсальная функция поиска районов
+        const getPaths = (names) => {
+            const result = [];
+            names.forEach(name => {
+                const p = Array.from(allDistricts).find(el => 
+                    el.getAttribute('data-name') === name || 
+                    el.getAttribute('data-district-name') === name
+                );
+                if (p) result.push(p);
+            });
+            return result;
+        };
 
-        const startPos = getRandomPointInPath(path);
+        if (animalType === 'bear') {
+            pathsToRoam = getPaths(['Белорецкий', 'Зилаирский', 'Ишимбайский', 'Караидельский', 'Бурзянский', 'Гафурийский']);
+        } else if (animalType === 'horse') {
+            pathsToRoam = getPaths(['Баймакский', 'Абзелиловский', 'Учалинский', 'Зианчуринский', 'Хайбуллинский']);
+        } else if (animalType === 'eagle') {
+            pathsToRoam = getPaths(['Хайбуллинский', 'Зианчуринский']);
+        } else if (animalType === 'bee') {
+            // ДОБАВЛЕНО ДЛЯ ПЧЕЛЫ: 3 района
+            pathsToRoam = getPaths(['Бурзянский', 'Белорецкий', 'Зилаирский']);
+        } else {
+            if (animalCfg && animalCfg.districts) {
+                const randomDistrictName = animalCfg.districts[Math.floor(Math.random() * animalCfg.districts.length)];
+                const p = Array.from(allDistricts).find(el => 
+                    el.getAttribute('data-name') === randomDistrictName || 
+                    el.getAttribute('data-district-name') === randomDistrictName
+                );
+                if (p) pathsToRoam.push(p);
+            }
+        }
+
+        if (pathsToRoam.length === 0) return;
+
+        // ==========================================
+        // ОСОБАЯ ЛОГИКА ДЛЯ ЛЕТАЮЩИХ (Орел и Пчела)
+        // ==========================================
+        if (animalType === 'eagle' || animalType === 'bee') {
+            if (pathsToRoam.length < 2) return; // Нужно минимум 2 района для полета
+            
+            // Выбираем стартовый и конечный районы (они должны быть разными)
+            const startPath = pathsToRoam[Math.floor(Math.random() * pathsToRoam.length)];
+            let endPath = pathsToRoam[Math.floor(Math.random() * pathsToRoam.length)];
+            while (endPath === startPath && pathsToRoam.length > 1) {
+                endPath = pathsToRoam[Math.floor(Math.random() * pathsToRoam.length)];
+            }
+
+            const startPos = getRandomPointInPath(startPath);
+            const endPos = getRandomPointInPath(endPath);
+            
+            if (!startPos || !endPos) return;
+
+            const midX = (startPos.x + endPos.x) / 2;
+            const midY = (startPos.y + endPos.y) / 2;
+            const dx = endPos.x - startPos.x;
+            const dy = endPos.y - startPos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist === 0) return; 
+
+            const nx = -dy / dist;
+            const ny = dx / dist;
+            const sign = Math.random() > 0.5 ? 1 : -1;
+            // Изгиб траектории (для пчелы можно сделать чуть более виляющий полет)
+            const offset = dist * (animalType === 'bee' ? 0.4 : 0.3) * sign; 
+            const cx = midX + nx * offset;
+            const cy = midY + ny * offset;
+
+            const wrapper = document.createElementNS(svgNS, 'g');
+            // Масштаб (пчела меньше орла)
+            const scale = CONFIG.animalScale * (animalCfg.scaleMultiplier || 1) * (animalType === 'eagle' ? 1.5 : 1); 
+            
+            const animalContent = animalType === 'eagle' ? createEagle() : createBee();
+            
+            animalContent.setAttribute('class', 'animal-fly animal-shadow');
+            wrapper.appendChild(animalContent);
+            wrapper.style.opacity = '0';
+            wrapper.style.transition = 'opacity 1s ease';
+            
+            animalLayer.appendChild(wrapper);
+            isAnimalVisible = true;
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => { wrapper.style.opacity = '1'; });
+            });
+
+            // Пчела летит быстрее орла (6 секунд против 8)
+            const duration = animalType === 'eagle' ? 8000 : 6000; 
+            const startTime = performance.now();
+
+            function animateFlyer(time) {
+                const elapsed = time - startTime;
+                const t = Math.min(elapsed / duration, 1);
+
+                // Формула кривой Безье
+                const x = (1-t)*(1-t)*startPos.x + 2*(1-t)*t*cx + t*t*endPos.x;
+                const y = (1-t)*(1-t)*startPos.y + 2*(1-t)*t*cy + t*t*endPos.y;
+                
+                // Вычисляем угол наклона (производная)
+                const dx_t = 2*(1-t)*(cx-startPos.x) + 2*t*(endPos.x-cx);
+                const dy_t = 2*(1-t)*(cy-startPos.y) + 2*t*(endPos.y-cy);
+                const angle = Math.atan2(dy_t, dx_t) * 180 / Math.PI + 90;
+
+                // Плавное уменьшение при подлете к концу (исчезновение вдали)
+                let currentScale = scale;
+                if (t > 0.8) {
+                    currentScale = scale * (1 - (t - 0.8) / 0.2 * 0.5); 
+                }
+
+                wrapper.setAttribute('transform', `translate(${x}, ${y}) rotate(${angle}) scale(${currentScale})`);
+
+                if (t < 1) {
+                    requestAnimationFrame(animateFlyer);
+                } else {
+                    wrapper.style.opacity = '0';
+                    setTimeout(() => {
+                        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+                        isAnimalVisible = false;
+                    }, 1000);
+                }
+            }
+
+            requestAnimationFrame(animateFlyer);
+            return; 
+        }
+
+        // ==========================================
+        // СТАНДАРТНАЯ ЛОГИКА (Для медведя, лошади, косули)
+        // ==========================================
+        const initialPath = pathsToRoam[Math.floor(Math.random() * pathsToRoam.length)];
+        const startPos = getRandomPointInPath(initialPath);
         if (!startPos) return;
 
         let animalContent;
@@ -2663,27 +2822,23 @@ document.addEventListener('DOMContentLoaded', () => {
         switch(animalType) {
             case 'bear': animalContent = createBear(); break;
             case 'horse': animalContent = createHorse(); break;
-            case 'eagle': animalContent = createEagle(); isFlying = true; break;
             case 'roedeer': animalContent = createRoeDeer(); break;
-            case 'bee': animalContent = createBee(); isFlying = true; break;
             default: return;
         }
 
         const wrapper = document.createElementNS(svgNS, 'g');
         const scale = CONFIG.animalScale * (animalCfg.scaleMultiplier || 1);
         
-        // Переменные для движения
         let currentX = startPos.x;
         let currentY = startPos.y;
         let targetX = currentX;
         let targetY = currentY;
-        let flip = 1; // 1 = смотрит вправо, -1 = смотрит влево
+        let flip = 1; 
         
-        // Скорость движения (пикселей в секунду). Летающие двигаются быстрее.
-        const speed = isFlying ? 18 : 10; 
+        let speed = 10; 
+        if (animalType === 'bear' || animalType === 'horse') speed = 14; 
         
-        // Применяем классы анимации (ходьба/полет, махи лапами/крыльями)
-        animalContent.setAttribute('class', isFlying ? 'animal-fly animal-shadow' : 'animal-walk animal-shadow');
+        animalContent.setAttribute('class', 'animal-walk animal-shadow');
         
         wrapper.appendChild(animalContent);
         wrapper.style.opacity = '0';
@@ -2692,29 +2847,28 @@ document.addEventListener('DOMContentLoaded', () => {
         animalLayer.appendChild(wrapper);
         isAnimalVisible = true;
 
-        // Плавное появление
         requestAnimationFrame(() => {
             requestAnimationFrame(() => { wrapper.style.opacity = '1'; });
         });
 
-        // --- ЛОГИКА ДВИЖЕНИЯ ---
         let lastTime = performance.now();
         let isAlive = true;
 
         function pickNewTarget() {
-            const newTarget = getRandomPointInPath(path);
+            const chosenPath = pathsToRoam[Math.floor(Math.random() * pathsToRoam.length)];
+            const newTarget = getRandomPointInPath(chosenPath);
             if (newTarget) {
                 targetX = newTarget.x;
                 targetY = newTarget.y;
             }
         }
 
-        pickNewTarget(); // Выбираем первую точку, куда пойдем
+        pickNewTarget(); 
 
         function moveLoop(time) {
             if (!isAlive) return;
             
-            const dt = (time - lastTime) / 1000; // Время с прошлого кадра
+            const dt = (time - lastTime) / 1000; 
             lastTime = time;
 
             const dx = targetX - currentX;
@@ -2722,23 +2876,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < 2) {
-                // Если дошли до точки — выбираем новую
                 pickNewTarget();
             } else {
-                // Идем к цели
                 const moveX = (dx / dist) * speed * dt;
                 const moveY = (dy / dist) * speed * dt;
                 
                 currentX += moveX;
                 currentY += moveY;
 
-                // Разворот в сторону движения
                 if (Math.abs(dx) > 0.5) {
                     if (dx > 0 && flip === -1) flip = 1;
                     if (dx < 0 && flip === 1) flip = -1;
                 }
 
-                // Обновляем позицию на карте
                 wrapper.setAttribute('transform', `translate(${currentX}, ${currentY}) scale(${scale * flip}, ${scale})`);
             }
 
@@ -2747,7 +2897,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         requestAnimationFrame(moveLoop);
 
-        // Удаление
         setTimeout(() => {
             isAlive = false;
             wrapper.style.opacity = '0';
@@ -4101,11 +4250,182 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
+
     // 1. Применяем тему сразу при загрузке страницы
     applyTimeBasedTheme();
 
     // 2. Проверяем время каждую минуту (на случай, если вкладка открыта очень долго)
     setInterval(applyTimeBasedTheme, 60000);
+
+// ==========================================
+    // АВТОМАТИЧЕСКАЯ ОТРИСОВКА ПАВЛОВСКОГО ВОДОХРАНИЛИЩА
+    // ==========================================
+    setTimeout(() => {
+        // Ищем контур Караидельского района
+        const karaidelPath = Array.from(allDistricts).find(el => 
+            el.getAttribute('data-name') === 'Караидельский' || 
+            el.getAttribute('data-district-name') === 'Караидельский'
+        );
+
+        if (!karaidelPath) {
+            console.warn("Караидельский район не найден для отрисовки воды.");
+            return;
+        }
+
+        // Получаем координаты и размеры района
+        const bbox = karaidelPath.getBBox();
+        
+        // Вычисляем центр района
+        const centerX = bbox.x + bbox.width / 2;
+        const centerY = bbox.y + bbox.height / 2;
+
+        // Создаем слой для воды (вставляем его перед слоем городов, чтобы вода была под ними)
+        const waterLayer = document.createElementNS(svgNS, 'g');
+        waterLayer.id = 'water-layer';
+        
+        // Находим слой городов, чтобы вставить воду ПЕРЕД ним
+        const citiesLayer = document.getElementById('cities-layer');
+        if (citiesLayer) {
+            svg.insertBefore(waterLayer, citiesLayer);
+        } else {
+            svg.appendChild(waterLayer);
+        }
+
+        // Рисуем водохранилище (изогнутую реку)
+        // Координаты заданы относительно центра Караидельского района
+        const waterPath = document.createElementNS(svgNS, 'path');
+        waterPath.setAttribute('class', 'water-body');
+        
+        // Формула пути (кривые Безье), чтобы река красиво изгибалась
+        // Начинаем чуть южнее (ниже) района и уходим на северо-восток
+        const pathD = `
+            M ${centerX + 10} ${centerY + 20} 
+            C ${centerX - 60} ${centerY + 10}, ${centerX + 10} ${centerY + 10}, ${centerX + 10} ${centerY} 
+            Z
+        `;
+        
+        waterPath.setAttribute('d', pathD);
+        waterLayer.appendChild(waterPath);
+        
+        console.log("✅ Павловское водохранилище успешно добавлено в Караидельский район.");
+
+    }, 1000); // Ждем 1 секунду, чтобы карта и районы точно загрузились
+
+// ==========================================
+    // ВЕТРОГЕНЕРАТОР В ТУЙМАЗИНСКОМ РАЙОНЕ (3D)
+    // ==========================================
+    
+    // 👇 НАСТРОЙКИ (МЕНЯЙТЕ ЗДЕСЬ) 👇
+    const WIND_X = 55;       // Координата X
+    const WIND_Y = 220;      // Координата Y
+    const WIND_SCALE = 0.3;  // Размер
+    // 👆 ------------------------ 👆
+
+    function createWindTurbine(x, y, scale) {
+        const g = document.createElementNS(svgNS, 'g');
+        g.setAttribute('transform', `translate(${x}, ${y}) scale(${scale})`);
+
+        // Тень на земле
+        const shadow = document.createElementNS(svgNS, 'ellipse');
+        shadow.setAttribute('cx', '2'); shadow.setAttribute('cy', '2');
+        shadow.setAttribute('rx', '8'); shadow.setAttribute('ry', '3');
+        shadow.setAttribute('fill', 'rgba(0,0,0,0.4)');
+        g.appendChild(shadow);
+
+        // 1. БАШНЯ (3D: две грани)
+        const towerLeft = document.createElementNS(svgNS, 'polygon');
+        towerLeft.setAttribute('points', '-3,0 -1.5,-50 0,-50 0,0');
+        towerLeft.setAttribute('fill', '#95a5a6'); // Темная грань
+        g.appendChild(towerLeft);
+
+        const towerRight = document.createElementNS(svgNS, 'polygon');
+        towerRight.setAttribute('points', '0,0 0,-50 1.5,-50 3,0');
+        towerRight.setAttribute('fill', '#ecf0f1'); // Светлая грань
+        g.appendChild(towerRight);
+
+        // 2. ГОНДОЛА (Корпус)
+        // Основа
+        const nacelleBody = document.createElementNS(svgNS, 'rect');
+        nacelleBody.setAttribute('x', '-2'); nacelleBody.setAttribute('y', '-54');
+        nacelleBody.setAttribute('width', '4'); nacelleBody.setAttribute('height', '4');
+        nacelleBody.setAttribute('fill', '#bdc3c7');
+        nacelleBody.setAttribute('rx', '1.5');
+        g.appendChild(nacelleBody);
+
+        // Верх (блик)
+        const nacelleTop = document.createElementNS(svgNS, 'ellipse');
+        nacelleTop.setAttribute('cx', '0'); nacelleTop.setAttribute('cy', '-54');
+        nacelleTop.setAttribute('rx', '2'); nacelleTop.setAttribute('ry', '1');
+        nacelleTop.setAttribute('fill', '#ffffff');
+        g.appendChild(nacelleTop);
+
+        // 3. РОТОР (Лопасти)
+        const rotorWrapper = document.createElementNS(svgNS, 'g');
+        // Прикрепляем к передней части гондолы и немного сплющиваем для изометрии
+        rotorWrapper.setAttribute('transform', 'translate(-2, -52) scale(1, 0.7)');
+
+        const rotorGroup = document.createElementNS(svgNS, 'g');
+        rotorGroup.setAttribute('class', 'wind-rotor');
+
+        // Создаем одну красивую 3D-лопасть
+        const bladePath = document.createElementNS(svgNS, 'path');
+        // Изогнутая форма, сужающаяся к концу. Без обводки (stroke), только заливка (fill).
+        bladePath.setAttribute('d', 'M 0,0 C -2,-5 -1,-18 0,-24 C 1,-18 2,-5 0,0 Z');
+        
+        // Левая (теневая) половина лопасти
+        bladePath.setAttribute('fill', '#dcdde1'); 
+        // Обрезаем правую часть (визуально разделяем лопасть на две грани)
+        bladePath.setAttribute('clip-path', 'inset(0 50% 0 0)'); 
+        rotorGroup.appendChild(bladePath);
+
+        // Правая (светлая) половина
+        const bladeLight = document.createElementNS(svgNS, 'path');
+        bladeLight.setAttribute('d', 'M 0,0 C -2,-5 -1,-18 0,-24 C 1,-18 2,-5 0,0 Z');
+        bladeLight.setAttribute('fill', '#ffffff');
+        bladeLight.setAttribute('clip-path', 'inset(0 0 0 50%)');
+        rotorGroup.appendChild(bladeLight);
+
+        // Дублируем лопасти с поворотом на 120 и 240 градусов
+        const blade2 = bladePath.cloneNode(true);
+        blade2.setAttribute('transform', 'rotate(120)');
+        rotorGroup.appendChild(blade2);
+
+        const blade2Light = bladeLight.cloneNode(true);
+        blade2Light.setAttribute('transform', 'rotate(120)');
+        rotorGroup.appendChild(blade2Light);
+
+        const blade3 = bladePath.cloneNode(true);
+        blade3.setAttribute('transform', 'rotate(240)');
+        rotorGroup.appendChild(blade3);
+
+        const blade3Light = bladeLight.cloneNode(true);
+        blade3Light.setAttribute('transform', 'rotate(240)');
+        rotorGroup.appendChild(blade3Light);
+
+        // Ступица (оранжевый центр)
+        const hub = document.createElementNS(svgNS, 'circle');
+        hub.setAttribute('cx', '0'); hub.setAttribute('cy', '0');
+        hub.setAttribute('r', '2.5');
+        hub.setAttribute('fill', '#e67e22');
+        rotorGroup.appendChild(hub);
+
+        rotorWrapper.appendChild(rotorGroup);
+        g.appendChild(rotorWrapper);
+
+        return g;
+    }
+
+    // Ждем загрузки карты и добавляем ветряк
+    setTimeout(() => {
+        const layer = document.getElementById('cities-layer') || svg;
+        if (!layer) return;
+
+        const windTurbine = createWindTurbine(WIND_X, WIND_Y, WIND_SCALE);
+        windTurbine.id = 'wind-turbine';
+        layer.appendChild(windTurbine);
+        console.log(`✅ 3D Ветрогенератор установлен в точку (${WIND_X}, ${WIND_Y})`);
+    }, 1000); 
 
 });
 </script>
