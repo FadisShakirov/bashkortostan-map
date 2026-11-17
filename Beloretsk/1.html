@@ -104,7 +104,7 @@
     }
 
     /* ==========================================
-       КАРТОЧКА (ВОССТАНОВЛЕНА ПРАВИЛЬНАЯ СЕТКА)
+       КАРТОЧКА (ЖЕСТКАЯ СЕТКА)
        ========================================== */
     .attraction {
         display: flex; 
@@ -122,31 +122,29 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer; 
         position: relative;
-        z-index: 1; /* Базовый слой */
+        z-index: 1; 
     }
 
     .attraction:hover { transform: translateY(-5px); box-shadow: 0 15px 50px rgba(0,0,0,0.2); }
     
-    /* Поднятие карточки при открытом меню */
-    .attraction.dropdown-open {
-        z-index: 999 !important; 
-    }
+    .attraction.dropdown-open { z-index: 999 !important; }
 
-    /* ВОССТАНОВЛЕН ФИКСИРОВАННЫЙ РАЗМЕР КАРТИНКИ */
+    /* Фиксируем картинку, чтобы она не растягивалась */
     .attraction img { 
         width: 250px; 
         height: 180px; 
         object-fit: cover; 
         border-radius: 12px; 
         box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-        flex-shrink: 0; /* Запрещает картинке сжиматься */
+        flex-shrink: 0; /* Запрет на сжатие/растяжение */
     }
     
     .attraction-info { 
-        flex: 1; /* Заставляет текст занимать оставшееся место */
+        flex: 1; 
         display: flex; 
         flex-direction: column; 
         justify-content: space-between; 
+        min-width: 0; /* Предотвращает вылезание текста */
     }
     
     .attraction-info h3 { 
@@ -172,83 +170,70 @@
         border-top-color: var(--card-border);
     }
 
-    .attraction.expanded .attraction-details p {
-        margin-bottom: 0; color: var(--subheading-color);
-    }
+    .attraction.expanded .attraction-details p { margin-bottom: 0; color: var(--subheading-color); }
 
     /* ==========================================
-       КНОПКИ И ВЫПАДАЮЩЕЕ МЕНЮ НАВИГАТОРА
+       КНОПКИ (СТРОГАЯ СЕТКА GRID)
        ========================================== */
     .buttons { 
-        display: flex; 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr); /* 3 идеально равные колонки */
         gap: 10px; 
-        flex-wrap: wrap; 
         margin-top: auto; 
         position: relative; 
         z-index: 10; 
+        width: 100%;
     }
     
-    .car-btn-wrapper {
-        position: relative; flex: 1; display: flex; min-width: 110px;
-    }
+    .car-btn-wrapper { position: relative; display: flex; width: 100%; }
 
     .action-btn {
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        padding: 10px 15px; border-radius: 10px; text-decoration: none;
-        font-weight: 600; font-size: 14px; transition: all 0.2s ease;
-        color: #fff; border: none; cursor: pointer; width: 100%;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 6px;
+        padding: 10px 5px; 
+        border-radius: 10px; 
+        text-decoration: none;
+        font-weight: 600; 
+        font-size: 13px; /* Чуть уменьшили шрифт, чтобы влезал */
+        transition: all 0.2s ease;
+        color: #fff; 
+        border: none; 
+        cursor: pointer; 
+        width: 100%; 
+        height: 100%;
+        min-height: 44px; 
+        box-sizing: border-box; 
+        white-space: nowrap; /* Запрет переноса текста на новую строку */
     }
 
     .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     
     .car-btn { background: #0984e3; } .car-btn:hover { background: #74b9ff; }
-    .bus-btn { background: #e17055; flex: 1; } .bus-btn:hover { background: #fab1a0; }
-    .train-btn { background: #00b894; flex: 1; } .train-btn:hover { background: #55efc4; }
+    .bus-btn { background: #e17055; } .bus-btn:hover { background: #fab1a0; }
+    .train-btn { background: #00b894; } .train-btn:hover { background: #55efc4; }
 
-    /* Иконки */
-    .action-btn svg { width: 24px; height: 24px; fill: currentColor; }
-
-    /* Анимации колес и дыма */
-    @keyframes spin-wheel { 100% { transform: rotate(360deg); } }
-    @keyframes smoke-puff {
-        0% { transform: translateY(0) scale(1); opacity: 0.8; }
-        100% { transform: translateY(-10px) scale(2.5); opacity: 0; }
-    }
-
-    .wheel { transform-box: fill-box; transform-origin: center; }
-    .action-btn:hover .wheel { animation: spin-wheel 0.8s linear infinite; }
-
-    .smoke { fill: #ecf0f1; opacity: 0; transform-box: fill-box; transform-origin: center; }
-    .action-btn:hover .smoke { animation: smoke-puff 1.2s ease-out infinite; }
+    .action-btn svg { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
 
     /* Выпадающее меню */
     .nav-dropdown {
-        position: absolute; top: 100%; left: 0; width: 100%;
-        background: #ffffff; /* Плотный фон, чтобы не просвечивало */
-        border: 1px solid var(--card-border);
+        position: absolute; top: calc(100% + 5px); left: 0; width: 100%; box-sizing: border-box;
+        background: #ffffff; border: 1px solid var(--card-border);
         border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         display: flex; flex-direction: column; gap: 5px; padding: 8px;
-        z-index: 1000; /* Всегда сверху */
-        opacity: 0; pointer-events: none; 
+        z-index: 1000; opacity: 0; pointer-events: none; 
         transform: translateY(-10px) scale(0.95);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        margin-top: 5px;
     }
 
-    body.dark .nav-dropdown {
-        background: #2a2a3a; /* Темный фон для темной темы */
-    }
-    
-    .nav-dropdown.active {
-        opacity: 1; pointer-events: auto; transform: translateY(0) scale(1);
-    }
+    body.dark .nav-dropdown { background: #2a2a3a; }
+    .nav-dropdown.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
     .nav-dropdown a {
         display: block; padding: 10px; border-radius: 6px; text-decoration: none;
         font-size: 13px; font-weight: 600; color: #fff; text-align: center;
-        transition: transform 0.1s;
     }
-    .nav-dropdown a:active { transform: scale(0.98); }
     .nav-dropdown .yandex { background: #ff0000; }
     .nav-dropdown .dgis { background: #009900; }
 
@@ -284,12 +269,12 @@
         p.main-desc { padding: 15px; font-size: 14px; margin-bottom: 20px; }
         
         .attraction { flex-direction: column; padding: 15px; padding-bottom: 35px; margin-bottom: 20px; }
-        .attraction img { width: 100%; height: 180px; }
+        .attraction img { width: 100%; height: 200px; }
         .attraction-info h3 { font-size: 18px; line-height: 1.3; }
         
-        .buttons { flex-direction: column; gap: 10px; }
+        /* Кнопки в колонку на телефоне */
+        .buttons { grid-template-columns: 1fr; gap: 10px; }
         .action-btn { padding: 14px 10px; font-size: 15px; }
-        .car-btn-wrapper, .bus-btn, .train-btn { width: 100%; }
         
         .cloud-back { filter: blur(30px); }
         .cloud-mid { filter: blur(20px); }
@@ -305,17 +290,14 @@
         color: #2c3e50; transition: all 0.3s ease;
     }
 
-    body.dark .weather-widget {
-        background: rgba(30, 30, 46, 0.7); border-color: rgba(255, 255, 255, 0.1); color: #eee;
-    }
-
+    body.dark .weather-widget { background: rgba(30, 30, 46, 0.7); border-color: rgba(255, 255, 255, 0.1); color: #eee; }
     #weather-icon { font-size: 18px; line-height: 1; }
 
     @media (max-width: 768px) {
         .weather-widget { top: 10px; right: 10px; padding: 6px 10px; font-size: 13px; gap: 5px; }
         #weather-icon { font-size: 16px; }
     }  
-</style>
+    </style>
 </head>
 <body>
 
@@ -342,7 +324,7 @@
                 <div class="attraction-info">
                     <div>
                         <h3>Достопримечательность: Айгир</h3>
-                        <p>Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами. Идеальная точка для похода выходного дня.</p>
+                        <p>Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами.</p>
                     </div>
                     <div class="attraction-details">
                         <p>Айгир — это не просто скалы, а настоящая «Мекка» для туристов Южного Урала. Здесь, на северном склоне хребта Караташ, возвышаются знаменитые «Зубы Шурале» (их также называют Орлиными скалами). С высоты около 689 метров открывается захватывающая панорама на изгиб реки Малый Инзер и окрестные горные хребты. Рядом с горой течёт одноимённый водопад, особенно красивый весной и летом. Место овеяно легендами: по одной из них, название происходит от башкирского «айғыр» — «жеребец». Сюда приезжают ради рассветов, фотосессий и треккинга — маршруты подходят как для новичков, так и для опытных путешественников.</p>
@@ -352,8 +334,6 @@
                             <button class="action-btn car-btn" onclick="toggleDropdown(this)">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-                                    <g class="wheel" style="transform-origin: 6.5px 15.5px;"><circle cx="6.5" cy="15.5" r="2" fill="#0984e3"/><line x1="4.5" y1="15.5" x2="8.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="6.5" y1="13.5" x2="6.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
-                                    <g class="wheel" style="transform-origin: 17.5px 15.5px;"><circle cx="17.5" cy="15.5" r="2" fill="#0984e3"/><line x1="15.5" y1="15.5" x2="19.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="17.5" y1="13.5" x2="17.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
                                 </svg>
                                 На машине
                             </button>
@@ -366,22 +346,13 @@
                         <a href="https://автовокзалы-рб.рф" target="_blank" class="action-btn bus-btn">
                             <svg viewBox="0 0 24 24">
                                 <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 16.5px;"><circle cx="7.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="6" y1="16.5" x2="9" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="7.5" y1="15" x2="7.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
-                                <g class="wheel" style="transform-origin: 16.5px 16.5px;"><circle cx="16.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="15" y1="16.5" x2="18" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="16.5" y1="15" x2="16.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
                             </svg>
                             На автобусе
                         </a>
                         
                         <a href="https://ticket.rzd.ru/" target="_blank" class="action-btn train-btn">
                             <svg viewBox="0 0 24 24">
-                                <g class="smoke-group">
-                                    <circle class="smoke" cx="16" cy="4" r="1.5" />
-                                    <circle class="smoke" cx="18" cy="2" r="1" style="animation-delay: 0.4s" />
-                                    <circle class="smoke" cx="14" cy="2" r="1.2" style="animation-delay: 0.8s" />
-                                </g>
                                 <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 16px;"><circle cx="7.5" cy="16" r="1.2" fill="#00b894"/><line x1="6.3" y1="16" x2="8.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="7.5" y1="14.8" x2="7.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
-                                <g class="wheel" style="transform-origin: 16.5px 16px;"><circle cx="16.5" cy="16" r="1.2" fill="#00b894"/><line x1="15.3" y1="16" x2="17.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="16.5" y1="14.8" x2="16.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
                             </svg>
                             На поезде
                         </a>
@@ -395,7 +366,7 @@
                 <div class="attraction-info">
                     <div>
                         <h3>Горнолыжный комплекс «Абзаково»</h3>
-                        <p>Один из самых современных курортов Башкортостана, расположенный у подножия хребта Крыкты-Тау. Зимой здесь катаются на лыжах и сноуборде, а летом — гуляют, отдыхают у воды и посещают аквапарк. «Уральская Швейцария» — так называют это место за красоту гор и высокий уровень сервиса.</p>
+                        <p>Один из самых современных курортов Башкортостана. Зимой здесь катаются на лыжах и сноуборде, а летом — гуляют, отдыхают у воды и посещают аквапарк. «Уральская Швейцария» — так называют это место за красоту гор и высокий уровень сервиса.</p>
                     </div>
                     <div class="attraction-details">
                         <p>Курорт «Абзаково» работает круглый год и предлагает 13 трасс общей протяжённостью около 18 км с перепадом высот до 320 метров. Трассы проходят через лесной массив, поэтому катание сопровождается потрясающими видами на горы. Для профессионалов подготовлены склоны, соответствующие стандартам FIS. Пять современных подъёмников доставляют на вершины до 5000 человек в час, а система искусственного заснеживания гарантирует стабильное покрытие. Помимо горнолыжного спорта, здесь есть аквапарк, спа-комплекс, зоопарк, хаски-город и развлекательный центр. Опытные инструкторы помогут новичкам, а пункты проката, кафе и медпункт работают прямо у подъёмников.</p>
@@ -405,8 +376,6 @@
                             <button class="action-btn car-btn" onclick="toggleDropdown(this)">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-                                    <g class="wheel" style="transform-origin: 6.5px 15.5px;"><circle cx="6.5" cy="15.5" r="2" fill="#0984e3"/><line x1="4.5" y1="15.5" x2="8.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="6.5" y1="13.5" x2="6.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
-                                    <g class="wheel" style="transform-origin: 17.5px 15.5px;"><circle cx="17.5" cy="15.5" r="2" fill="#0984e3"/><line x1="15.5" y1="15.5" x2="19.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="17.5" y1="13.5" x2="17.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
                                 </svg>
                                 На машине
                             </button>
@@ -419,22 +388,13 @@
                         <a href="https://автовокзалы-рб.рф" target="_blank" class="action-btn bus-btn">
                             <svg viewBox="0 0 24 24">
                                 <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 16.5px;"><circle cx="7.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="6" y1="16.5" x2="9" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="7.5" y1="15" x2="7.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
-                                <g class="wheel" style="transform-origin: 16.5px 16.5px;"><circle cx="16.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="15" y1="16.5" x2="18" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="16.5" y1="15" x2="16.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
                             </svg>
                             На автобусе
                         </a>
                         
                         <a href="https://ticket.rzd.ru/" target="_blank" class="action-btn train-btn">
                             <svg viewBox="0 0 24 24">
-                                <g class="smoke-group">
-                                    <circle class="smoke" cx="16" cy="4" r="1.5" />
-                                    <circle class="smoke" cx="18" cy="2" r="1" style="animation-delay: 0.4s" />
-                                    <circle class="smoke" cx="14" cy="2" r="1.2" style="animation-delay: 0.8s" />
-                                </g>
                                 <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 16px;"><circle cx="7.5" cy="16" r="1.2" fill="#00b894"/><line x1="6.3" y1="16" x2="8.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="7.5" y1="14.8" x2="7.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
-                                <g class="wheel" style="transform-origin: 16.5px 16px;"><circle cx="16.5" cy="16" r="1.2" fill="#00b894"/><line x1="15.3" y1="16" x2="17.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="16.5" y1="14.8" x2="16.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
                             </svg>
                             На поезде
                         </a>
@@ -448,18 +408,16 @@
                 <div class="attraction-info">
                     <div>
                         <h3>Инзерские зубчатки</h3>
-                        <p>Живописный горный хребет в междуречье Большого Инзера и Тирляна. Главная особенность — скальный цирк из причудливых скал-«зубцов» высотой до 35 метров. Пейзажи настолько необычны, что напоминают декорации к фильму «Аватар». Одно из самых красивых и загадочных мест Южного Урала.</p>
+                        <p>Живописный горный хребет в междуречье Большого Инзера и Тирляна. Главная особенность — скальный цирк из причудливых скал-«зубцов» высотой до 35 метров. Пейзажи напоминают декорации к фильму «Аватар».</p>
                     </div>
                     <div class="attraction-details">
-                        <p>Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды. Путь к хребту начинается через кордон Миселя, где нужно перейти вброд холодную горную реку.</p>
+                        <p>Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды.</p>
                     </div>
                     <div class="buttons">
                         <div class="car-btn-wrapper">
                             <button class="action-btn car-btn" onclick="toggleDropdown(this)">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-                                    <g class="wheel" style="transform-origin: 6.5px 15.5px;"><circle cx="6.5" cy="15.5" r="2" fill="#0984e3"/><line x1="4.5" y1="15.5" x2="8.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="6.5" y1="13.5" x2="6.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
-                                    <g class="wheel" style="transform-origin: 17.5px 15.5px;"><circle cx="17.5" cy="15.5" r="2" fill="#0984e3"/><line x1="15.5" y1="15.5" x2="19.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="17.5" y1="13.5" x2="17.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
                                 </svg>
                                 На машине
                             </button>
@@ -472,22 +430,13 @@
                         <a href="https://автовокзалы-рб.рф" target="_blank" class="action-btn bus-btn">
                             <svg viewBox="0 0 24 24">
                                 <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 16.5px;"><circle cx="7.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="6" y1="16.5" x2="9" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="7.5" y1="15" x2="7.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
-                                <g class="wheel" style="transform-origin: 16.5px 16.5px;"><circle cx="16.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="15" y1="16.5" x2="18" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="16.5" y1="15" x2="16.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
                             </svg>
                             На автобусе
                         </a>
                         
                         <a href="https://ticket.rzd.ru/" target="_blank" class="action-btn train-btn">
                             <svg viewBox="0 0 24 24">
-                                <g class="smoke-group">
-                                    <circle class="smoke" cx="16" cy="4" r="1.5" />
-                                    <circle class="smoke" cx="18" cy="2" r="1" style="animation-delay: 0.4s" />
-                                    <circle class="smoke" cx="14" cy="2" r="1.2" style="animation-delay: 0.8s" />
-                                </g>
                                 <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 16px;"><circle cx="7.5" cy="16" r="1.2" fill="#00b894"/><line x1="6.3" y1="16" x2="8.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="7.5" y1="14.8" x2="7.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
-                                <g class="wheel" style="transform-origin: 16.5px 16px;"><circle cx="16.5" cy="16" r="1.2" fill="#00b894"/><line x1="15.3" y1="16" x2="17.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="16.5" y1="14.8" x2="16.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
                             </svg>
                             На поезде
                         </a>
@@ -495,7 +444,7 @@
                 </div>
             </div>
 
-            <!-- ========== ГАЛЕРЕЯ (5 ФОТО) ========== -->
+            <!-- ========== ГАЛЕРЕЯ ========== -->
             <div class="carousel-container">
                 <h3>Галерея</h3>
                 <div class="carousel">
@@ -519,7 +468,6 @@
         // ========== РАСКРЫТИЕ КАРТОЧЕК ==========
         document.querySelectorAll('.attraction').forEach(card => {
             card.addEventListener('click', (e) => {
-                // Не раскрываем карточку, если клик был по кнопке или по выпадающему меню
                 if (e.target.closest('.action-btn') || e.target.closest('.nav-dropdown')) return;
                 card.classList.toggle('expanded');
             });
@@ -527,7 +475,6 @@
 
         // ========== ВЫПАДАЮЩЕЕ МЕНЮ НАВИГАТОРА ==========
         function toggleDropdown(btn) {
-            // Закрываем все другие открытые меню
             document.querySelectorAll('.nav-dropdown').forEach(dd => {
                 if (dd !== btn.nextElementSibling) {
                     dd.classList.remove('active');
@@ -536,11 +483,9 @@
                 }
             });
             
-            // Переключаем текущее
             const dropdown = btn.nextElementSibling;
             dropdown.classList.toggle('active');
             
-            // Находим родительскую карточку и поднимаем её наверх
             const parentCard = btn.closest('.attraction');
             if (parentCard) {
                 if (dropdown.classList.contains('active')) {
@@ -551,7 +496,6 @@
             }
         }
 
-        // Закрытие меню при клике в любом другом месте
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.car-btn-wrapper')) {
                 document.querySelectorAll('.nav-dropdown').forEach(dd => {
