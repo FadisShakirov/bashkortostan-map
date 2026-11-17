@@ -530,23 +530,27 @@
         };
 
         function openNavModal(destinationName) {
-            const encodedDest = encodeURIComponent(destinationName);
-            
-            // Ссылка для Яндекс.Карт (название работает нормально)
-            document.getElementById('link-yandex').href = `https://yandex.ru/maps/?rtext=~${encodedDest}&rtt=auto`;
-            
-            // Ссылка для 2ГИС (используем координаты, если они есть)
-            const coords = destinationCoords[destinationName];
-            if (coords) {
-                // Формат 2ГИС: сначала долгота, потом широта
-                document.getElementById('link-2gis').href = `https://2gis.ru/routeSearch/rsType/car/to/${coords.lon},${coords.lat}`;
-            } else {
-                // Если координат нет, оставляем старую ссылку (но лучше её не использовать)
-                document.getElementById('link-2gis').href = `https://2gis.ru/routeSearch/rsType/car/to/${encodedDest}`;
-            }
-            
-            document.getElementById('nav-modal').classList.add('active');
+    const encodedDest = encodeURIComponent(destinationName);
+    const coords = destinationCoords[destinationName];
+    
+    // Яндекс.Карты — работают с текстовым названием
+    document.getElementById('link-yandex').href = `https://yandex.ru/maps/?rtext=~${encodedDest}&rtt=auto`;
+    
+    if (coords) {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            // В приложении 2ГИС можно построить маршрут от текущего местоположения
+            document.getElementById('link-2gis').href = `dgis://2gis.ru/routeSearch/rsType/car/to/${coords.lon},${coords.lat}`;
+        } else {
+            // В вебе открываем точку на карте
+            document.getElementById('link-2gis').href = `https://2gis.ru/geo/${coords.lon},${coords.lat}`;
         }
+    } else {
+        document.getElementById('link-2gis').href = `https://2gis.ru/routeSearch/rsType/car/to/${encodedDest}`;
+    }
+    
+    document.getElementById('nav-modal').classList.add('active');
+}
 
         function closeNavModal() {
             document.getElementById('nav-modal').classList.remove('active');
