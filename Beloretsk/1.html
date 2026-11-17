@@ -129,99 +129,87 @@
     }
 
     .attraction-details {
-        max-height: 0;
-        overflow: hidden;
+        max-height: 0; overflow: hidden;
         transition: max-height 0.4s ease, margin-top 0.4s ease;
-        margin-top: 0;
-        color: var(--subheading-color);
-        font-size: 14px;
-        line-height: 1.6;
-        border-top: 1px solid transparent;
+        margin-top: 0; color: var(--subheading-color);
+        font-size: 14px; line-height: 1.6; border-top: 1px solid transparent;
     }
 
     .attraction.expanded .attraction-details {
-        max-height: 2000px; 
-        margin-top: 15px;
-        padding-top: 15px;
+        max-height: 2000px; margin-top: 15px; padding-top: 15px;
         border-top-color: var(--card-border);
     }
 
     .attraction.expanded .attraction-details p {
-        margin-bottom: 0;
-        color: var(--subheading-color);
+        margin-bottom: 0; color: var(--subheading-color);
     }
 
     /* ==========================================
-       АНИМИРОВАННЫЕ КНОПКИ (ВИД СБОКУ)
+       КНОПКИ И ВЫПАДАЮЩЕЕ МЕНЮ НАВИГАТОРА
        ========================================== */
-    .buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; }
+    .buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; position: relative; z-index: 10; }
     
+    /* Обертка для кнопки машины, чтобы позиционировать выпадающее меню */
+    .car-btn-wrapper {
+        position: relative; flex: 1; display: flex; min-width: 110px;
+    }
+
     .action-btn {
         display: flex; align-items: center; justify-content: center; gap: 8px;
         padding: 10px 15px; border-radius: 10px; text-decoration: none;
         font-weight: 600; font-size: 14px; transition: all 0.2s ease;
-        color: #fff; flex: 1; min-width: 110px; border: none; cursor: pointer;
-        background-color: #333;
+        color: #fff; border: none; cursor: pointer; width: 100%;
     }
 
     .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    
     .car-btn { background: #0984e3; } .car-btn:hover { background: #74b9ff; }
-    .bus-btn { background: #e17055; } .bus-btn:hover { background: #fab1a0; }
-    .train-btn { background: #00b894; } .train-btn:hover { background: #55efc4; }
+    .bus-btn { background: #e17055; flex: 1; } .bus-btn:hover { background: #fab1a0; }
+    .train-btn { background: #00b894; flex: 1; } .train-btn:hover { background: #55efc4; }
 
-    .action-btn svg { width: 26px; height: 26px; fill: currentColor; }
+    /* Иконки */
+    .action-btn svg { width: 24px; height: 24px; fill: currentColor; }
 
-    /* --- АНИМАЦИИ --- */
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    @keyframes smoke {
+    /* Анимации колес и дыма */
+    @keyframes spin-wheel { 100% { transform: rotate(360deg); } }
+    @keyframes smoke-puff {
         0% { transform: translateY(0) scale(1); opacity: 0.8; }
-        100% { transform: translateY(-8px) scale(2); opacity: 0; }
+        100% { transform: translateY(-10px) scale(2.5); opacity: 0; }
     }
 
-    .wheel { /* Точка вращения задается в inline-style для каждого колеса */ }
-    .action-btn:hover .wheel { animation: spin 0.6s linear infinite; }
+    .wheel { transform-box: fill-box; transform-origin: center; }
+    .action-btn:hover .wheel { animation: spin-wheel 0.8s linear infinite; }
 
-    .smoke { fill: #ccc; opacity: 0; transform-origin: center; }
-    .action-btn:hover .smoke { animation: smoke 1.2s ease-out infinite; }
+    .smoke { fill: #ecf0f1; opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .action-btn:hover .smoke { animation: smoke-puff 1.2s ease-out infinite; }
+
+    /* Выпадающее меню */
+    .nav-dropdown {
+        position: absolute; top: 100%; left: 0; width: 100%;
+        background: var(--card-bg); border: 1px solid var(--card-border);
+        border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        display: flex; flex-direction: column; gap: 5px; padding: 8px;
+        z-index: 100; opacity: 0; pointer-events: none; 
+        transform: translateY(-10px) scale(0.95);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        margin-top: 5px;
+    }
+    
+    .nav-dropdown.active {
+        opacity: 1; pointer-events: auto; transform: translateY(0) scale(1);
+    }
+
+    .nav-dropdown a {
+        display: block; padding: 10px; border-radius: 6px; text-decoration: none;
+        font-size: 13px; font-weight: 600; color: #fff; text-align: center;
+        transition: transform 0.1s;
+    }
+    .nav-dropdown a:active { transform: scale(0.98); }
+    .nav-dropdown .yandex { background: #ff0000; }
+    .nav-dropdown .dgis { background: #009900; }
 
     /* ==========================================
-       МОДАЛЬНОЕ ОКНО НАВИГАТОРА
-       ========================================== */
-    .nav-modal-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        backdrop-filter: blur(5px);
-    }
-    .nav-modal-overlay.active { opacity: 1; pointer-events: auto; }
-    
-    .nav-modal {
-        background: var(--card-bg); padding: 25px; border-radius: 16px;
-        border: 1px solid var(--card-border); text-align: center;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.3s ease;
-        max-width: 300px; width: 90%;
-    }
-    .nav-modal-overlay.active .nav-modal { transform: scale(1); }
-
-    .nav-modal h3 { margin-top: 0; color: var(--heading-color); font-size: 20px; margin-bottom: 15px; }
-    .nav-choice { display: flex; flex-direction: column; gap: 10px; }
-    
-    .nav-choice-btn {
-        display: block; padding: 12px; border-radius: 8px; text-decoration: none;
-        font-weight: 600; font-size: 15px; color: #fff; transition: transform 0.2s;
-    }
-    .nav-choice-btn:active { transform: scale(0.98); }
-    
-    .yandex-btn { background: #ff0000; } .yandex-btn:hover { background: #cc0000; }
-    .dgis-btn { background: #009900; } .dgis-btn:hover { background: #007700; }
-    
-    .close-modal-btn {
-        margin-top: 15px; background: transparent; border: none; color: var(--subheading-color);
-        text-decoration: underline; cursor: pointer; font-size: 14px;
-    }
-
-    /* ==========================================
-       ГАЛЕРЕЯ (ВОЗВРАЩЕНА КАК БЫЛА)
+       ГАЛЕРЕЯ
        ========================================== */
     .carousel-container {
         width: 100%; max-width: 850px; text-align: left; background: var(--card-bg);
@@ -257,7 +245,8 @@
         
         /* Кнопки в колонку на телефоне */
         .buttons { flex-direction: column; gap: 10px; }
-        .action-btn { width: 100%; box-sizing: border-box; padding: 14px 10px; font-size: 15px; }
+        .action-btn { padding: 14px 10px; font-size: 15px; }
+        .car-btn-wrapper, .bus-btn, .train-btn { width: 100%; }
         
         .cloud-back { filter: blur(30px); }
         .cloud-mid { filter: blur(20px); }
@@ -288,7 +277,6 @@
 <body>
 
     <div class="card-wrapper">
-
         <div id="weather-widget" class="weather-widget">
             <span id="weather-icon">⏳</span>
             <span id="weather-temp">--°</span>
@@ -317,45 +305,41 @@
                         <p>Айгир — это не просто скалы, а настоящая «Мекка» для туристов Южного Урала. Здесь, на северном склоне хребта Караташ, возвышаются знаменитые «Зубы Шурале» (их также называют Орлиными скалами). С высоты около 689 метров открывается захватывающая панорама на изгиб реки Малый Инзер и окрестные горные хребты. Рядом с горой течёт одноимённый водопад, особенно красивый весной и летом. Место овеяно легендами: по одной из них, название происходит от башкирского «айғыр» — «жеребец». Сюда приезжают ради рассветов, фотосессий и треккинга — маршруты подходят как для новичков, так и для опытных путешественников.</p>
                     </div>
                     <div class="buttons">
-                        <button class="action-btn car-btn" onclick="openNavModal('Айгир')">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/>
-                                <g class="wheel" style="transform-origin: 6px 17px;">
-                                    <circle cx="6" cy="17" r="2.5" fill="#2d3436"/><line x1="4.5" y1="17" x2="7.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 18px 17px;">
-                                    <circle cx="18" cy="17" r="2.5" fill="#2d3436"/><line x1="16.5" y1="17" x2="19.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                            </svg>
-                            На машине
-                        </button>
+                        <!-- Машина с выпадающим меню -->
+                        <div class="car-btn-wrapper">
+                            <button class="action-btn car-btn" onclick="toggleDropdown(this)">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                                    <g class="wheel" style="transform-origin: 6.5px 15.5px;"><circle cx="6.5" cy="15.5" r="2" fill="#0984e3"/><line x1="4.5" y1="15.5" x2="8.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="6.5" y1="13.5" x2="6.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
+                                    <g class="wheel" style="transform-origin: 17.5px 15.5px;"><circle cx="17.5" cy="15.5" r="2" fill="#0984e3"/><line x1="15.5" y1="15.5" x2="19.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="17.5" y1="13.5" x2="17.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
+                                </svg>
+                                На машине
+                            </button>
+                            <div class="nav-dropdown">
+                                <a href="https://yandex.ru/maps/?rtext=~Айгир&rtt=auto" target="_blank" class="yandex">Яндекс</a>
+                                <a href="https://2gis.ru/geo/57.696168,54.122716" target="_blank" class="dgis">2ГИС</a>
+                            </div>
+                        </div>
+                        
                         <a href="https://автовокзалы-рб.рф" target="_blank" class="action-btn bus-btn">
                             <svg viewBox="0 0 24 24">
-                                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 17px;">
-                                    <circle cx="7.5" cy="17" r="2.5" fill="#2d3436"/><line x1="5.5" y1="17" x2="9.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 16.5px 17px;">
-                                    <circle cx="16.5" cy="17" r="2.5" fill="#2d3436"/><line x1="14.5" y1="17" x2="18.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
+                                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                <g class="wheel" style="transform-origin: 7.5px 16.5px;"><circle cx="7.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="6" y1="16.5" x2="9" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="7.5" y1="15" x2="7.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
+                                <g class="wheel" style="transform-origin: 16.5px 16.5px;"><circle cx="16.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="15" y1="16.5" x2="18" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="16.5" y1="15" x2="16.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
                             </svg>
                             На автобусе
                         </a>
+                        
                         <a href="https://ticket.rzd.ru/" target="_blank" class="action-btn train-btn">
                             <svg viewBox="0 0 24 24">
                                 <g class="smoke-group">
-                                    <circle class="smoke" cx="16" cy="3" r="1.5" />
-                                    <circle class="smoke" cx="18" cy="1" r="1" style="animation-delay: 0.4s" />
-                                    <circle class="smoke" cx="14" cy="1" r="1.2" style="animation-delay: 0.8s" />
+                                    <circle class="smoke" cx="16" cy="4" r="1.5" />
+                                    <circle class="smoke" cx="18" cy="2" r="1" style="animation-delay: 0.4s" />
+                                    <circle class="smoke" cx="14" cy="2" r="1.2" style="animation-delay: 0.8s" />
                                 </g>
-                                <rect x="15" y="5" width="2" height="3" />
-                                <path d="M3 15h18v-5c0-1.1-.9-2-2-2h-8v-3H7v3H3v7z" />
-                                <g class="wheel" style="transform-origin: 8px 16px;">
-                                    <circle cx="8" cy="16" r="2.5" fill="#2d3436"/><line x1="6" y1="16" x2="10" y2="16" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 16px 16px;">
-                                    <circle cx="16" cy="16" r="2.5" fill="#2d3436"/><line x1="14" y1="16" x2="18" y2="16" stroke="#fff" stroke-width="1"/>
-                                </g>
+                                <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                <g class="wheel" style="transform-origin: 7.5px 16px;"><circle cx="7.5" cy="16" r="1.2" fill="#00b894"/><line x1="6.3" y1="16" x2="8.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="7.5" y1="14.8" x2="7.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
+                                <g class="wheel" style="transform-origin: 16.5px 16px;"><circle cx="16.5" cy="16" r="1.2" fill="#00b894"/><line x1="15.3" y1="16" x2="17.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="16.5" y1="14.8" x2="16.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
                             </svg>
                             На поезде
                         </a>
@@ -375,45 +359,40 @@
                         <p>Курорт «Абзаково» работает круглый год и предлагает 13 трасс общей протяжённостью около 18 км с перепадом высот до 320 метров. Трассы проходят через лесной массив, поэтому катание сопровождается потрясающими видами на горы. Для профессионалов подготовлены склоны, соответствующие стандартам FIS. Пять современных подъёмников доставляют на вершины до 5000 человек в час, а система искусственного заснеживания гарантирует стабильное покрытие. Помимо горнолыжного спорта, здесь есть аквапарк, спа-комплекс, зоопарк, хаски-город и развлекательный центр. Опытные инструкторы помогут новичкам, а пункты проката, кафе и медпункт работают прямо у подъёмников.</p>
                     </div>
                     <div class="buttons">
-                        <button class="action-btn car-btn" onclick="openNavModal('Абзаково')">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/>
-                                <g class="wheel" style="transform-origin: 6px 17px;">
-                                    <circle cx="6" cy="17" r="2.5" fill="#2d3436"/><line x1="4.5" y1="17" x2="7.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 18px 17px;">
-                                    <circle cx="18" cy="17" r="2.5" fill="#2d3436"/><line x1="16.5" y1="17" x2="19.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                            </svg>
-                            На машине
-                        </button>
+                        <div class="car-btn-wrapper">
+                            <button class="action-btn car-btn" onclick="toggleDropdown(this)">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                                    <g class="wheel" style="transform-origin: 6.5px 15.5px;"><circle cx="6.5" cy="15.5" r="2" fill="#0984e3"/><line x1="4.5" y1="15.5" x2="8.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="6.5" y1="13.5" x2="6.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
+                                    <g class="wheel" style="transform-origin: 17.5px 15.5px;"><circle cx="17.5" cy="15.5" r="2" fill="#0984e3"/><line x1="15.5" y1="15.5" x2="19.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="17.5" y1="13.5" x2="17.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
+                                </svg>
+                                На машине
+                            </button>
+                            <div class="nav-dropdown">
+                                <a href="https://yandex.ru/maps/?rtext=~Абзаково&rtt=auto" target="_blank" class="yandex">Яндекс</a>
+                                <a href="https://2gis.ru/geo/58.590899,53.831546" target="_blank" class="dgis">2ГИС</a>
+                            </div>
+                        </div>
+                        
                         <a href="https://автовокзалы-рб.рф" target="_blank" class="action-btn bus-btn">
                             <svg viewBox="0 0 24 24">
-                                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 17px;">
-                                    <circle cx="7.5" cy="17" r="2.5" fill="#2d3436"/><line x1="5.5" y1="17" x2="9.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 16.5px 17px;">
-                                    <circle cx="16.5" cy="17" r="2.5" fill="#2d3436"/><line x1="14.5" y1="17" x2="18.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
+                                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                <g class="wheel" style="transform-origin: 7.5px 16.5px;"><circle cx="7.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="6" y1="16.5" x2="9" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="7.5" y1="15" x2="7.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
+                                <g class="wheel" style="transform-origin: 16.5px 16.5px;"><circle cx="16.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="15" y1="16.5" x2="18" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="16.5" y1="15" x2="16.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
                             </svg>
                             На автобусе
                         </a>
+                        
                         <a href="https://ticket.rzd.ru/" target="_blank" class="action-btn train-btn">
                             <svg viewBox="0 0 24 24">
                                 <g class="smoke-group">
-                                    <circle class="smoke" cx="16" cy="3" r="1.5" />
-                                    <circle class="smoke" cx="18" cy="1" r="1" style="animation-delay: 0.4s" />
-                                    <circle class="smoke" cx="14" cy="1" r="1.2" style="animation-delay: 0.8s" />
+                                    <circle class="smoke" cx="16" cy="4" r="1.5" />
+                                    <circle class="smoke" cx="18" cy="2" r="1" style="animation-delay: 0.4s" />
+                                    <circle class="smoke" cx="14" cy="2" r="1.2" style="animation-delay: 0.8s" />
                                 </g>
-                                <rect x="15" y="5" width="2" height="3" />
-                                <path d="M3 15h18v-5c0-1.1-.9-2-2-2h-8v-3H7v3H3v7z" />
-                                <g class="wheel" style="transform-origin: 8px 16px;">
-                                    <circle cx="8" cy="16" r="2.5" fill="#2d3436"/><line x1="6" y1="16" x2="10" y2="16" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 16px 16px;">
-                                    <circle cx="16" cy="16" r="2.5" fill="#2d3436"/><line x1="14" y1="16" x2="18" y2="16" stroke="#fff" stroke-width="1"/>
-                                </g>
+                                <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                <g class="wheel" style="transform-origin: 7.5px 16px;"><circle cx="7.5" cy="16" r="1.2" fill="#00b894"/><line x1="6.3" y1="16" x2="8.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="7.5" y1="14.8" x2="7.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
+                                <g class="wheel" style="transform-origin: 16.5px 16px;"><circle cx="16.5" cy="16" r="1.2" fill="#00b894"/><line x1="15.3" y1="16" x2="17.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="16.5" y1="14.8" x2="16.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
                             </svg>
                             На поезде
                         </a>
@@ -433,45 +412,40 @@
                         <p>Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды. Путь к хребту начинается через кордон Миселя, где нужно перейти вброд холодную горную реку.</p>
                     </div>
                     <div class="buttons">
-                        <button class="action-btn car-btn" onclick="openNavModal('Инзерские зубчатки')">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/>
-                                <g class="wheel" style="transform-origin: 6px 17px;">
-                                    <circle cx="6" cy="17" r="2.5" fill="#2d3436"/><line x1="4.5" y1="17" x2="7.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 18px 17px;">
-                                    <circle cx="18" cy="17" r="2.5" fill="#2d3436"/><line x1="16.5" y1="17" x2="19.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                            </svg>
-                            На машине
-                        </button>
+                        <div class="car-btn-wrapper">
+                            <button class="action-btn car-btn" onclick="toggleDropdown(this)">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                                    <g class="wheel" style="transform-origin: 6.5px 15.5px;"><circle cx="6.5" cy="15.5" r="2" fill="#0984e3"/><line x1="4.5" y1="15.5" x2="8.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="6.5" y1="13.5" x2="6.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
+                                    <g class="wheel" style="transform-origin: 17.5px 15.5px;"><circle cx="17.5" cy="15.5" r="2" fill="#0984e3"/><line x1="15.5" y1="15.5" x2="19.5" y2="15.5" stroke="#fff" stroke-width="1"/><line x1="17.5" y1="13.5" x2="17.5" y2="17.5" stroke="#fff" stroke-width="1"/></g>
+                                </svg>
+                                На машине
+                            </button>
+                            <div class="nav-dropdown">
+                                <a href="https://yandex.ru/maps/?rtext=~Инзерские%20зубчатки&rtt=auto" target="_blank" class="yandex">Яндекс</a>
+                                <a href="https://2gis.ru/geo/58.3622,54.2639" target="_blank" class="dgis">2ГИС</a>
+                            </div>
+                        </div>
+                        
                         <a href="https://автовокзалы-рб.рф" target="_blank" class="action-btn bus-btn">
                             <svg viewBox="0 0 24 24">
-                                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10z"/>
-                                <g class="wheel" style="transform-origin: 7.5px 17px;">
-                                    <circle cx="7.5" cy="17" r="2.5" fill="#2d3436"/><line x1="5.5" y1="17" x2="9.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 16.5px 17px;">
-                                    <circle cx="16.5" cy="17" r="2.5" fill="#2d3436"/><line x1="14.5" y1="17" x2="18.5" y2="17" stroke="#fff" stroke-width="1"/>
-                                </g>
+                                <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                <g class="wheel" style="transform-origin: 7.5px 16.5px;"><circle cx="7.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="6" y1="16.5" x2="9" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="7.5" y1="15" x2="7.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
+                                <g class="wheel" style="transform-origin: 16.5px 16.5px;"><circle cx="16.5" cy="16.5" r="1.5" fill="#e17055"/><line x1="15" y1="16.5" x2="18" y2="16.5" stroke="#fff" stroke-width="0.8"/><line x1="16.5" y1="15" x2="16.5" y2="18" stroke="#fff" stroke-width="0.8"/></g>
                             </svg>
                             На автобусе
                         </a>
+                        
                         <a href="https://ticket.rzd.ru/" target="_blank" class="action-btn train-btn">
                             <svg viewBox="0 0 24 24">
                                 <g class="smoke-group">
-                                    <circle class="smoke" cx="16" cy="3" r="1.5" />
-                                    <circle class="smoke" cx="18" cy="1" r="1" style="animation-delay: 0.4s" />
-                                    <circle class="smoke" cx="14" cy="1" r="1.2" style="animation-delay: 0.8s" />
+                                    <circle class="smoke" cx="16" cy="4" r="1.5" />
+                                    <circle class="smoke" cx="18" cy="2" r="1" style="animation-delay: 0.4s" />
+                                    <circle class="smoke" cx="14" cy="2" r="1.2" style="animation-delay: 0.8s" />
                                 </g>
-                                <rect x="15" y="5" width="2" height="3" />
-                                <path d="M3 15h18v-5c0-1.1-.9-2-2-2h-8v-3H7v3H3v7z" />
-                                <g class="wheel" style="transform-origin: 8px 16px;">
-                                    <circle cx="8" cy="16" r="2.5" fill="#2d3436"/><line x1="6" y1="16" x2="10" y2="16" stroke="#fff" stroke-width="1"/>
-                                </g>
-                                <g class="wheel" style="transform-origin: 16px 16px;">
-                                    <circle cx="16" cy="16" r="2.5" fill="#2d3436"/><line x1="14" y1="16" x2="18" y2="16" stroke="#fff" stroke-width="1"/>
-                                </g>
+                                <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                <g class="wheel" style="transform-origin: 7.5px 16px;"><circle cx="7.5" cy="16" r="1.2" fill="#00b894"/><line x1="6.3" y1="16" x2="8.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="7.5" y1="14.8" x2="7.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
+                                <g class="wheel" style="transform-origin: 16.5px 16px;"><circle cx="16.5" cy="16" r="1.2" fill="#00b894"/><line x1="15.3" y1="16" x2="17.7" y2="16" stroke="#fff" stroke-width="0.6"/><line x1="16.5" y1="14.8" x2="16.5" y2="17.2" stroke="#fff" stroke-width="0.6"/></g>
                             </svg>
                             На поезде
                         </a>
@@ -479,7 +453,7 @@
                 </div>
             </div>
 
-            <!-- ========== ГАЛЕРЕЯ (5 ФОТО, КАК БЫЛО) ========== -->
+            <!-- ========== ГАЛЕРЕЯ (5 ФОТО) ========== -->
             <div class="carousel-container">
                 <h3>Галерея</h3>
                 <div class="carousel">
@@ -493,18 +467,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ВЫБОРА НАВИГАТОРА -->
-    <div class="nav-modal-overlay" id="nav-modal">
-        <div class="nav-modal">
-            <h3>Выберите навигатор</h3>
-            <div class="nav-choice">
-                <a href="#" id="link-yandex" target="_blank" class="nav-choice-btn yandex-btn">Яндекс Карты</a>
-                <a href="#" id="link-2gis" target="_blank" class="nav-choice-btn dgis-btn">2ГИС</a>
-            </div>
-            <button class="close-modal-btn" onclick="closeNavModal()">Отмена</button>
-        </div>
-    </div>
-
     <script>
         try {
             if (window.parent && window.parent !== window && window.parent.document.body.classList.contains('dark-mode')) {
@@ -515,49 +477,31 @@
         // ========== РАСКРЫТИЕ КАРТОЧЕК ==========
         document.querySelectorAll('.attraction').forEach(card => {
             card.addEventListener('click', (e) => {
-                if (e.target.closest('.action-btn') || e.target.closest('button')) return;
+                // Не раскрываем карточку, если клик был по кнопке или по выпадающему меню
+                if (e.target.closest('.action-btn') || e.target.closest('.nav-dropdown')) return;
                 card.classList.toggle('expanded');
             });
         });
 
-        // ========== МОДАЛЬНОЕ ОКНО НАВИГАТОРА (с координатами для 2ГИС) ==========
-        
-        // Координаты для точного построения маршрута в 2ГИС
-        const destinationCoords = {
-            'Айгир': { lat: 54.122716, lon: 57.696168 },          // деревня Айгир
-            'Абзаково': { lat: 53.831546, lon: 58.590899 },       // село Абзаково
-            'Инзерские зубчатки': { lat: 54.2639, lon: 58.3622 }  // хребет
-        };
-
-        function openNavModal(destinationName) {
-    const encodedDest = encodeURIComponent(destinationName);
-    const coords = destinationCoords[destinationName];
-    
-    // Яндекс.Карты — работают с текстовым названием
-    document.getElementById('link-yandex').href = `https://yandex.ru/maps/?rtext=~${encodedDest}&rtt=auto`;
-    
-    if (coords) {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-            // В приложении 2ГИС можно построить маршрут от текущего местоположения
-            document.getElementById('link-2gis').href = `dgis://2gis.ru/routeSearch/rsType/car/to/${coords.lon},${coords.lat}`;
-        } else {
-            // В вебе открываем точку на карте
-            document.getElementById('link-2gis').href = `https://2gis.ru/geo/${coords.lon},${coords.lat}`;
-        }
-    } else {
-        document.getElementById('link-2gis').href = `https://2gis.ru/routeSearch/rsType/car/to/${encodedDest}`;
-    }
-    
-    document.getElementById('nav-modal').classList.add('active');
-}
-
-        function closeNavModal() {
-            document.getElementById('nav-modal').classList.remove('active');
+        // ========== ВЫПАДАЮЩЕЕ МЕНЮ НАВИГАТОРА ==========
+        function toggleDropdown(btn) {
+            // Закрываем все другие открытые меню
+            document.querySelectorAll('.nav-dropdown').forEach(dd => {
+                if (dd !== btn.nextElementSibling) {
+                    dd.classList.remove('active');
+                }
+            });
+            
+            // Переключаем текущее
+            const dropdown = btn.nextElementSibling;
+            dropdown.classList.toggle('active');
         }
 
-        document.getElementById('nav-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'nav-modal') closeNavModal();
+        // Закрытие меню при клике в любом другом месте
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.car-btn-wrapper')) {
+                document.querySelectorAll('.nav-dropdown').forEach(dd => dd.classList.remove('active'));
+            }
         });
 
         // ========== ОБЛАКА ==========
