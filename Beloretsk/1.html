@@ -280,9 +280,19 @@
         .cloud-mid { filter: blur(20px); }
     }
 
-    /* ================= ВИДЖЕТ ПОГОДЫ ================= */
+   /* ================= ВЕРХНЯЯ ПАНЕЛЬ (ПОГОДА И КНОПКИ) ================= */
+    .top-right-controls {
+        position: absolute; 
+        top: 20px; 
+        right: 20px; 
+        z-index: 20;
+        display: flex; 
+        align-items: center; 
+        gap: 10px;
+    }
+
+    /* Виджет погоды */
     .weather-widget {
-        position: absolute; top: 20px; right: 20px; z-index: 10;
         display: flex; align-items: center; gap: 8px; padding: 8px 14px;
         background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 30px;
@@ -293,18 +303,97 @@
     body.dark .weather-widget { background: rgba(30, 30, 46, 0.7); border-color: rgba(255, 255, 255, 0.1); color: #eee; }
     #weather-icon { font-size: 18px; line-height: 1; }
 
+    /* Кнопки сервисов */
+    .top-services-widget {
+        display: flex; align-items: center; gap: 10px;
+    }
+
+    .service-dropdown { position: relative; }
+
+    .service-pill-btn {
+        display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+        background: rgba(255, 255, 255, 0.6); 
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        font-family: inherit; font-weight: 700; font-size: 14px;
+        color: #2c3e50; cursor: pointer; transition: all 0.2s ease;
+    }
+
+    .service-pill-btn:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); }
+
+    body.dark .service-pill-btn {
+        background: rgba(30, 30, 46, 0.7);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: #eee;
+    }
+    body.dark .service-pill-btn:hover { background: rgba(45, 45, 68, 0.9); }
+
+    .service-menu {
+        position: absolute; top: calc(100% + 8px); right: 0; /* Выравнивание по правому краю */
+        min-width: 190px; background: #ffffff; border: 1px solid var(--card-border);
+        border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        display: flex; flex-direction: column; gap: 6px; padding: 8px;
+        z-index: 1000; opacity: 0; pointer-events: none;
+        transform: translateY(-10px) scale(0.95);
+        transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    body.dark .service-menu { background: #2a2a3a; }
+    .service-menu.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+
+    .service-menu a {
+        display: block; padding: 10px 12px; border-radius: 8px;
+        text-decoration: none; font-size: 13px; font-weight: 600;
+        color: #fff; text-align: center; transition: opacity 0.2s;
+    }
+    .service-menu a:hover { opacity: 0.9; }
+
+    .srv-yandex { background: #fc3f1d; }
+    .srv-dgis { background: #19b000; }
+    .srv-ostrovok { background: #0057ff; }
+   
+
     @media (max-width: 768px) {
-        .weather-widget { top: 10px; right: 10px; padding: 6px 10px; font-size: 13px; gap: 5px; }
-        #weather-icon { font-size: 16px; }
-    }  
+        .top-right-controls { top: 10px; right: 10px; gap: 6px; flex-direction: column; align-items: flex-end; }
+        .service-pill-btn, .weather-widget { padding: 6px 10px; font-size: 12px; gap: 4px; }
+        .content-wrapper { padding-top: 85px; } /* Отступ, чтобы на телефоне шапка не наезжала */
+    }
     </style>
 </head>
 <body>
 
     <div class="card-wrapper">
-        <div id="weather-widget" class="weather-widget">
-            <span id="weather-icon">⏳</span>
-            <span id="weather-temp">--°</span>
+        <div class="top-right-controls">
+            <!-- Кнопки сервисов -->
+            <div class="top-services-widget">
+                <div class="service-dropdown">
+                    <button type="button" class="service-pill-btn" onclick="toggleTopMenu('food-menu', event)">
+                        <span>🍽️</span> Где поесть
+                    </button>
+                    <div id="food-menu" class="service-menu">
+                        <a href="#" data-service="yandex-food" class="srv-yandex" target="_blank" rel="noopener">Яндекс Карты</a>
+                        <a href="#" data-service="2gis-food" class="srv-dgis" target="_blank" rel="noopener">2ГИС</a>
+                    </div>
+                </div>
+
+                <div class="service-dropdown">
+                    <button type="button" class="service-pill-btn" onclick="toggleTopMenu('stay-menu', event)">
+                        <span>🛏️</span> Где переночевать
+                    </button>
+                    <div id="stay-menu" class="service-menu">
+                        <a href="#" data-service="yandex-travel" class="srv-yandex" target="_blank" rel="noopener">Яндекс Путешествия</a>
+                        <a href="#" data-service="ostrovok" class="srv-ostrovok" target="_blank" rel="noopener">Островок</a>
+                       
+                    </div>
+                </div>
+            </div>
+
+            <!-- Виджет погоды -->
+            <div id="weather-widget" class="weather-widget">
+                <span id="weather-icon">⏳</span>
+                <span id="weather-temp">--°</span>
+            </div>
         </div>
 
         <div class="bg-layer"></div>
@@ -458,7 +547,7 @@
         </div>
     </div>
 
-    <script>
+     <script>
         try {
             if (window.parent && window.parent !== window && window.parent.document.body.classList.contains('dark-mode')) {
                 document.body.classList.add('dark');
@@ -574,53 +663,114 @@
         requestAnimationFrame(animateAllClouds);
 
         // ==========================================
-        // ЛОГИКА ВИДЖЕТА ПОГОДЫ (wttr.in)
-        // ==========================================
-        async function fetchWeather() {
-            const iconEl = document.getElementById('weather-icon');
-            const tempEl = document.getElementById('weather-temp');
+    // 1. ЛОГИКА ПОГОДЫ (wttr.in)
+    // ==========================================
+    async function fetchWeather() {
+        const iconEl = document.getElementById('weather-icon');
+        const tempEl = document.getElementById('weather-temp');
+        
+        // Координаты Белорецкого района
+        const lat = 53.96;
+        const lon = 58.40;
+
+        const url = `https://wttr.in/${lat},${lon}?format=j1`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
-            const lat = 53.96;
-            const lon = 58.40;
-
-            const url = `https://wttr.in/${lat},${lon}?format=j1`;
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            if (data.current_condition && data.current_condition[0]) {
+                const current = data.current_condition[0];
+                const temp = current.temp_C;
+                const code = current.weatherCode;
                 
-                const data = await response.json();
-                
-                if (data.current_condition && data.current_condition[0]) {
-                    const current = data.current_condition[0];
-                    const temp = current.temp_C;
-                    const code = current.weatherCode;
-                    
-                    tempEl.textContent = `${temp}°`;
-                    iconEl.textContent = getWeatherIconWttr(code);
-                } else {
-                    throw new Error('Нет данных о погоде');
-                }
-            } catch (error) {
-                console.error("Не удалось загрузить погоду:", error);
-                iconEl.textContent = '❌';
-                tempEl.textContent = '--°';
+                tempEl.textContent = `${temp}°`;
+                iconEl.textContent = getWeatherIconWttr(code);
+            } else {
+                throw new Error('Нет данных о погоде');
             }
+        } catch (error) {
+            console.error("Не удалось загрузить погоду:", error);
+            iconEl.textContent = '❌';
+            tempEl.textContent = '--°';
         }
+    }
 
-        function getWeatherIconWttr(code) {
-            const codeNum = parseInt(code, 10);
-            if (codeNum === 113) return '☀️';
-            if (codeNum === 116) return '🌤️';
-            if (codeNum === 119 || codeNum === 122) return '☁️';
-            if (codeNum === 143 || codeNum === 248 || codeNum === 260) return '🌫️';
-            if ([176, 263, 266, 293, 296, 299, 302, 305, 308, 353, 356, 359].includes(codeNum)) return '🌧️';
-            if ([179, 182, 185, 281, 284, 311, 314, 317, 320, 350, 362, 365, 374, 377].includes(codeNum)) return '🌨️';
-            if ([200, 386, 389, 392, 395].includes(codeNum)) return '⛈️';
-            return '🌡️';
+    function getWeatherIconWttr(code) {
+        const codeNum = parseInt(code, 10);
+        if (codeNum === 113) return '☀️';
+        if (codeNum === 116) return '🌤️';
+        if (codeNum === 119 || codeNum === 122) return '☁️';
+        if (codeNum === 143 || codeNum === 248 || codeNum === 260) return '🌫️';
+        if ([176, 263, 266, 293, 296, 299, 302, 305, 308, 353, 356, 359].includes(codeNum)) return '🌧️';
+        if ([179, 182, 185, 281, 284, 311, 314, 317, 320, 350, 362, 365, 374, 377].includes(codeNum)) return '🌨️';
+        if ([200, 386, 389, 392, 395].includes(codeNum)) return '⛈️';
+        return '🌡️';
+    }
+
+    // ==========================================
+    // 2. ССЫЛКИ НА АГРЕГАТОРЫ (Еда и Жилье)
+    // ==========================================
+    function initDistrictServices() {
+        const titleEl = document.querySelector('h1');
+        const districtName = titleEl ? titleEl.textContent.trim() : 'Белорецкий район';
+        
+        const foodQuery = encodeURIComponent(`кафе и рестораны ${districtName}`);
+        const hotelQuery = encodeURIComponent(`отели ${districtName}`);
+
+        const links = {
+            'yandex-food': `https://yandex.ru/maps/?mode=search&text=${foodQuery}`,
+            '2gis-food': `https://2gis.ru/search/%D0%BA%D0%B0%D1%84%D0%B5%20%D0%B8%20%D1%80%D0%B5%D1%81%D1%82%D0%BE%D1%80%D0%B0%D0%BD%D1%8B%20%D0%91%D0%B5%D0%BB%D0%BE%D1%80%D0%B5%D1%86%D0%BA%D0%B8%D0%B9%20%D1%80%D0%B0%D0%B9%D0%BE%D0%BD?m=57.850882%2C54.047921%2F9.11`,
+            'yandex-travel': `https://travel.yandex.ru/hotels/beloretsky-district/`,
+            'ostrovok': `https://ostrovok.ru/hotel/russia/beloreck/`,
+          
+        };
+
+        for (const [key, url] of Object.entries(links)) {
+            const linkEl = document.querySelector(`a[data-service="${key}"]`);
+            if (linkEl) linkEl.href = url;
         }
+    }
 
-        document.addEventListener('DOMContentLoaded', fetchWeather);
-    </script>
+    // ==========================================
+    // 3. ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ
+    // ==========================================
+    function toggleTopMenu(menuId, event) {
+        event.stopPropagation(); 
+        const targetMenu = document.getElementById(menuId);
+        const isActive = targetMenu.classList.contains('active');
+
+        document.querySelectorAll('.service-menu').forEach(function(m) {
+            m.classList.remove('active');
+        });
+        
+        if (!isActive) {
+            targetMenu.classList.add('active');
+        }
+    }
+
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.service-menu').forEach(function(m) {
+            m.classList.remove('active');
+        });
+    });
+
+    // ==========================================
+    // 4. ЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchWeather();
+        initDistrictServices();
+    });
+
+    // Проверка темной темы от родительского окна
+    try {
+        if (window.parent && window.parent !== window && window.parent.document.body.classList.contains('dark-mode')) {
+            document.body.classList.add('dark');
+        }
+    } catch (e) {}
+</script>
 </body>
 </html>
