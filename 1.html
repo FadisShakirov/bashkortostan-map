@@ -354,10 +354,42 @@
     .srv-ostrovok { background: #0057ff; }
    
 
-    @media (max-width: 768px) {
-        .top-right-controls { top: 10px; right: 10px; gap: 6px; flex-direction: column; align-items: flex-end; }
-        .service-pill-btn, .weather-widget { padding: 6px 10px; font-size: 12px; gap: 4px; }
-        .content-wrapper { padding-top: 85px; } /* Отступ, чтобы на телефоне шапка не наезжала */
+   @media (max-width: 768px) {
+        .top-right-controls { 
+            top: 10px; 
+            right: 10px; 
+            left: 10px; 
+            /* МЕНЯЕМ НАПРАВЛЕНИЕ: теперь погода будет сверху, а кнопки снизу */
+            flex-direction: column-reverse; 
+            align-items: flex-end; 
+            gap: 8px; 
+        }
+        
+        /* Выстраиваем кнопки друг под другом */
+        .top-services-widget {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        /* Уменьшаем размеры */
+        .service-pill-btn, .weather-widget { 
+            padding: 6px 12px; 
+            font-size: 12px; 
+            gap: 4px; 
+        }
+        
+        /* Меню открываем влево */
+        .service-menu {
+            right: 0;
+            left: auto; 
+            min-width: 160px;
+        }
+
+        /* Отступ для контента, чтобы шапка не перекрывала текст */
+        .content-wrapper { 
+            padding-top: 160px; 
+        }
     }
     </style>
 </head>
