@@ -354,39 +354,39 @@
     .srv-ostrovok { background: #0057ff; }
    
 
-    @media (max-width: 768px) {
-        /* Прижимаем весь блок к правому краю и разрешаем ему занимать всю ширину экрана */
+   @media (max-width: 768px) {
         .top-right-controls { 
             top: 10px; 
             right: 10px; 
-            left: 10px; /* Важно: это не даст блоку уйти за левый край экрана */
-            flex-direction: column; /* Выстраиваем погоду и кнопки в колонку */
-            align-items: flex-end; /* Прижимаем всё вправо */
+            left: 10px; 
+            /* МЕНЯЕМ НАПРАВЛЕНИЕ: теперь погода будет сверху, а кнопки снизу */
+            flex-direction: column-reverse; 
+            align-items: flex-end; 
             gap: 8px; 
         }
         
-        /* Выстраиваем кнопки "Где поесть" и "Где переночевать" друг под другом */
+        /* Выстраиваем кнопки друг под другом */
         .top-services-widget {
             flex-direction: column;
             align-items: flex-end;
             gap: 8px;
         }
 
-        /* Уменьшаем размеры кнопок и погоды для мобильных */
+        /* Уменьшаем размеры */
         .service-pill-btn, .weather-widget { 
             padding: 6px 12px; 
             font-size: 12px; 
             gap: 4px; 
         }
         
-        /* Выпадающее меню открываем влево (чтобы оно не уходило за правый край) */
+        /* Меню открываем влево */
         .service-menu {
             right: 0;
             left: auto; 
             min-width: 160px;
         }
 
-        /* Увеличиваем отступ сверху для контента, так как шапка стала выше */
+        /* Отступ для контента, чтобы шапка не перекрывала текст */
         .content-wrapper { 
             padding-top: 160px; 
         }
