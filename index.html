@@ -139,7 +139,7 @@
     50% { transform: translateY(-0.7px); }
 }
 .combine-body-anim {
-    animation: combine-idle 0.6s ease-in-out infinite;
+    animation: combine-idle 1.6s ease-in-out infinite;
 }
 
  /* ================= ВЕТРОГЕНЕРАТОР ================= */
@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zoomAnimMs: 650,
         vehicleIntervalMs: 19000,   // Частота появления транспорта (в миллисекундах)
         vehicleDurationMs: 10000,  // Время проезда транспорта (в миллисекундах)
-        vehicleScale: 2.5,           // Размер транспорта (масштаб)
+        vehicleScale: 3.5,           // Размер транспорта (масштаб)
 
         // Настройки границ
         outerBorderColor: '#28713E',
@@ -356,19 +356,32 @@ document.addEventListener('DOMContentLoaded', () => {
         districtBorderWidth: 1,
         districtBorderOpacity: 0.7,
 
-        // 🏔️ Горные системы (районы + общие параметры рельефа)
+        // 🏔️ Горные системы Башкортостана (согласно орографической карте)
         mountainSystems: {
-            'Уралтау': {
-                districts: ['Баймакский', 'Бурзянский', 'Абзелиловский', 'Белорецкий', 'Учалинский'],
-                scale: 28, freq: 0.008, seed: 7, azimuth: 355
+            // 1. Высокогорье Южного Урала (Ямантау 1640м, Б. Иремель 1582м, Зигальга, Машак)
+            'Высокогорье Южного Урала': {
+                districts: ['Белорецкий', 'Учалинский'],
+                scale: 34, freq: 0.0085, seed: 7, azimuth: 315
             },
+            // 2. Передовые складчатые хребты западного склона (Зильмердак, Каратау, Баштау)
+            'Передовые хребты Урала': {
+                districts: ['Архангельский', 'Гафурийский', 'Ишимбайский'],
+                scale: 24, freq: 0.0095, seed: 14, azimuth: 310
+            },
+            // 3. Водораздельный хребет Уралтау и хребет Ирендык
+            'Уралтау и Ирендык': {
+                districts: ['Бурзянский', 'Абзелиловский', 'Баймакский'],
+                scale: 22, freq: 0.008, seed: 19, azimuth: 320
+            },
+            // 4. Зилаирское плато (глубоко расчленённые речные каньоны и увалы)
             'Зилаирское плато': {
                 districts: ['Кугарчинский', 'Зилаирский', 'Зианчуринский', 'Хайбуллинский'],
-                scale: 15, freq: 0.008, seed: 7, azimuth: 345
+                scale: 15, freq: 0.011, seed: 11, azimuth: 325
             },
+            // 5. Уфимское карстовое плато и отроги Каратау на северо-востоке
             'Уфимское плато': {
                 districts: ['Нуримановский', 'Караидельский', 'Аскинский', 'Салаватский', 'Дуванский'],
-                scale: 12, freq: 0.015, seed: 21, azimuth: 375
+                scale: 12, freq: 0.015, seed: 21, azimuth: 315
             }
         },
 
@@ -734,14 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             .yurt-smoke { animation: yurt-smoke 2.5s ease-out infinite; }
 
-            /* --- КНОПКА ТЕМЫ --- */
-            #theme-toggle {
-                position: fixed; top: 16px; right: 16px;
-                width: 44px; height: 44px; border-radius: 50%;
-                border: none; background: #fff; color: #333;
-                font-size: 20px; cursor: pointer; z-index: 100002;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-                transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
+           
             }
             #theme-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
             body.dark-mode #theme-toggle { background: #2a2a3a; color: #ffd166; }
@@ -785,12 +791,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
      /* ================================================================
-       2. ЛОГИКА ФОНА (ОБЛАКА В ФОРМЕ ЖИВОТНЫХ И ЗВЕЗДЫ)
+       2. ЛОГИКА ФОНА (ВОЗДУШНЫЕ ОБЛАКА-ЖИВОТНЫЕ И НОЧНЫЕ ЗВЁЗДЫ)
        ================================================================ */
     const ctx = canvas.getContext('2d');
     let width, height;
     let particles = [];
-    let lastDrawTime = 0; // 👈 ВАЖНО: Переменная для контроля FPS
+    let lastDrawTime = 0;
+
+    // 1. Контур облака-скакуна (мягкие клубы гривы, шеи и ног)
+    const horseCloudPath = new Path2D(`
+        M 22 82
+        C 10 80, 6 66, 16 58
+        C 12 46, 22 34, 38 36
+        C 50 36, 62 28, 72 18
+        C 78 12, 86 14, 88 22
+        C 96 24, 104 32, 102 40
+        C 96 46, 86 42, 82 50
+        C 90 58, 100 68, 94 78
+        C 88 84, 78 76, 74 68
+        C 66 76, 52 78, 40 72
+        C 34 82, 28 84, 22 82 Z
+    `);
+
+    // 2. Контур облака-куницы (изогнутая спинка, ушки и пышный хвост — без «ложки»)
+    const martenCloudPath = new Path2D(`
+        M 14 72
+        C 6 64, 10 48, 24 46
+        C 34 44, 42 52, 50 48
+        C 58 34, 76 30, 90 42
+        C 96 36, 104 38, 106 46
+        C 114 50, 114 58, 106 60
+        C 98 62, 94 72, 86 72
+        C 78 72, 76 62, 68 62
+        C 60 62, 58 72, 50 72
+        C 42 72, 36 64, 28 68
+        C 22 72, 18 76, 14 72 Z
+    `);
+
+    // Предварительно рендерим облака в кэш с тройным мягким размытием
+    function createCloudSprite(path2D) {
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = 160;
+        offCanvas.height = 130;
+        const octx = offCanvas.getContext('2d');
+
+        // Смещаем центр рисования внутрь увеличенного холста, чтобы края blur не обрезались
+        octx.translate(20, 15);
+
+        // 1. Широкая воздушная дымка (очень мягкий край)
+        octx.save();
+        octx.filter = 'blur(12px)';
+        octx.fillStyle = 'rgba(255, 255, 255, 0.32)';
+        octx.fill(path2D);
+        octx.restore();
+
+        // 2. Основное тело облака (воздушная полупрозрачность)
+        octx.save();
+        octx.filter = 'blur(6px)';
+        octx.fillStyle = 'rgba(255, 255, 255, 0.48)';
+        octx.fill(path2D);
+        octx.restore();
+
+        // 3. Лёгкий светлый центр для читаемости силуэта
+        octx.save();
+        octx.filter = 'blur(3px)';
+        octx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        octx.fill(path2D);
+        octx.restore();
+
+        return offCanvas;
+    }
+
+    const cloudSprites = {
+        horse: createCloudSprite(horseCloudPath),
+        marten: createCloudSprite(martenCloudPath)
+    };
 
     function resizeCanvas() {
         width = canvas.width = window.innerWidth;
@@ -802,16 +877,20 @@ document.addEventListener('DOMContentLoaded', () => {
         constructor() {
             this.x = Math.random() * width;
             this.y = Math.random() * height;
-            // Случайно выбираем: Лошадь или Куница
             this.type = Math.random() > 0.5 ? 'horse' : 'marten';
-            
-            // УВЕЛИЧИЛИ размер облака (было 0.8 - 1.4, стало 2.0 - 4.0)
-            this.scale = Math.random() * 2.0 + 2.0; 
+
+            // Крупный масштаб облаков (2.6 - 4.6)
+            this.scale = Math.random() * 2.0 + 2.6;
             this.offset = Math.random() * Math.PI * 2;
-            
-            // Скорость движения
-            this.vx = Math.random() * CONFIG.fogSpeed - (CONFIG.fogSpeed / 2);
-            this.vy = Math.random() * 0.05 - 0.025;
+
+            // Плавный ветер
+            const dir = Math.random() > 0.35 ? 1 : -1;
+            this.vx = (Math.random() * 0.6 + 0.4) * CONFIG.fogSpeed * dir;
+            this.vy = (Math.random() - 0.5) * 0.04;
+
+            // Ночные звёзды
+            this.starRadius = Math.random() * 1.1 + 0.5;
+            this.isBrightStar = Math.random() > 0.85;
         }
     }
 
@@ -824,31 +903,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Контуры животных (Лошадь и Куница) в виде Path2D
-     const horseCloudPath = new Path2D(`
-        M 15 70 
-        C 5 60, 10 45, 20 40 
-        C 15 25, 30 15, 45 25 
-        C 55 5, 75 5, 80 25 
-        C 95 20, 100 45, 85 55 
-        C 90 65, 70 75, 60 65 
-        C 55 80, 45 85, 40 70 
-        C 30 85, 15 85, 20 70 Z
-    `);
-
-    // Куница: вытянутое тело, пышный хвост, маленькая голова
-    const martenCloudPath = new Path2D(`
-       
-    `);
-
     function drawBackground(timestamp) {
         if (!CONFIG.bgAnimationEnabled) {
             ctx.clearRect(0, 0, width, height);
-            return; 
+            return;
         }
 
-        if (!effectsEnabled) {
-            requestAnimationFrame(drawBackground); 
+        if ((typeof effectsEnabled !== 'undefined' && !effectsEnabled) || window.isPaused) {
+            requestAnimationFrame(drawBackground);
             return;
         }
 
@@ -863,55 +925,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lastDrawTime = timestamp - (elapsed % fpsInterval);
 
-        // --- ОТРИСОВКА ---
         ctx.clearRect(0, 0, width, height);
         const isDark = document.body.classList.contains('dark-mode');
-        const time = Date.now();
+        const time = timestamp;
 
         particles.forEach(p => {
             if (!isDark) {
-                // ☁️ ДНЕВНЫЕ ОБЛАКА В ФОРМЕ ЖИВОТНЫХ
+                // ☁️ ДНЕВНЫЕ МЯГКИЕ ОБЛАКА
                 p.x += p.vx;
                 p.y += p.vy;
-                if (p.x < -200) p.x = width + 200;
-                if (p.x > width + 200) p.x = -200;
-                if (p.y < -200) p.y = height + 200;
-                if (p.y > height + 200) p.y = -200;
+
+                const margin = 220 * p.scale;
+                if (p.x < -margin) p.x = width + margin;
+                if (p.x > width + margin) p.x = -margin;
+                if (p.y < -margin) p.y = height + margin;
+                if (p.y > height + margin) p.y = -margin;
+
+                const sprite = cloudSprites[p.type];
+                const dirX = p.vx >= 0 ? 1 : -1;
 
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                ctx.scale(p.scale, p.scale);
-                
-                // 🎯 ДВОЙНОЕ РАЗМЫТИЕ ДЛЯ ЭФФЕКТА ОБЛАКА
-                
-                // 1. Широкая и мягкая основа (ореол)
-                ctx.filter = 'blur(6px)'; 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; 
-                if (p.type === 'horse') {
-                    ctx.fill(horseCloudPath);
-                } else {
-                    ctx.fill(martenCloudPath);
-                }
-
-                // 2. Более плотная и четкая середина (силуэт)
-                ctx.filter = 'blur(2px)'; 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                if (p.type === 'horse') {
-                    ctx.fill(horseCloudPath);
-                } else {
-                    ctx.fill(martenCloudPath);
-                }
-                
+                ctx.scale(p.scale * dirX, p.scale);
+                ctx.drawImage(sprite, -80, -65);
                 ctx.restore();
 
             } else {
-                // ⭐ НОЧНЫЕ ЗВЕЗДЫ
-                const opacity = (Math.sin(time * CONFIG.starTwinkleSpeed + p.offset) * 0.5 + 0.5);
+                // ⭐ НОЧНЫЕ ЗВЁЗДЫ
+                const twinkle = Math.sin(time * CONFIG.starTwinkleSpeed + p.offset) * 0.45 + 0.55;
+                ctx.fillStyle = `rgba(255, 255, 255, ${twinkle.toFixed(2)})`;
+
                 ctx.beginPath();
-                const starSize = p.scale * 0.8; 
-                ctx.arc(p.x, p.y, starSize, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+                ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
                 ctx.fill();
+
+                if (p.isBrightStar && twinkle > 0.75) {
+                    const ray = p.starRadius * 3.2;
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${(twinkle * 0.45).toFixed(2)})`;
+                    ctx.lineWidth = 0.6;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x - ray, p.y);
+                    ctx.lineTo(p.x + ray, p.y);
+                    ctx.moveTo(p.x, p.y - ray);
+                    ctx.lineTo(p.x, p.y + ray);
+                    ctx.stroke();
+                }
             }
         });
 
@@ -928,103 +986,214 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeBtn = document.createElement('button');
 
 /* ================================================================
-       КНОПКА ВКЛЮЧЕНИЯ/ОТКЛЮЧЕНИЯ ЭФФЕКТОВ
+       ПАНЕЛЬ УПРАВЛЕНИЯ: ТУМБЛЕРЫ ЭФФЕКТОВ И ТЕМЫ (ЕДИНЫЙ СТИЛЬ)
        ================================================================ */
-    const effectsBtn = document.createElement('button');
-    effectsBtn.id = 'effects-toggle';
-    effectsBtn.innerHTML = '✨';
-    effectsBtn.setAttribute('title', 'Включить/отключить анимации');
-    
-    // 🎯 ЗАДАЕМ СТИЛИ НАПРЯМУЮ (без CSS)
-    effectsBtn.style.cssText = `
-        position: fixed;
-        top: 16px;
-        right: 72px;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        border: none;
-        background: #fff;
-        color: #333;
-        font-size: 20px;
-        cursor: pointer;
-        z-index: 100002;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
-        padding: 0;
-    `;
-    
-    // Ховер-эффект
-    effectsBtn.addEventListener('mouseenter', () => {
-        effectsBtn.style.transform = 'scale(1.08)';
-        effectsBtn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+
+    // Удаляем старые кнопки, если они уже были созданы
+    const oldEffectsBtn = document.getElementById('effects-toggle');
+    if (oldEffectsBtn) oldEffectsBtn.remove();
+    const oldThemeBtn = document.getElementById('theme-toggle');
+    if (oldThemeBtn) oldThemeBtn.remove();
+
+    // Вспомогательная фабрика для создания одинаковых стильных тумблеров
+    function createModernToggle({ id, rightPx, iconLeft, iconRight, initialTooltip }) {
+        const btn = document.createElement('button');
+        btn.id = id;
+        btn.setAttribute('aria-label', initialTooltip);
+        btn.style.cssText = `
+            position: fixed;
+            top: 16px;
+            right: ${rightPx}px;
+            width: 76px;
+            height: 44px;
+            border-radius: 22px;
+            border: 1.5px solid rgba(9, 132, 227, 0.35);
+            cursor: pointer;
+            z-index: 100002;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            box-sizing: border-box;
+            transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.25s ease, transform 0.2s ease;
+            outline: none;
+        `;
+
+        const bgLeft = document.createElement('span');
+        bgLeft.textContent = iconLeft;
+        bgLeft.style.cssText = 'font-size: 14px; opacity: 0.85; pointer-events: none;';
+
+        const bgRight = document.createElement('span');
+        bgRight.textContent = iconRight;
+        bgRight.style.cssText = 'font-size: 14px; opacity: 0.65; pointer-events: none;';
+
+        const knob = document.createElement('div');
+        knob.style.cssText = `
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+            pointer-events: none;
+        `;
+
+        const tooltip = document.createElement('div');
+        tooltip.textContent = initialTooltip;
+        tooltip.style.cssText = `
+            position: absolute;
+            top: 52px;
+            right: 0;
+            background: rgba(25, 28, 38, 0.92);
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 6px 11px;
+            border-radius: 8px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            letter-spacing: 0.2px;
+        `;
+
+        btn.appendChild(bgLeft);
+        btn.appendChild(bgRight);
+        btn.appendChild(knob);
+        btn.appendChild(tooltip);
+        document.body.appendChild(btn);
+
+        // Плавный ховер и появление подсказки
+        btn.addEventListener('mouseenter', () => {
+            btn.style.transform = 'scale(1.04)';
+            tooltip.style.opacity = '1';
+            tooltip.style.transform = 'translateY(0)';
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'scale(1)';
+            tooltip.style.opacity = '0';
+            tooltip.style.transform = 'translateY(-4px)';
+        });
+
+        return { btn, knob, tooltip };
+    }
+
+    // 1. Создаем ТУМБЛЕР ЭФФЕКТОВ (слева, right: 104px)
+    const effectsUI = createModernToggle({
+        id: 'effects-toggle',
+        rightPx: 104,
+        iconLeft: '✨',
+        iconRight: '💤',
+        initialTooltip: 'Отключить эффекты'
     });
-    effectsBtn.addEventListener('mouseleave', () => {
-        effectsBtn.style.transform = 'scale(1)';
-        effectsBtn.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+
+    // 2. Создаем ТУМБЛЕР ТЕМЫ (справа в углу, right: 16px)
+    const themeUI = createModernToggle({
+        id: 'theme-toggle',
+        rightPx: 16,
+        iconLeft: '☀️',
+        iconRight: '🌙',
+        initialTooltip: 'Включить ночной режим'
     });
-    
-    document.body.appendChild(effectsBtn);
+
+    // --- ОБНОВЛЕНИЕ ВНЕШНЕГО ВИДА ТУМБЛЕРА ЭФФЕКТОВ ---
+    function updateEffectsSwitchUI() {
+        const isDark = document.body.classList.contains('dark-mode');
+
+        if (effectsEnabled) {
+            effectsUI.knob.style.transform = 'translateX(32px)';
+            effectsUI.knob.textContent = '✨';
+            effectsUI.knob.style.background = '#ffffff';
+            effectsUI.btn.style.background = isDark
+                ? 'linear-gradient(135deg, #0984e3, #6c5ce7)'
+                : 'linear-gradient(135deg, #0984e3, #00cec9)';
+            effectsUI.btn.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+            effectsUI.btn.style.boxShadow = '0 4px 16px rgba(9, 132, 227, 0.4)';
+            effectsUI.tooltip.textContent = 'Отключить эффекты';
+            effectsUI.btn.setAttribute('aria-label', 'Отключить эффекты');
+        } else {
+            effectsUI.knob.style.transform = 'translateX(0px)';
+            effectsUI.knob.textContent = '💤';
+            effectsUI.knob.style.background = isDark ? '#3b3b4f' : '#ffffff';
+            effectsUI.btn.style.background = isDark ? '#232332' : '#dfe6e9';
+            effectsUI.btn.style.borderColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
+            effectsUI.btn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+            effectsUI.tooltip.textContent = 'Включить эффекты';
+            effectsUI.btn.setAttribute('aria-label', 'Включить эффекты');
+        }
+    }
 
     function toggleEffects() {
         effectsEnabled = !effectsEnabled;
-        effectsBtn.innerHTML = effectsEnabled ? '✨' : '💤';
+        updateEffectsSwitchUI();
 
         if (!effectsEnabled) {
-            // 1. Отключаем встроенные SVG-анимации (качалка, юрты, завод)
             svg.pauseAnimations();
-            
-            // 2. Отключаем CSS-анимации (животные, крылья, лапы)
             document.body.classList.add('effects-off');
 
-            // 3. Удаляем транспорт, животных, лайнер и САМОЛЕТ с карты
             if (typeof animalLayer !== 'undefined') animalLayer.innerHTML = '';
             if (typeof vehicleLayer !== 'undefined') vehicleLayer.innerHTML = '';
             if (typeof shipLayer !== 'undefined') shipLayer.innerHTML = '';
-            if (typeof planeLayer !== 'undefined') planeLayer.innerHTML = ''; // <-- Останавливаем самолет
+            if (typeof planeLayer !== 'undefined') planeLayer.innerHTML = '';
             
-            // Сбрасываем флаги
             if (typeof isAnimalVisible !== 'undefined') isAnimalVisible = false;
             if (typeof isShipVisible !== 'undefined') isShipVisible = false;
-            
-            // ❗ Слой авто-фото (autoPhotoLayer) и таймеры (autoShowTimer) мы НЕ ТРОГАЕМ, 
-            // чтобы фотографии районов продолжали сменяться.
-
         } else {
-            // 1. Включаем SVG-анимации обратно
             svg.unpauseAnimations();
-            
-            // 2. Включаем CSS-анимации
             document.body.classList.remove('effects-off');
         }
     }
 
-    effectsBtn.addEventListener('click', toggleEffects);
+    effectsUI.btn.addEventListener('click', toggleEffects);
 
-    themeBtn.id = 'theme-toggle';
-    themeBtn.setAttribute('aria-label', 'Переключить тему');
-    document.body.appendChild(themeBtn);
-
+    // --- ЛОГИКА И ОБНОВЛЕНИЕ ВНЕШНЕГО ВИДА ТУМБЛЕРА ТЕМЫ ---
     function applyTheme(isDark) {
         document.body.classList.toggle('dark-mode', isDark);
-        themeBtn.textContent = isDark ? '☀️' : '🌙';
-        
-        // 👇 ДОБАВИТЬ ЭТИ СТРОКИ
-        if (effectsBtn) {
-            effectsBtn.style.background = isDark ? '#2a2a3a' : '#fff';
-            effectsBtn.style.color = isDark ? '#ffd166' : '#333';
+
+        if (isDark) {
+            // Ночной режим (бегунок справа, глубокий звёздный индиго)
+            themeUI.knob.style.transform = 'translateX(32px)';
+            themeUI.knob.textContent = '🌙';
+            themeUI.knob.style.background = '#2a2a3e';
+            themeUI.btn.style.background = 'linear-gradient(135deg, #1e1e2f, #3c3b6e)';
+            themeUI.btn.style.borderColor = 'rgba(255, 209, 102, 0.35)';
+            themeUI.btn.style.boxShadow = '0 4px 16px rgba(15, 15, 35, 0.5)';
+            themeUI.tooltip.textContent = 'Включить дневной режим';
+            themeUI.btn.setAttribute('aria-label', 'Включить дневной режим');
+        } else {
+            // Дневной режим (бегунок слева, тёплое солнечное небо)
+            themeUI.knob.style.transform = 'translateX(0px)';
+            themeUI.knob.textContent = '☀️';
+            themeUI.knob.style.background = '#ffffff';
+            themeUI.btn.style.background = 'linear-gradient(135deg, #74b9ff, #ffeaa7)';
+            themeUI.btn.style.borderColor = 'rgba(253, 203, 110, 0.6)';
+            themeUI.btn.style.boxShadow = '0 4px 16px rgba(116, 185, 255, 0.4)';
+            themeUI.tooltip.textContent = 'Включить ночной режим';
+            themeUI.btn.setAttribute('aria-label', 'Включить ночной режим');
         }
-        
-        try { localStorage.setItem('bmap-theme', isDark ? 'dark' : 'light'); } catch(e) {}
-        initParticles();
+
+        // Синхронно обновляем оттенки тумблера эффектов
+        updateEffectsSwitchUI();
+
+        try { localStorage.setItem('bmap-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+        if (typeof initParticles === 'function') initParticles();
     }
+
     let savedDark = false;
-    try { savedDark = localStorage.getItem('bmap-theme') === 'dark'; } catch(e) {}
+    try { savedDark = localStorage.getItem('bmap-theme') === 'dark'; } catch (e) {}
     applyTheme(savedDark);
-    themeBtn.addEventListener('click', () => {
+
+    themeUI.btn.addEventListener('click', () => {
         applyTheme(!document.body.classList.contains('dark-mode'));
     });
 
@@ -1154,36 +1323,139 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ================================================================
-       6. СЛОЙ ГОРОДОВ
+       6. СЛОЙ ГОРОДОВ + АКТУАЛЬНАЯ ТЕМПЕРАТУРА (Open-Meteo API)
        ================================================================ */
     const cities = [
-        {name:'Агидель',x:53.2,y:68.4,r:2,fs:5},{name:'Баймак',x:320.4,y:427,r:2,fs:5},
-        {name:'Белебей',x:55.4,y:262.8,r:2,fs:5},{name:'Белорецк',x:325,y:280,r:2,fs:5},
-        {name:'Бирск',x:145.9,y:123,r:2,fs:5},{name:'Благовещенск',x:175.5,y:163,r:2,fs:5},
-        {name:'Давлеканово',x:114.5,y:251.6,r:2,fs:5},{name:'Дюртюли',x:106.6,y:116.1,r:2,fs:5},
-        {name:'Ишимбай',x:177.7,y:334.1,r:2,fs:5},{name:'Кумертау',x:160.8,y:436.5,r:2,fs:5},
-        {name:'Межгорье',x:296.8,y:250.4,r:2,fs:5},{name:'Мелеуз',x:167.8,y:387.2,r:2,fs:5},
-        {name:'Нефтекамск',x:72.7,y:47.1,r:2,fs:5},{name:'Октябрьский',x:18.2,y:223.7,r:2,fs:5},
-        {name:'Салават',x:167.8,y:344.9,r:2,fs:5},{name:'Сибай',x:343.7,y:412.2,r:2,fs:5},
-        {name:'Стерлитамак',x:168.6,y:315.9,r:2,fs:5},{name:'Туймазы',x:29.8,y:207.8,r:2,fs:5},
-        {name:'Учалы',x:388.3,y:243.2,r:2,fs:5},{name:'Янаул',x:111.9,y:27.4,r:2,fs:5},
-        {name:'УФА',x:175,y:195,r:3,fs:7,capital:true}
+        { name: 'Агидель',      x: 53.2,  y: 68.4,  r: 2, fs: 5, lat: 55.899, lon: 53.937 },
+        { name: 'Баймак',       x: 320.4, y: 427,   r: 2, fs: 5, lat: 52.592, lon: 58.321 },
+        { name: 'Белебей',      x: 55.4,  y: 262.8, r: 2, fs: 5, lat: 54.101, lon: 54.113 },
+        { name: 'Белорецк',     x: 325,   y: 280,   r: 2, fs: 5, lat: 53.965, lon: 58.407 },
+        { name: 'Бирск',        x: 145.9, y: 123,   r: 2, fs: 5, lat: 55.420, lon: 55.535 },
+        { name: 'Благовещенск', x: 175.5, y: 163,   r: 2, fs: 5, lat: 55.036, lon: 55.975 },
+        { name: 'Давлеканово',  x: 114.5, y: 251.6, r: 2, fs: 5, lat: 54.218, lon: 55.033 },
+        { name: 'Дюртюли',     x: 106.6, y: 116.1, r: 2, fs: 5, lat: 55.489, lon: 54.864 },
+        { name: 'Ишимбай',      x: 177.7, y: 334.1, r: 2, fs: 5, lat: 53.448, lon: 56.038 },
+        { name: 'Кумертау',     x: 160.8, y: 436.5, r: 2, fs: 5, lat: 52.766, lon: 55.792 },
+        { name: 'Межгорье',     x: 296.8, y: 250.4, r: 2, fs: 5, lat: 54.058, lon: 57.818 },
+        { name: 'Мелеуз',       x: 167.8, y: 387.2, r: 2, fs: 5, lat: 52.961, lon: 55.932 },
+        { name: 'Нефтекамск',   x: 72.7,  y: 47.1,  r: 2, fs: 5, lat: 56.088, lon: 54.248 },
+        { name: 'Октябрьский',  x: 18.2,  y: 223.7, r: 2, fs: 5, lat: 54.481, lon: 53.471 },
+        { name: 'Салават',      x: 167.8, y: 344.9, r: 2, fs: 5, lat: 53.361, lon: 55.925 },
+        { name: 'Сибай',        x: 343.7, y: 412.2, r: 2, fs: 5, lat: 52.712, lon: 58.665 },
+        { name: 'Стерлитамак',  x: 168.6, y: 315.9, r: 2, fs: 5, lat: 53.630, lon: 55.930 },
+        { name: 'Туймазы',      x: 29.8,  y: 207.8, r: 2, fs: 5, lat: 54.605, lon: 53.700 },
+        { name: 'Учалы',        x: 388.3, y: 243.2, r: 2, fs: 5, lat: 54.316, lon: 59.383 },
+        { name: 'Янаул',        x: 111.9, y: 27.4,  r: 2, fs: 5, lat: 56.266, lon: 54.933 },
+        { name: 'УФА',          x: 175,   y: 195,   r: 3, fs: 7, lat: 54.735, lon: 55.958, capital: true }
     ];
+
     const citiesLayer = document.createElementNS(svgNS, 'g');
     citiesLayer.id = 'cities-layer';
+
+    const tempLabels = []; // Сохраняем ссылки на текстовые плашки температуры
+
     cities.forEach(c => {
         const g = document.createElementNS(svgNS, 'g');
         g.setAttribute('class', 'city' + (c.capital ? ' city-capital' : ''));
+
         const halo = document.createElementNS(svgNS, 'circle');
-        halo.setAttribute('class','city-halo'); halo.setAttribute('cx',c.x); halo.setAttribute('cy',c.y); halo.setAttribute('r',(c.r||2)*1.8);
+        halo.setAttribute('class', 'city-halo');
+        halo.setAttribute('cx', c.x);
+        halo.setAttribute('cy', c.y);
+        halo.setAttribute('r', (c.r || 2) * 1.8);
+
         const dot = document.createElementNS(svgNS, 'circle');
-        dot.setAttribute('class','city-dot'); dot.setAttribute('cx',c.x); dot.setAttribute('cy',c.y); dot.setAttribute('r',c.r||2);
+        dot.setAttribute('class', 'city-dot');
+        dot.setAttribute('cx', c.x);
+        dot.setAttribute('cy', c.y);
+        dot.setAttribute('r', c.r || 2);
+
         const text = document.createElementNS(svgNS, 'text');
-        text.setAttribute('class','city-name'); text.setAttribute('x',c.x); text.setAttribute('y',c.y-(c.fs||5)*0.8); text.setAttribute('font-size',c.fs||5); text.textContent = c.name;
-        g.appendChild(halo); g.appendChild(dot); g.appendChild(text);
+        text.setAttribute('class', 'city-name');
+        text.setAttribute('x', c.x);
+        text.setAttribute('y', c.y - (c.fs || 5) * 0.8);
+        text.setAttribute('font-size', c.fs || 5);
+        text.textContent = c.name;
+
+        // --- МИНИ-БЕЙДЖ ТЕМПЕРАТУРЫ НАД НАЗВАНИЕМ ГОРОДА ---
+        const badgeGroup = document.createElementNS(svgNS, 'g');
+        const badgeY = c.y - (c.fs || 5) * 1.95;
+        const badgeW = c.capital ? 13 : 10.5;
+        const badgeH = c.capital ? 5.2 : 4.2;
+
+        const badgeBg = document.createElementNS(svgNS, 'rect');
+        badgeBg.setAttribute('x', (c.x - badgeW / 2).toFixed(1));
+        badgeBg.setAttribute('y', (badgeY - badgeH + 0.8).toFixed(1));
+        badgeBg.setAttribute('width', badgeW);
+        badgeBg.setAttribute('height', badgeH);
+        badgeBg.setAttribute('rx', (badgeH / 2).toFixed(1));
+        badgeBg.setAttribute('fill', 'rgba(20, 25, 38, 0.78)');
+        badgeBg.setAttribute('stroke', 'rgba(255, 255, 255, 0.25)');
+        badgeBg.setAttribute('stroke-width', '0.25');
+
+        const tempText = document.createElementNS(svgNS, 'text');
+        tempText.setAttribute('x', c.x);
+        tempText.setAttribute('y', badgeY.toFixed(1));
+        tempText.setAttribute('text-anchor', 'middle');
+        tempText.setAttribute('font-family', 'system-ui, -apple-system, sans-serif');
+        tempText.setAttribute('font-weight', '700');
+        tempText.setAttribute('font-size', c.capital ? '4.0' : '3.2');
+        tempText.setAttribute('fill', '#ffffff');
+        tempText.textContent = '•••'; // Индикатор загрузки
+
+        badgeGroup.appendChild(badgeBg);
+        badgeGroup.appendChild(tempText);
+
+        tempLabels.push({ city: c, textEl: tempText, bgEl: badgeBg });
+
+        g.appendChild(halo);
+        g.appendChild(dot);
+        g.appendChild(text);
+        g.appendChild(badgeGroup);
         citiesLayer.appendChild(g);
     });
+
     svg.appendChild(citiesLayer);
+
+    // --- ЗАГРУЗКА РЕАЛЬНОЙ ПОГОДЫ ОДНИМ ПАКЕТНЫМ ЗАПРОСОМ ДЛЯ ВСЕХ 21 ГОРОДОВ ---
+    (async function loadBashkortostanWeather() {
+        try {
+            const lats = cities.map(c => c.lat).join(',');
+            const lons = cities.map(c => c.lon).join(',');
+            const url = `https://open-meteo.com{lats}&longitude=${lons}&current_weather=true`;
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Weather API error');
+            const data = await response.json();
+
+            // Open-Meteo возвращает массив объектов по порядку переданных координат
+            const results = Array.isArray(data) ? data : [data];
+
+            results.forEach((item, index) => {
+                const labelObj = tempLabels[index];
+                if (!labelObj || !item.current_weather) return;
+
+                const temp = Math.round(item.current_weather.temperature);
+                const sign = temp > 0 ? '+' : '';
+                labelObj.textEl.textContent = `${sign}${temp}°`;
+
+                // Подсвечиваем цифру в зависимости от мороза или тепла
+                if (temp < 0) {
+                    labelObj.textEl.setAttribute('fill', '#74b9ff'); // Прохладный голубой для минуса
+                } else if (temp > 0) {
+                    labelObj.textEl.setAttribute('fill', '#ffeaa7'); // Тёплый янтарный для плюса
+                } else {
+                    labelObj.textEl.setAttribute('fill', '#ffffff');
+                }
+            });
+        } catch (err) {
+            console.warn('Не удалось загрузить погоду для городов:', err);
+            // Если нет сети — аккуратно скрываем пустые плашки
+            tempLabels.forEach(item => {
+                if (item.textEl.parentNode) item.textEl.parentNode.style.display = 'none';
+            });
+        }
+    })();
 
   /* ================================================================
        7. ГЛОБАЛЬНАЯ ПАУЗА ПРИ КЛИКЕ + АВТОПОКАЗ ФОТО
@@ -2287,123 +2559,193 @@ spawnVehicle(type);
     }, 2000);
 
      /* ================================================================
-       14. РЕЛЬЕФ ГОР — ваш рабочий фильтр + лёгкий изгиб
+       14. РЕЛЬЕФ ГОР — Строго в границах республики и по реальным хребтам
        ================================================================ */
     function applyMountainRelief() {
+        allDistricts.forEach(path => path.removeAttribute('filter'));
+        svg.querySelectorAll('filter[id^="relief-"]').forEach(f => f.remove());
+        const oldLayer = document.getElementById('seamless-ural-relief');
+        if (oldLayer) oldLayer.remove();
+        const oldClip = document.getElementById('bashkortostan-strict-clip');
+        if (oldClip) oldClip.remove();
+
         let defs = svg.querySelector('defs');
         if (!defs) {
             defs = document.createElementNS(svgNS, 'defs');
             svg.insertBefore(defs, svg.firstChild);
         }
 
-        const districtParams = {};
-        Object.values(CONFIG.mountainSystems).forEach(sys => {
-            sys.districts.forEach(name => {
-                districtParams[name] = sys;
-            });
+        // 1. ФИЛЬТР ЕДИНОГО 3D-РЕЛЬЕФА
+        const filter = document.createElementNS(svgNS, 'filter');
+        filter.setAttribute('id', 'ural-single-relief');
+        filter.setAttribute('filterUnits', 'userSpaceOnUse');
+        filter.setAttribute('x', '0');
+        filter.setAttribute('y', '0');
+        filter.setAttribute('width', '428.87');
+        filter.setAttribute('height', '537.69');
+        filter.setAttribute('color-interpolation-filters', 'sRGB');
+
+        const noise = document.createElementNS(svgNS, 'feTurbulence');
+        noise.setAttribute('type', 'fractalNoise');
+        noise.setAttribute('baseFrequency', '0.011 0.0075');
+        noise.setAttribute('numOctaves', '7');
+        noise.setAttribute('seed', '7');
+        noise.setAttribute('result', 'noise');
+        filter.appendChild(noise);
+
+        const warp = document.createElementNS(svgNS, 'feTurbulence');
+        warp.setAttribute('type', 'fractalNoise');
+        warp.setAttribute('baseFrequency', '0.0025 0.004');
+        warp.setAttribute('numOctaves', '1');
+        warp.setAttribute('seed', '1');
+        warp.setAttribute('result', 'warp');
+        filter.appendChild(warp);
+
+        const displace = document.createElementNS(svgNS, 'feDisplacementMap');
+        displace.setAttribute('in', 'noise');
+        displace.setAttribute('in2', 'warp');
+        displace.setAttribute('scale', '9');
+        displace.setAttribute('xChannelSelector', 'R');
+        displace.setAttribute('yChannelSelector', 'G');
+        displace.setAttribute('result', 'curvedNoise');
+        filter.appendChild(displace);
+
+        const gray = document.createElementNS(svgNS, 'feColorMatrix');
+        gray.setAttribute('type', 'saturate');
+        gray.setAttribute('values', '0');
+        gray.setAttribute('in', 'curvedNoise');
+        gray.setAttribute('result', 'gray');
+        filter.appendChild(gray);
+
+        const lighting = document.createElementNS(svgNS, 'feDiffuseLighting');
+        lighting.setAttribute('in', 'gray');
+        lighting.setAttribute('lighting-color', '#ffffff');
+        lighting.setAttribute('surfaceScale', '34');
+        lighting.setAttribute('diffuseConstant', '1.35');
+        lighting.setAttribute('result', 'hillshade');
+        const dLight = document.createElementNS(svgNS, 'feDistantLight');
+        dLight.setAttribute('azimuth', '85');
+        dLight.setAttribute('elevation', '18');
+        lighting.appendChild(dLight);
+        filter.appendChild(lighting);
+
+        const ct = document.createElementNS(svgNS, 'feComponentTransfer');
+        ct.setAttribute('in', 'hillshade');
+        ct.setAttribute('result', 'enhanced');
+        ['R', 'G', 'B'].forEach(ch => {
+            const f = document.createElementNS(svgNS, 'feFunc' + ch);
+            f.setAttribute('type', 'linear');
+            f.setAttribute('slope', '1.05');
+            f.setAttribute('intercept', '0.18');
+            ct.appendChild(f);
         });
+        filter.appendChild(ct);
 
-        let idx = 0;
-        allDistricts.forEach(path => {
-            const name = path.dataset.districtName;
-            const cfg = districtParams[name];
-            if (!cfg) return;
+        defs.appendChild(filter);
 
-            const fid = 'relief-' + (idx++);
-            const filter = document.createElementNS(svgNS, 'filter');
-            filter.setAttribute('id', fid);
-            filter.setAttribute('filterUnits', 'userSpaceOnUse');
-            filter.setAttribute('x', '0');
-            filter.setAttribute('y', '0');
-            filter.setAttribute('width', '428.87');
-            filter.setAttribute('height', '537.69');
-            filter.setAttribute('color-interpolation-filters', 'sRGB');
+        // 2. МАСКА ПЛАВНОГО ЗАТУХАНИЯ (Скорректирована строго по реальной орографии Урала)
+        const maskBlur = document.createElementNS(svgNS, 'filter');
+        maskBlur.id = 'ural-soft-edge';
+        const blur = document.createElementNS(svgNS, 'feGaussianBlur');
+        blur.setAttribute('stdDeviation', '9');
+        maskBlur.appendChild(blur);
+        defs.appendChild(maskBlur);
 
-            // 1. Шум — ваш рабочий вариант (без вытягивания, без искажений)
-            const noise = document.createElementNS(svgNS, 'feTurbulence');
-            noise.setAttribute('type', 'fractalNoise');
-            noise.setAttribute('baseFrequency', String(cfg.freq)); // как было
-            noise.setAttribute('numOctaves', '7');                 // как было
-            noise.setAttribute('seed', String(cfg.seed));          // как было
-            noise.setAttribute('result', 'noise');
-            filter.appendChild(noise);
+        const mask = document.createElementNS(svgNS, 'mask');
+        mask.id = 'ural-zone-mask';
+        mask.setAttribute('maskUnits', 'userSpaceOnUse');
+        mask.setAttribute('x', '0');
+        mask.setAttribute('y', '0');
+        mask.setAttribute('width', '428.87');
+        mask.setAttribute('height', '537.69');
 
-            // 1.5. ЛЁГКИЙ ИЗГИБ (feDisplacementMap с очень маленьким scale)
-            // Создаём очень плавный шум для искривления (низкая частота)
-            const warp = document.createElementNS(svgNS, 'feTurbulence');
-            warp.setAttribute('type', 'fractalNoise');
-            warp.setAttribute('baseFrequency', '0.002 0.004'); // плавные волны
-            warp.setAttribute('numOctaves', '1');
-            warp.setAttribute('seed', '1');
-            warp.setAttribute('result', 'warp');
-            filter.appendChild(warp);
+        const maskGroup = document.createElementNS(svgNS, 'g');
+        maskGroup.setAttribute('filter', 'url(#ural-soft-edge)');
 
-            const displace = document.createElementNS(svgNS, 'feDisplacementMap');
-            displace.setAttribute('in', 'noise');
-            displace.setAttribute('in2', 'warp');
-            displace.setAttribute('scale', '8'); // <-- МАЛЕНЬКИЙ scale! Не размывает, а только изгибает
-            displace.setAttribute('xChannelSelector', 'R');
-            displace.setAttribute('yChannelSelector', 'G');
-            displace.setAttribute('result', 'curvedNoise');
-            filter.appendChild(displace);
+        // 2а. Основная дуга Южного Урала (добавлен захват на ~15px вглубь Учалинского района вправо)
+        const southUral = document.createElementNS(svgNS, 'path');
+        southUral.setAttribute('d', `
+            M 258,150
+            C 288,146 345,152 402,178
+            C 412,218 378,265 352,320
+            C 334,370 324,425 308,468
+            C 272,478 242,472 222,455
+            C 218,415 222,372 222,335
+            C 222,300 230,265 232,230
+            C 234,195 242,168 258,150 Z
+        `);
+        southUral.setAttribute('fill', '#ffffff');
+        maskGroup.appendChild(southUral);
 
-            // 2. В серый — чтобы свет корректно читал высоты
-            const gray = document.createElementNS(svgNS, 'feColorMatrix');
-            gray.setAttribute('type', 'saturate');
-            gray.setAttribute('values', '0');
-            gray.setAttribute('in', 'curvedNoise'); // берём уже изогнутый шум
-            gray.setAttribute('result', 'gray');
-            filter.appendChild(gray);
+        // 2б. Уфимское плато на севере (западная граница сдвинута вправо до X=222 -> покрывает только 30-35% Аскинского района!)
+        const ufaPlateau = document.createElementNS(svgNS, 'path');
+        ufaPlateau.setAttribute('d', `
+            M 222,28
+            C 248,28 274,52 284,88
+            C 292,115 276,135 248,135
+            C 226,135 212,115 214,85
+            C 216,58 214,38 222,28 Z
+        `);
+        ufaPlateau.setAttribute('fill', '#ffffff');
+        ufaPlateau.setAttribute('fill-opacity', '0.78');
+        maskGroup.appendChild(ufaPlateau);
 
-            // 3. Свет сверху-слева создаёт тени/блики
-            const lighting = document.createElementNS(svgNS, 'feDiffuseLighting');
-            lighting.setAttribute('in', 'gray');
-            lighting.setAttribute('lighting-color', '#ffffff');
-            lighting.setAttribute('surfaceScale', String(cfg.scale));
-            lighting.setAttribute('diffuseConstant', '1.3');
-            lighting.setAttribute('result', 'hillshade');
-            const dLight = document.createElementNS(svgNS, 'feDistantLight');
-            dLight.setAttribute('azimuth', String(cfg.azimuth || 315));
-            dLight.setAttribute('elevation', '45');
-            lighting.appendChild(dLight);
-            filter.appendChild(lighting);
+        mask.appendChild(maskGroup);
+        defs.appendChild(mask);
 
-            // 4. Усиливаем контраст теней
-            const ct = document.createElementNS(svgNS, 'feComponentTransfer');
-            ct.setAttribute('in', 'hillshade');
-            ct.setAttribute('result', 'enhanced');
-            ['R', 'G', 'B'].forEach(ch => {
-                const f = document.createElementNS(svgNS, 'feFunc' + ch);
-                f.setAttribute('type', 'linear');
-                f.setAttribute('slope', '0.8');     // Контраст (меньше = мягче)
-                f.setAttribute('intercept', '0.3'); // Тени (больше = светлее и серее)
-            });
-            filter.appendChild(ct);
-
-            // 5. Накладываем светотень на цвет района
-            const blend = document.createElementNS(svgNS, 'feBlend');
-            blend.setAttribute('in', 'SourceGraphic');
-            blend.setAttribute('in2', 'enhanced');
-            blend.setAttribute('mode', 'multiply');
-            blend.setAttribute('result', 'blended');
-            filter.appendChild(blend);
-
-            // 6. Обрезаем строго по контуру района
-            const composite = document.createElementNS(svgNS, 'feComposite');
-            composite.setAttribute('in', 'blended');
-            composite.setAttribute('in2', 'SourceGraphic');
-            composite.setAttribute('operator', 'in');
-            filter.appendChild(composite);
-
-            defs.appendChild(filter);
-            path.setAttribute('filter', `url(#${fid})`);
+        // 3. СТРОГАЯ ОБРЕЗКА ПО ВНЕШНЕМУ КОНТУРУ БАШКОРТОСТАНА (не даёт горам вылезти на белый фон!)
+        const clip = document.createElementNS(svgNS, 'clipPath');
+        clip.id = 'bashkortostan-strict-clip';
+        allDistricts.forEach(p => {
+            const c = p.cloneNode(false);
+            c.removeAttribute('id');
+            c.removeAttribute('class');
+            c.removeAttribute('filter');
+            clip.appendChild(c);
         });
+        defs.appendChild(clip);
+
+        // 4. СЛОЙ РЕЛЬЕФА (исправлено смешивание цветов при обрезке по контуру!)
+        const reliefLayer = document.createElementNS(svgNS, 'g');
+        reliefLayer.id = 'seamless-ural-relief';
+        reliefLayer.style.pointerEvents = 'none';
+        reliefLayer.style.mixBlendMode = 'multiply'; // Теперь multiply работает напрямую с цветами районов!
+
+        // Группа с маской плавного затухания
+        const maskedGroup = document.createElementNS(svgNS, 'g');
+        maskedGroup.setAttribute('mask', 'url(#ural-zone-mask)');
+
+        // Прямоугольник рельефа обрезается строго по границам Башкортостана
+        const reliefRect = document.createElementNS(svgNS, 'rect');
+        reliefRect.setAttribute('x', '165');
+        reliefRect.setAttribute('y', '15');
+        reliefRect.setAttribute('width', '245');
+        reliefRect.setAttribute('height', '475');
+        reliefRect.setAttribute('fill', '#ffffff');
+        reliefRect.setAttribute('filter', 'url(#ural-single-relief)');
+        reliefRect.setAttribute('clip-path', 'url(#bashkortostan-strict-clip)');
+
+        maskedGroup.appendChild(reliefRect);
+        reliefLayer.appendChild(maskedGroup);
+
+        // Вставляем строго поверх заливки районов, но под реками, дорогами и подписями
+        const targetBefore = document.getElementById('rivers-layer') || document.getElementById('roads-layer') || document.getElementById('cities-layer');
+        if (targetBefore && targetBefore.parentNode) {
+            targetBefore.parentNode.insertBefore(reliefLayer, targetBefore);
+        } else {
+            const lastDistrict = allDistricts[allDistricts.length - 1];
+            if (lastDistrict && lastDistrict.parentNode) {
+                lastDistrict.parentNode.insertBefore(reliefLayer, lastDistrict.nextSibling);
+            } else {
+                svg.appendChild(reliefLayer);
+            }
+        }
     }
 
     applyMountainRelief();
 
 /* ================================================================
-       16. РЕКИ (с мягким размытием и наложением)
+       16. РЕКИ (Мягкое акварельное русло, деликатное течение и рыба)
        ================================================================ */
     let defsForRivers = svg.querySelector('defs');
     if (!defsForRivers) {
@@ -2411,7 +2753,10 @@ spawnVehicle(type);
         svg.insertBefore(defsForRivers, svg.firstChild);
     }
 
-    // Фильтр для размытия краев реки
+    const oldRiverFilter = document.getElementById('river-soften');
+    if (oldRiverFilter) oldRiverFilter.remove();
+
+    // Мягкость краёв воды (stdDeviation = 0.95)
     const riverFilter = document.createElementNS(svgNS, 'filter');
     riverFilter.setAttribute('id', 'river-soften');
     riverFilter.setAttribute('x', '-20%');
@@ -2421,16 +2766,35 @@ spawnVehicle(type);
 
     const blur = document.createElementNS(svgNS, 'feGaussianBlur');
     blur.setAttribute('in', 'SourceGraphic');
-    blur.setAttribute('stdDeviation', '0.8'); // Мягкость краев
+    blur.setAttribute('stdDeviation', '0.95');
     riverFilter.appendChild(blur);
     defsForRivers.appendChild(riverFilter);
+
+    // Анимация плавного течения воды
+    if (!document.getElementById('river-flow-style')) {
+        const flowStyle = document.createElementNS(svgNS, 'style');
+        flowStyle.id = 'river-flow-style';
+        flowStyle.textContent = `
+            @keyframes river-stream {
+                to { stroke-dashoffset: -30; }
+            }
+            .river-current-line {
+                animation: river-stream 4.5s linear infinite;
+            }
+            body.effects-off .river-current-line {
+                animation-play-state: paused !important;
+            }
+        `;
+        defsForRivers.appendChild(flowStyle);
+    }
+
+    const oldRiversLayer = document.getElementById('rivers-layer');
+    if (oldRiversLayer) oldRiversLayer.remove();
 
     const riversLayer = document.createElementNS(svgNS, 'g');
     riversLayer.id = 'rivers-layer';
     riversLayer.style.pointerEvents = 'none';
-    
 
-    // Вставляем реки под фото, подписи и дороги
     const targetLayer = svg.querySelector('#photo-layer') || svg.querySelector('#labels-layer');
     if (targetLayer) {
         svg.insertBefore(riversLayer, targetLayer);
@@ -2438,53 +2802,187 @@ spawnVehicle(type);
         svg.appendChild(riversLayer);
     }
 
+    const riverPathsList = [];
+
     CONFIG.riversData.forEach(river => {
         const g = document.createElementNS(svgNS, 'g');
 
-        // 1. Широкая светлая подложка (эффект берегов)
+        // Группа самой воды с общим мягким размытием краёв
+        const waterGroup = document.createElementNS(svgNS, 'g');
+        waterGroup.style.filter = 'url(#river-soften)';
+
+        // 1. Деликатная светлая пойма (мягкий переход к берегам)
         const bgPath = document.createElementNS(svgNS, 'path');
         bgPath.setAttribute('d', river.d);
         bgPath.setAttribute('fill', 'none');
-        bgPath.setAttribute('stroke', '#85C1E9'); // Светло-голубой
-        bgPath.setAttribute('stroke-width', '4'); // Ширина
+        bgPath.setAttribute('stroke', '#85c1e9');
+        bgPath.setAttribute('stroke-width', '3.4');
         bgPath.setAttribute('stroke-linecap', 'round');
         bgPath.setAttribute('stroke-linejoin', 'round');
-        bgPath.setAttribute('opacity', '0.1');
-        bgPath.style.filter = 'url(#river-soften)';
-        g.appendChild(bgPath);
+        bgPath.setAttribute('opacity', '0.22');
+        waterGroup.appendChild(bgPath);
 
-        // 2. Узкое темное русло
+        // 2. Мягкое основное русло (снижена резкость и яркость)
         const path = document.createElementNS(svgNS, 'path');
         path.setAttribute('d', river.d);
         path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#1B4F72'); // Темно-синий
-        path.setAttribute('stroke-width', '1.8');
+        path.setAttribute('stroke', '#2e86c1');
+        path.setAttribute('stroke-width', '1.55');
         path.setAttribute('stroke-linecap', 'round');
         path.setAttribute('stroke-linejoin', 'round');
-        path.setAttribute('opacity', '0.5');
-        path.style.filter = 'url(#river-soften)';
-        g.appendChild(path);
+        path.setAttribute('opacity', '0.48');
+        waterGroup.appendChild(path);
 
-        // 3. Подпись реки (четкая, вдоль русла)
+        // 3. Едва заметный блик течения
+        const currentPath = document.createElementNS(svgNS, 'path');
+        currentPath.setAttribute('d', river.d);
+        currentPath.setAttribute('fill', 'none');
+        currentPath.setAttribute('stroke', '#d6eaf8');
+        currentPath.setAttribute('stroke-width', '0.55');
+        currentPath.setAttribute('stroke-dasharray', '6 14');
+        currentPath.setAttribute('stroke-linecap', 'round');
+        currentPath.setAttribute('opacity', '0.32');
+        currentPath.setAttribute('class', 'river-current-line');
+        waterGroup.appendChild(currentPath);
+
+        g.appendChild(waterGroup);
+
+        if (/белая|уфа|дёма|дема|ай|юрюзань|нугуш|сакмара/i.test(river.name || '') || riverPathsList.length < 3) {
+            riverPathsList.push(path);
+        }
+
+        // 4. Чёткая подпись реки
         try {
             const pathLength = path.getTotalLength();
             const midPoint = path.getPointAtLength(pathLength / 2);
-            const nextPoint = path.getPointAtLength(pathLength / 2 + 10);
-            const angle = Math.atan2(nextPoint.y - midPoint.y, nextPoint.x - midPoint.x) * 180 / Math.PI;
-            
+            const nextPoint = path.getPointAtLength(Math.min(pathLength, pathLength / 2 + 10));
+            let angle = Math.atan2(nextPoint.y - midPoint.y, nextPoint.x - midPoint.x) * 180 / Math.PI;
+            if (angle > 90 || angle < -90) angle += 180;
+
             const text = document.createElementNS(svgNS, 'text');
             text.setAttribute('x', midPoint.x);
-            text.setAttribute('y', midPoint.y - 3);
+            text.setAttribute('y', midPoint.y - 3.2);
             text.setAttribute('class', 'river-label');
-            text.setAttribute('transform', `rotate(${angle}, ${midPoint.x}, ${midPoint.y})`);
+            text.setAttribute('transform', `rotate(${angle.toFixed(1)}, ${midPoint.x.toFixed(1)}, ${midPoint.y.toFixed(1)})`);
             text.textContent = river.name;
-            text.style.filter = 'none'; // Убираем размытие для текста
-            text.style.mixBlendMode = 'normal';
             g.appendChild(text);
         } catch (e) {}
 
         riversLayer.appendChild(g);
     });
+
+// --- 🐟 ВЫПРЫГИВАЮЩАЯ РЫБКА В РЫБНЫХ МЕСТАХ (Редкий акцент раз в 18-28 сек) ---
+    function spawnJumpingFish() {
+        if ((typeof effectsEnabled !== 'undefined' && !effectsEnabled) || window.isPaused || riverPathsList.length === 0) {
+            setTimeout(spawnJumpingFish, 5000);
+            return;
+        }
+
+        // Выбираем случайную рыбную реку и точку на ней (избегая самых краёв)
+        const riverPath = riverPathsList[Math.floor(Math.random() * riverPathsList.length)];
+        let len = 0;
+        try { len = riverPath.getTotalLength(); } catch (e) {}
+        if (len < 30) {
+            setTimeout(spawnJumpingFish, 5000);
+            return;
+        }
+
+        const dist = len * (0.15 + Math.random() * 0.7);
+        const pt = riverPath.getPointAtLength(dist);
+        const dir = Math.random() > 0.5 ? 1 : -1;
+
+        const splashGroup = document.createElementNS(svgNS, 'g');
+        splashGroup.setAttribute('transform', `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+        riversLayer.appendChild(splashGroup);
+
+        const el = (tag, attrs) => {
+            const n = document.createElementNS(svgNS, tag);
+            for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+            return n;
+        };
+
+        // 1. Расходящиеся круги ряби на воде
+        [0, 0.35].forEach(delay => {
+            const ripple = el('ellipse', {
+                cx: '0', cy: '0', rx: '1', ry: '0.5',
+                fill: 'none', stroke: '#ffffff', 'stroke-width': '0.5', opacity: '0.85'
+            });
+            ripple.appendChild(el('animate', { attributeName: 'rx', values: '1; 8.5', dur: '1.3s', begin: `${delay}s`, fill: 'freeze' }));
+            ripple.appendChild(el('animate', { attributeName: 'ry', values: '0.5; 4.2', dur: '1.3s', begin: `${delay}s`, fill: 'freeze' }));
+            ripple.appendChild(el('animate', { attributeName: 'opacity', values: '0.85; 0', dur: '1.3s', begin: `${delay}s`, fill: 'freeze' }));
+            splashGroup.appendChild(ripple);
+        });
+
+        // 2. Серебристая рыбка (хариус / таймень), прыгающая по дуге
+        const fishScale = 0.65;
+        const fishWrapper = el('g', { transform: `scale(${fishScale * dir}, ${fishScale})` });
+        const fishBody = el('g', { opacity: '0' });
+
+        // Тело рыбки с лёгким изгибом и спинным плавником
+        fishBody.appendChild(el('path', {
+            d: 'M -4.5,0.5 C -2,-2.2 2.5,-2.2 5,0 C 2.5,2.2 -2,2.2 -4.5,0.5 Z',
+            fill: '#dfe6e9', stroke: '#2c3e50', 'stroke-width': '0.45'
+        }));
+        // Спинка с синевато-серебристым отливом
+        fishBody.appendChild(el('path', {
+            d: 'M -3.5,0 C -1.5,-1.8 2,-1.8 4.2,-0.2 C 1.8,-0.6 -1.2,-0.6 -3.5,0 Z',
+            fill: '#5dade2'
+        }));
+        // Хвостовой плавник (с лёгким красноватым оттенком, как у тайменя/хариуса)
+        fishBody.appendChild(el('polygon', {
+            points: '-4.2,0.4 -6.8,-1.5 -6.0,0.4 -6.8,2.2',
+            fill: '#e17055', stroke: '#2c3e50', 'stroke-width': '0.35'
+        }));
+        // Глаз
+        fishBody.appendChild(el('circle', { cx: '3.2', cy: '-0.4', r: '0.45', fill: '#111' }));
+
+        fishWrapper.appendChild(fishBody);
+        splashGroup.appendChild(fishWrapper);
+
+        // Анимация прыжка по дуге (850 мс)
+        const jumpDur = 850;
+        const t0 = performance.now();
+
+        function animateJump(now) {
+            const t = Math.min((now - t0) / jumpDur, 1);
+            // Дуга прыжка: x от -4 до +4, y поднимается до -8.5px и уходит обратно в воду
+            const jx = -4 + 8 * t;
+            const jy = -Math.sin(t * Math.PI) * 8.5 + 1.5;
+            // Наклон носом вверх на взлёте (-35°) и носом вниз при входе в воду (+35°)
+            const pitch = -35 + 70 * t;
+
+            // Плавное появление из воды и уход под воду
+            const vis = t < 0.15 ? (t / 0.15) : (t > 0.85 ? (1 - t) / 0.15 : 1);
+            fishBody.setAttribute('opacity', vis.toFixed(2));
+            fishBody.setAttribute('transform', `translate(${jx.toFixed(2)}, ${jy.toFixed(2)}) rotate(${pitch.toFixed(1)})`);
+
+            if (t < 1) {
+                requestAnimationFrame(animateJump);
+            } else {
+                // Всплеск в точке входа в воду
+                const entryRipple = el('ellipse', {
+                    cx: (4 * dir).toFixed(1), cy: '1.5', rx: '0.8', ry: '0.4',
+                    fill: 'none', stroke: '#ffffff', 'stroke-width': '0.5', opacity: '0.8'
+                });
+                entryRipple.appendChild(el('animate', { attributeName: 'rx', values: '0.8; 6', dur: '1s', fill: 'freeze' }));
+                entryRipple.appendChild(el('animate', { attributeName: 'ry', values: '0.4; 3', dur: '1s', fill: 'freeze' }));
+                entryRipple.appendChild(el('animate', { attributeName: 'opacity', values: '0.8; 0', dur: '1s', fill: 'freeze' }));
+                splashGroup.appendChild(entryRipple);
+
+                setTimeout(() => {
+                    if (splashGroup.parentNode) splashGroup.parentNode.removeChild(splashGroup);
+                }, 1100);
+            }
+        }
+
+        requestAnimationFrame(animateJump);
+
+        // Следующий всплеск через 18–28 секунд (чтобы не отвлекало от карты)
+        setTimeout(spawnJumpingFish, 18000 + Math.random() * 10000);
+    }
+
+    // Первый всплеск через 6 секунд после загрузки карты
+    setTimeout(spawnJumpingFish, 6000);
 
  /* ================================================================
        17. АНИМАЦИЯ ПЕРЕЛИСТЫВАНИЯ И КАРТОЧКА РАЙОНА
@@ -4230,52 +4728,73 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     staticLayer.style.pointerEvents = 'none';
     svg.appendChild(staticLayer);
 
-    // --- 🛢️ НЕФТЯНАЯ КАЧАЛКА (Компактная плита и контрастный силуэт) ---
+    // --- 🛢️ НЕФТЯНАЯ КАЧАЛКА (Пересобрана с нуля в строгой 3D-изометрии 2:1) ---
     function createPumpjack() {
         const g = document.createElementNS(svgNS, 'g');
 
         const el = (tag, attrs) => {
             const node = document.createElementNS(svgNS, tag);
-            for (const [k, v] of Object.entries(attrs)) {
-                node.setAttribute(k, v);
-            }
+            for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
             return node;
         };
 
-        // 1. ТЕНЬ НА ЗЕМЛЕ
+        // Единая математическая проекция 3D -> 2.5D изометрия:
+        // u — вдоль станка (слева направо), v — поперек станка (в глубину), z — строго вверх
+        const P = (u, v, z = 0) => [
+            +(u * 0.894 + v * 0.894).toFixed(2),
+            +(-u * 0.447 + v * 0.447 - z).toFixed(2)
+        ];
+        const pts = (arr) => arr.map(p => p.join(',')).join(' ');
+
+        // 1. КОНТАКТНЫЕ ТЕНИ НА ГРУНТЕ КАРТЫ (строго под тремя зонами опоры)
+        const shadow1 = el('ellipse', { cx: '-8.5', cy: '4.5', rx: '4.8', ry: '2.1', fill: 'rgba(0,0,0,0.28)' });
+        const shadow2 = el('ellipse', { cx: '0.5', cy: '0.2', rx: '5.5', ry: '2.5', fill: 'rgba(0,0,0,0.28)' });
+        const shadow3 = el('ellipse', { cx: '11.5', cy: '-5.2', rx: '3.6', ry: '1.7', fill: 'rgba(0,0,0,0.28)' });
+        g.appendChild(shadow1);
+        g.appendChild(shadow2);
+        g.appendChild(shadow3);
+
+        // 2. ДВЕ ПРОДОЛЬНЫЕ БАЛКИ РАМЫ (салазки вмурованы в грунт)
+        // Дальняя балка (v = -2.2)
         g.appendChild(el('polygon', {
-            points: '-18,4 12,-11 19,-7.5 -11,7.5',
-            fill: 'rgba(0, 0, 0, 0.35)',
-            transform: 'translate(1.5, 3)'
+            points: pts([P(-12, -2.5, 0), P(4, -2.5, 0), P(4, -2.5, 1.2), P(-12, -2.5, 1.2)]),
+            fill: '#1e272e'
+        }));
+        // Ближняя балка (v = +2.2) — верх и бок
+        g.appendChild(el('polygon', {
+            points: pts([P(-12, 1.8, 1.2), P(4, 1.8, 1.2), P(4, 2.5, 1.2), P(-12, 2.5, 1.2)]),
+            fill: '#576574'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(-12, 2.5, 0), P(4, 2.5, 0), P(4, 2.5, 1.2), P(-12, 2.5, 1.2)]),
+            fill: '#2d3436', stroke: '#111', 'stroke-width': '0.3'
         }));
 
-        // 2. КОМПАКТНАЯ ПРЯМОУГОЛЬНАЯ ПЛИТА
-        g.appendChild(el('polygon', { points: '-17,3 -10,6.5 -10,9 -17,5.5', fill: '#7f8c8d' }));
-        g.appendChild(el('polygon', { points: '-10,6.5 17,-7 17,-4.5 -10,9', fill: '#576574' }));
+        // 3. РЕДУКТОР И ВРАЩАЮЩИЙСЯ КРИВОШИП (слева, u = -9)
+        // Тумба редуктора
         g.appendChild(el('polygon', {
-            points: '-17,3 10,-10.5 17,-7 -10,6.5',
-            fill: '#bdc3c7', stroke: '#636e72', 'stroke-width': '0.4'
+            points: pts([P(-11, -1.8, 1.2), P(-11, 1.8, 1.2), P(-11, 1.8, 6.2), P(-11, -1.8, 6.2)]),
+            fill: '#7f8c8d', stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(-11, 1.8, 1.2), P(-7, 1.8, 1.2), P(-7, 1.8, 6.2), P(-11, 1.8, 6.2)]),
+            fill: '#576574', stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(-11, -1.8, 6.2), P(-7, -1.8, 6.2), P(-7, 1.8, 6.2), P(-11, 1.8, 6.2)]),
+            fill: '#bdc3c7', stroke: '#2d3436', 'stroke-width': '0.35'
         }));
 
-        // 3. ДАЛЬНЯЯ НОГА А-СТОЙКИ
-        g.appendChild(el('polygon', { points: '-2,-3 2,-13 3.5,-13 -0.5,-2.5', fill: '#636e72' }));
-        g.appendChild(el('polygon', { points: '5.5,-6.8 2,-13 3.5,-13 7,-6.2', fill: '#636e72' }));
-
-        // 4. РЕДУКТОР И МАХОВИК
-        g.appendChild(el('polygon', {
-            points: '-12,2 -8.5,3.8 -8.5,-1 -12,-2.8',
-            fill: '#95a5a6', stroke: '#2d3436', 'stroke-width': '0.35'
-        }));
-        g.appendChild(el('polygon', { points: '-8.5,3.8 -5,2 -5,-2.8 -8.5,-1', fill: '#636e72' }));
-
-        const crankPlane = el('g', { transform: 'translate(-8.2, -1) skewY(-26.5)' });
+        // Кривошип с противовесом на ближнем борту редуктора
+        const [cx0, cy0] = P(-9, 2.1, 4.2);
+        const crankPlane = el('g', { transform: `translate(${cx0}, ${cy0}) skewY(-26.56)` });
         const crank = el('g', {});
-        crank.appendChild(el('circle', { cx: '0', cy: '0', r: '3.6', fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.6' }));
+        crank.appendChild(el('circle', { cx: '0', cy: '0', r: '2.3', fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.45' }));
         crank.appendChild(el('path', {
-            d: 'M 0,0 L -3.6,-3.3 A 4.8,4.8 0 0,1 3.6,-3.3 Z',
-            fill: '#e67e22', stroke: '#2d3436', 'stroke-width': '0.4'
+            d: 'M -0.8,0 L -1.6,-3.8 L 1.6,-3.8 L 0.8,0 Z',
+            fill: '#e67e22', stroke: '#2d3436', 'stroke-width': '0.4', 'stroke-linejoin': 'round'
         }));
-        crank.appendChild(el('circle', { cx: '0', cy: '0', r: '1.1', fill: '#2d3436' }));
+        crank.appendChild(el('circle', { cx: '0', cy: '0', r: '0.8', fill: '#2d3436' }));
         crank.appendChild(el('animateTransform', {
             attributeName: 'transform', type: 'rotate',
             values: '0 0 0; 180 0 0; 360 0 0', dur: '2.6s', repeatCount: 'indefinite'
@@ -4283,44 +4802,165 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
         crankPlane.appendChild(crank);
         g.appendChild(crankPlane);
 
-        // 5. УСТЬЕ СКВАЖИНЫ
-        g.appendChild(el('polygon', { points: '8.5,-5.5 11.5,-4 11.5,-1 8.5,-2.5', fill: '#7f8c8d', stroke: '#2d3436', 'stroke-width': '0.35' }));
-        g.appendChild(el('polygon', { points: '11.5,-4 14.5,-5.5 14.5,-2.5 11.5,-1', fill: '#576574' }));
-        g.appendChild(el('rect', { x: '10.5', y: '-7.5', width: '2', height: '2.2', fill: '#ff4757' }));
-// 6. ВЕРТИКАЛЬНЫЙ ШТОК
+        // 4. ЧЕТЫРЁХНОГАЯ ПИРАМИДА А-СТОЙКИ (u от -3.5 до +3.5 -> вершина u = 0, z = 14.5)
+        // Дальние ноги (v = -2.2 -> -1.1)
+        g.appendChild(el('polygon', {
+            points: pts([P(-3.8, -2.2, 1.2), P(-2.6, -2.2, 1.2), P(-0.4, -1.1, 14.5), P(-1.2, -1.1, 14.5)]),
+            fill: '#636e72', stroke: '#2d3436', 'stroke-width': '0.3'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(2.6, -2.2, 1.2), P(3.8, -2.2, 1.2), P(1.2, -1.1, 14.5), P(0.4, -1.1, 14.5)]),
+            fill: '#636e72', stroke: '#2d3436', 'stroke-width': '0.3'
+        }));
+        // Ближние ноги (v = +2.2 -> +1.1)
+        g.appendChild(el('polygon', {
+            points: pts([P(-3.8, 2.2, 1.2), P(-2.6, 2.2, 1.2), P(-0.4, 1.1, 14.5), P(-1.2, 1.1, 14.5)]),
+            fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.38', 'stroke-linejoin': 'round'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(2.6, 2.2, 1.2), P(3.8, 2.2, 1.2), P(1.2, 1.1, 14.5), P(0.4, 1.1, 14.5)]),
+            fill: '#b2bec3', stroke: '#2d3436', 'stroke-width': '0.38', 'stroke-linejoin': 'round'
+        }));
+        // Поперечина ближней рамы (z = 7.5)
+        g.appendChild(el('polygon', {
+            points: pts([P(-2.2, 1.7, 7.2), P(2.2, 1.7, 7.2), P(2.0, 1.7, 8.4), P(-2.0, 1.7, 8.4)]),
+            fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+
+        // 5. УСТЬЕ СКВАЖИНЫ И ТРУБА (справа, u = 12.5, v = 0)
+        // Основание устья
+        g.appendChild(el('polygon', {
+            points: pts([P(11, -1.5, 0), P(11, 1.5, 0), P(11, 1.5, 2.8), P(11, -1.5, 2.8)]),
+            fill: '#7f8c8d', stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(11, 1.5, 0), P(14, 1.5, 0), P(14, 1.5, 2.8), P(11, 1.5, 2.8)]),
+            fill: '#576574', stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+        g.appendChild(el('polygon', {
+            points: pts([P(11, -1.5, 2.8), P(14, -1.5, 2.8), P(14, 1.5, 2.8), P(11, 1.5, 2.8)]),
+            fill: '#bdc3c7', stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+        // Красная задвижка (сальник)
+        const [vx, vy] = P(12.5, 0, 2.8);
+        g.appendChild(el('rect', {
+            x: vx - 0.9, y: vy - 2.0, width: '1.8', height: '2.0',
+            fill: '#ff4757', stroke: '#2d3436', 'stroke-width': '0.3'
+        }));
+        
+
+        // 6. ВЕРТИКАЛЬНЫЙ ШТОК С ТРОСОМ (u = 12.5, v = 0 — строго в центр скважины)
+        const [rx1, ry1] = P(12.5, 0, 8.5);
+        const [rx2, ry2] = P(12.5, 0, 3.2);
         const polishRod = el('g', {});
-        polishRod.appendChild(el('line', { x1: '11.5', y1: '-17.5', x2: '11.5', y2: '-5.5', stroke: '#f5f6fa', 'stroke-width': '1.1' }));
-        polishRod.appendChild(el('rect', { x: '10.3', y: '-11.5', width: '2.4', height: '1.3', fill: '#f1c40f' }));
+        polishRod.appendChild(el('line', {
+            x1: rx1, y1: ry1, x2: rx2, y2: ry2,
+            stroke: '#f5f6fa', 'stroke-width': '1.1'
+        }));
+        polishRod.appendChild(el('line', {
+            x1: rx1, y1: ry1, x2: rx2, y2: ry2,
+            stroke: '#2d3436', 'stroke-width': '0.35'
+        }));
+        // Жёлтый зажим (траверса)
+        const [tx, ty] = P(12.5, 0, 8.8);
+        polishRod.appendChild(el('rect', {
+            x: tx - 1.1, y: ty - 0.6, width: '2.2', height: '1.1', rx: '0.2',
+            fill: '#fbc531', stroke: '#2d3436', 'stroke-width': '0.25'
+        }));
         polishRod.appendChild(el('animateTransform', {
             attributeName: 'transform', type: 'translate',
-            values: '0,2.2; 0,-2.2; 0,2.2', dur: '2.6s', repeatCount: 'indefinite'
+            values: '0,2.0; 0,-2.0; 0,2.0', dur: '2.6s', repeatCount: 'indefinite'
         }));
         g.appendChild(polishRod);
 
-        // 7. БЛИЖНЯЯ НОГА А-СТОЙКИ
-        g.appendChild(el('polygon', { points: '-4.5,1.8 0.5,-12.5 2,-12.5 -2.8,2.5', fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.45' }));
-        g.appendChild(el('polygon', { points: '3.5,-2.2 0.5,-12.5 2,-12.5 5.2,-1.5', fill: '#b2bec3', stroke: '#2d3436', 'stroke-width': '0.45' }));
-        g.appendChild(el('polygon', { points: '-2,-4.8 3,-7.3 3.5,-6.1 -1.5,-3.6', fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.35' }));
-
-        // 8. ЯРКАЯ СТРЕЛА / БАЛАНСИР
-        const rigBeam = el('g', { transform: 'translate(1, 1) skewY(-26.5)' });
+        // 7. БАЛАНСИР И ПРАВИЛЬНАЯ ГОЛОВКА (построены по 3D-координатам P(u, v, z))
+        const [pivX, pivY] = P(0, 0, 14.5); // Точка оси качания на макушке пирамиды
         const beam = el('g', {});
 
-        beam.appendChild(el('polygon', { points: '-11,-12 -9.4,-12 -9.6,-6.8 -11.2,-6.8', fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.35' }));
-        beam.appendChild(el('polygon', { points: '-11.5,-13.5 -9.5,-14.8 11.5,-14.8 10,-13.5', fill: '#ff7675' }));
-        beam.appendChild(el('polygon', { points: '-11.5,-13.5 10,-13.5 10,-10.5 -11.5,-10.5', fill: '#ff4757', stroke: '#2d3436', 'stroke-width': '0.4' }));
-        beam.appendChild(el('path', { d: 'M 9.5,-14 C 13.5,-14 14.5,-8.5 12.5,-5.5 L 9.5,-9.5 Z', fill: '#e84118', stroke: '#2d3436', 'stroke-width': '0.45' }));
-        beam.appendChild(el('path', { d: 'M 11.8,-13 C 13,-11.5 13.2,-8.8 12,-6.8', fill: 'none', stroke: '#fbc531', 'stroke-width': '1' }));
-        beam.appendChild(el('circle', { cx: '1', cy: '-12', r: '1.8', fill: '#fbc531', stroke: '#2d3436', 'stroke-width': '0.5' }));
-
-        beam.appendChild(el('animateTransform', {
-            attributeName: 'transform', type: 'rotate',
-            values: '10 1 -12; -10 1 -12; 10 1 -12', dur: '2.6s', repeatCount: 'indefinite'
+        // Шатун (от хвоста балансира u = -9.5 к редуктору)
+        beam.appendChild(el('polygon', {
+            points: pts([P(-10.1, 1.3, 14.5), P(-8.9, 1.3, 14.5), P(-8.9, 1.3, 6.2), P(-10.1, 1.3, 6.2)]),
+            fill: '#dfe6e9', stroke: '#2d3436', 'stroke-width': '0.35'
         }));
 
-        rigBeam.appendChild(beam);
-        g.appendChild(rigBeam);
+        // Балка балансира (цельный заполненный брус: u от -10.5 до +9.5, v от -1.1 до +1.1, z от 13.5 до 15.8)
+        // 1. Задний заполненный квадратный торец балки (закрывает профиль!)
+        beam.appendChild(el('polygon', {
+            points: pts([P(-10.5, -1.1, 13.5), P(-10.5, 1.1, 13.5), P(-10.5, 1.1, 15.8), P(-10.5, -1.1, 15.8)]),
+            fill: '#c0392b', stroke: '#2d3436', 'stroke-width': '0.38', 'stroke-linejoin': 'round'
+        }));
+        // 2. Верхняя грань балки
+        beam.appendChild(el('polygon', {
+            points: pts([P(-10.5, -1.1, 15.8), P(9.5, -1.1, 15.8), P(9.5, 1.1, 15.8), P(-10.5, 1.1, 15.8)]),
+            fill: '#ff7675', stroke: '#2d3436', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
+        }));
+        // 3. Ближняя боковая стенка балки
+        beam.appendChild(el('polygon', {
+            points: pts([P(-10.5, 1.1, 13.5), P(9.5, 1.1, 13.5), P(9.5, 1.1, 15.8), P(-10.5, 1.1, 15.8)]),
+            fill: '#ff4757', stroke: '#2d3436', 'stroke-width': '0.38', 'stroke-linejoin': 'round'
+        }));
+        // Ближняя боковая стенка балки
+        beam.appendChild(el('polygon', {
+            points: pts([P(-10.5, 1.1, 13.5), P(9.5, 1.1, 13.5), P(9.5, 1.1, 15.8), P(-10.5, 1.1, 15.8)]),
+            fill: '#ff4757', stroke: '#2d3436', 'stroke-width': '0.38', 'stroke-linejoin': 'round'
+        }));
 
+        // ПРАВИЛЬНАЯ ГОЛОВКА БАЛАНСИРА («horsehead») в 3D-координатах:
+        // Выходит из торца u = 9.5; передняя дуга касается линии троса u = 12.5!
+        const hTopF = P(9.5, 1.2, 16.4), hTopB = P(9.5, -1.2, 16.4);
+        const hMidF = P(12.5, 1.2, 13.8), hMidB = P(12.5, -1.2, 13.8);
+        const hBotF = P(11.6, 1.2, 9.6),  hBotB = P(11.6, -1.2, 9.6);
+        const hInF  = P(9.5, 1.2, 13.0),  hInB  = P(9.5, -1.2, 13.0);
+
+        // Изогнутый 3D-торец полумесяца (по которому ложится трос)
+        beam.appendChild(el('path', {
+            d: `M ${hTopF.join(',')} Q ${hMidF.join(',')} ${hBotF.join(',')} L ${hBotB.join(',')} Q ${hMidB.join(',')} ${hTopB.join(',')} Z`,
+            fill: '#96281b', stroke: '#2d3436', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
+        }));
+        // Ближняя щека полумесяца
+        beam.appendChild(el('path', {
+            d: `M ${hTopF.join(',')} Q ${hMidF.join(',')} ${hBotF.join(',')} L ${hInF.join(',')} Z`,
+            fill: '#e84118', stroke: '#2d3436', 'stroke-width': '0.4', 'stroke-linejoin': 'round'
+        }));
+        // Жёлтая кайма по краю ближней щеки
+        const y1 = P(10.2, 1.2, 15.6);
+        const y2 = P(12.0, 1.2, 13.5);
+        const y3 = P(11.3, 1.2, 10.4);
+        beam.appendChild(el('path', {
+            d: `M ${y1.join(',')} Q ${y2.join(',')} ${y3.join(',')}`,
+            fill: 'none', stroke: '#fbc531', 'stroke-width': '0.75', 'stroke-linecap': 'round'
+        }));
+
+        // Центральный подшипник (один аккуратный эллипс в плоскости стрелы)
+        const bCenter = P(0, 1.25, 14.5);
+        const bx = Number(bCenter.join(',').split(',').shift());
+        const by = Number(bCenter.join(',').split(',').pop());
+
+        beam.appendChild(el('ellipse', {
+            cx: bx.toFixed(2),
+            cy: by.toFixed(2),
+            rx: '1.1',
+            ry: '1.6',
+            transform: `rotate(26.5 ${bx.toFixed(2)} ${by.toFixed(2)})`,
+            fill: '#fbc531',
+            stroke: '#2d3436',
+            'stroke-width': '0.45'
+        }));
+        beam.appendChild(el('circle', {
+            cx: bx.toFixed(2),
+            cy: by.toFixed(2),
+            r: '0.45',
+            fill: '#2d3436'
+        }));
+
+        // Плавное качание строго вокруг вершины пирамиды (pivX, pivY)
+        beam.appendChild(el('animateTransform', {
+            attributeName: 'transform', type: 'rotate',
+            values: `8 ${pivX} ${pivY}; -8 ${pivX} ${pivY}; 8 ${pivX} ${pivY}`,
+            dur: '2.6s', repeatCount: 'indefinite'
+        }));
+
+        g.appendChild(beam);
         return g;
     }
 
@@ -4459,7 +5099,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     
     // 1. Качалка в Краснокамском районе (северо-запад)
     const pumpjack = createPumpjack();
-    pumpjack.setAttribute('transform', 'translate(88, 60) scale(0.7)');
+    pumpjack.setAttribute('transform', 'translate(88, 60) scale(1.0)');
     staticLayer.appendChild(pumpjack);
 
     // 2. Юрты в Зилаирском районе (юг)
@@ -4471,7 +5111,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     yurt2.setAttribute('transform', 'translate(315, 445) scale(0.3)');
     staticLayer.appendChild(yurt2);
 
-         // --- 🏭 НЕФТЕПЕРЕРАБАТЫВАЮЩИЙ ЗАВОД (2.5D изометрия) ---
+         // --- 🏭 НЕФТЕПЕРЕРАБАТЫВАЮЩИЙ ЗАВОД (Компактный: 1 РВС, 1 здание, 1 колонна, 1 факел) ---
     function createRefinery() {
         const g = document.createElementNS(svgNS, 'g');
 
@@ -4481,256 +5121,173 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
             return node;
         };
 
-        // 1. ТЕНЬ ЗАВОДА НА ЗЕМЛЕ
-        g.appendChild(el('polygon', {
-            points: '-32,4 0,-12 34,5 2,21',
-            fill: 'rgba(0, 0, 0, 0.28)',
-            transform: 'translate(2, 5)'
-        }));
+        // 1. ОДИН ВЕРТИКАЛЬНЫЙ РЕЗЕРВУАР (РВС)
+        const tank = el('g', { transform: 'translate(-8, -3)' });
+        const r = 4.8;
+        const ry = 2.3;
+        const h = 8.0;
 
-        // 2. ИЗОМЕТРИЧЕСКАЯ БЕТОННАЯ ПЛОЩАДКА (с толщиной 2.5D)
-        // Левая боковая толщина плиты
-        g.appendChild(el('polygon', {
-            points: '-30,2 0,17 0,20 -30,5',
-            fill: '#7f8c8d'
+        // Контактная тень
+        tank.appendChild(el('ellipse', {
+            cx: '1.2', cy: '0.6', rx: r * 1.1, ry: ry * 1.1,
+            fill: 'rgba(0, 0, 0, 0.28)'
         }));
-        // Правая боковая толщина плиты
-        g.appendChild(el('polygon', {
-            points: '0,17 32,1 32,4 0,20',
-            fill: '#636e72'
+        // Левая светлая и правая теневая стороны цилиндра
+        tank.appendChild(el('path', {
+            d: `M ${-r},${-h} L ${-r},0 A ${r},${ry} 0 0,0 0,${ry} L 0,${-h + ry} A ${r},${ry} 0 0,1 ${-r},${-h} Z`,
+            fill: '#f5f6fa'
         }));
-        // Верхняя рабочая площадка
-        g.appendChild(el('polygon', {
-            points: '-30,2 2,-14 32,1 0,17',
-            fill: '#bdc3c7', stroke: '#7f8c8d', 'stroke-width': '0.5'
+        tank.appendChild(el('path', {
+            d: `M 0,${-h + ry} L 0,${ry} A ${r},${ry} 0 0,0 ${r},0 L ${r},${-h} A ${r},${ry} 0 0,1 0,${-h + ry} Z`,
+            fill: '#b2bec3'
         }));
-        // Желтая разметка безопасности по краю площадки
-        g.appendChild(el('polygon', {
-            points: '-27,2 2,-12.5 29,1 0,15.5',
-            fill: 'none', stroke: '#f1c40f', 'stroke-width': '0.4', 'stroke-dasharray': '2,1.5', opacity: '0.7'
+        // Синяя полоса обвязки
+        tank.appendChild(el('path', {
+            d: `M ${-r},${-h * 0.55} A ${r},${ry} 0 0,0 ${r},${-h * 0.55}`,
+            fill: 'none', stroke: '#0984e3', 'stroke-width': '1.0'
         }));
+        // Контур и коническая крыша
+        tank.appendChild(el('path', {
+            d: `M ${-r},${-h} L ${-r},0 A ${r},${ry} 0 0,0 ${r},0 L ${r},${-h}`,
+            fill: 'none', stroke: '#636e72', 'stroke-width': '0.35'
+        }));
+        tank.appendChild(el('ellipse', {
+            cx: '0', cy: -h, rx: r, ry: ry,
+            fill: '#ffffff', stroke: '#636e72', 'stroke-width': '0.35'
+        }));
+        tank.appendChild(el('path', {
+            d: `M ${-r},${-h} L 0,${-h - ry * 0.45} L ${r},${-h}`,
+            fill: 'none', stroke: '#bdc3c7', 'stroke-width': '0.35'
+        }));
+        // Лестница
+        tank.appendChild(el('line', {
+            x1: -r * 0.72, y1: 0, x2: -r * 0.52, y2: -h,
+            stroke: '#2d3436', 'stroke-width': '0.5'
+        }));
+        g.appendChild(tank);
 
-        // 3. ПРОМЫШЛЕННЫЙ ЦЕХ (здание с двухскатной/плоской крышей в изометрии)
-        const building = el('g', { transform: 'translate(-12, 5)' });
-        // Левая стена (светлее)
+        // 2. ОДНО АДМИНИСТРАТИВНОЕ ЗДАНИЕ / ОПЕРАТОРНАЯ
+        const building = el('g', { transform: 'translate(-7, 6.5)' });
         building.appendChild(el('polygon', {
-            points: '-10,0 0,5 0,-2 -10,-7',
-            fill: '#dfe6e9'
+            points: '-8,0 0,4 8.5,-0.5 0.5,-4.5',
+            fill: 'rgba(0, 0, 0, 0.25)'
         }));
-        // Правая стена (в тени)
         building.appendChild(el('polygon', {
-            points: '0,5 8,1 8,-6 0,-2',
-            fill: '#95a5a6'
+            points: '-8,0 0,4 0,-1.5 -8,-5.5',
+            fill: '#dfe6e9', stroke: '#636e72', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
         }));
-        // Крыша цеха
         building.appendChild(el('polygon', {
-            points: '-10,-7 -2,-11 8,-6 0,-2',
-            fill: '#ffffff', stroke: '#7f8c8d', 'stroke-width': '0.3'
+            points: '0,4 6.5,0.8 6.5,-4.7 0,-1.5',
+            fill: '#95a5a6', stroke: '#636e72', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
         }));
-        // Ворота цеха
         building.appendChild(el('polygon', {
-            points: '-7,1.5 -3,3.5 -3,-0.5 -7,-2.5',
-            fill: '#2d3436'
+            points: '-8,-5.5 -1.5,-8.7 6.5,-4.7 0,-1.5',
+            fill: '#ffffff', stroke: '#636e72', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
         }));
+        // Окошки
+        building.appendChild(el('polygon', { points: '-6.2,-2.0 -4.0,-0.9 -4.0,-2.3 -6.2,-3.4', fill: '#2c3e50' }));
+        building.appendChild(el('polygon', { points: '-3.0,-0.4 -0.8,0.7 -0.8,-0.7 -3.0,-1.8', fill: '#2c3e50' }));
         g.appendChild(building);
 
-        // 4. СФЕРИЧЕСКИЕ РЕЗЕРВУАРЫ (газгольдеры с объемом и опорами)
-        function drawSphereTank(tx, ty, r) {
-            const t = el('g', { transform: `translate(${tx}, ${ty})` });
-            // Тень под резервуаром
-            t.appendChild(el('ellipse', {
-                cx: '0', cy: r * 0.85, rx: r * 0.9, ry: r * 0.45,
-                fill: 'rgba(0,0,0,0.25)'
-            }));
-            // Опорные стойки
-            t.appendChild(el('line', { x1: -r * 0.5, y1: 0, x2: -r * 0.5, y2: r * 0.85, stroke: '#2d3436', 'stroke-width': '0.9' }));
-            t.appendChild(el('line', { x1: r * 0.5, y1: 0, x2: r * 0.5, y2: r * 0.85, stroke: '#2d3436', 'stroke-width': '0.9' }));
-            // Основная сфера (теневой базовый тон)
-            t.appendChild(el('circle', {
-                cx: '0', cy: '0', r: r,
-                fill: '#b2bec3', stroke: '#636e72', 'stroke-width': '0.4'
-            }));
-            // Светлый блик сверху-слева (3D-объем шара)
-            t.appendChild(el('circle', {
-                cx: -r * 0.25, cy: -r * 0.25, r: r * 0.65,
-                fill: '#dfe6e9'
-            }));
-            t.appendChild(el('circle', {
-                cx: -r * 0.35, cy: -r * 0.35, r: r * 0.28,
-                fill: '#ffffff', opacity: '0.8'
-            }));
-            return t;
-        }
-        g.appendChild(drawSphereTank(-14, -4, 4.5));
-        g.appendChild(drawSphereTank(-5, -8, 3.8));
-
-        // 5. ТРУБОПРОВОД (связывает резервуары с колоннами)
+        // 3. СВЯЗУЮЩИЙ ТРУБОПРОВОД НА ОПОРЕ
+        g.appendChild(el('line', { x1: '-2', y1: '-2', x2: '-2', y2: '1.5', stroke: '#2d3436', 'stroke-width': '0.8' }));
         g.appendChild(el('polyline', {
-            points: '-10,-3 -3,-6 3,-3 10,-6',
-            fill: 'none', stroke: '#e17055', 'stroke-width': '1.1', 'stroke-linejoin': 'round'
+            points: '-4,-4 -1,-2.5 3,-4.5 9,-2',
+            fill: 'none', stroke: '#e17055', 'stroke-width': '0.95', 'stroke-linejoin': 'round'
         }));
 
-        // 6. РЕКТИФИКАЦИОННЫЕ КОЛОННЫ (цилиндры со светотенью)
-        function drawColumn(cx, cy, w, h) {
-            const col = el('g', { transform: `translate(${cx}, ${cy})` });
-            // Левая освещенная половина цилиндра
-            col.appendChild(el('rect', {
-                x: -w / 2, y: -h, width: w / 2, height: h,
-                fill: '#dfe6e9'
-            }));
-            // Правая теневая половина цилиндра
-            col.appendChild(el('rect', {
-                x: '0', y: -h, width: w / 2, height: h,
-                fill: '#95a5a6'
-            }));
-            // Общий контур и купол колонны
-            col.appendChild(el('ellipse', {
-                cx: '0', cy: -h, rx: w / 2, ry: w * 0.25,
-                fill: '#ffffff', stroke: '#636e72', 'stroke-width': '0.35'
-            }));
-            col.appendChild(el('rect', {
-                x: -w / 2, y: -h, width: w, height: h,
-                fill: 'none', stroke: '#636e72', 'stroke-width': '0.35'
-            }));
-            // Технические площадки-кольца (обручи)
-            col.appendChild(el('line', { x1: -w * 0.65, y1: -h * 0.65, x2: w * 0.65, y2: -h * 0.65, stroke: '#2d3436', 'stroke-width': '0.7' }));
-            col.appendChild(el('line', { x1: -w * 0.65, y1: -h * 0.35, x2: w * 0.65, y2: -h * 0.35, stroke: '#2d3436', 'stroke-width': '0.7' }));
-            return col;
+        // 4. ОДНА РЕКТИФИКАЦИОННАЯ КОЛОННА (Труба 1)
+        const colX = 3.5;
+        const colY = 3.5;
+        const cw = 5.0;
+        const ch = 22;
+
+        const col = el('g', { transform: `translate(${colX}, ${colY})` });
+        col.appendChild(el('ellipse', {
+            cx: '1.3', cy: '0.5', rx: cw * 0.85, ry: cw * 0.4,
+            fill: 'rgba(0, 0, 0, 0.28)'
+        }));
+        col.appendChild(el('rect', { x: -cw / 2, y: -ch, width: cw / 2, height: ch, fill: '#dfe6e9' }));
+        col.appendChild(el('rect', { x: '0', y: -ch, width: cw / 2, height: ch, fill: '#95a5a6' }));
+        col.appendChild(el('ellipse', {
+            cx: '0', cy: -ch, rx: cw / 2, ry: cw * 0.25,
+            fill: '#ffffff', stroke: '#636e72', 'stroke-width': '0.35'
+        }));
+        col.appendChild(el('rect', {
+            x: -cw / 2, y: -ch, width: cw, height: ch,
+            fill: 'none', stroke: '#636e72', 'stroke-width': '0.35'
+        }));
+        // Сервисные мостики
+        col.appendChild(el('line', { x1: -cw * 0.65, y1: -ch * 0.65, x2: cw * 0.65, y2: -ch * 0.65, stroke: '#2d3436', 'stroke-width': '0.65' }));
+        col.appendChild(el('line', { x1: -cw * 0.65, y1: -ch * 0.35, x2: cw * 0.65, y2: -ch * 0.35, stroke: '#2d3436', 'stroke-width': '0.65' }));
+        g.appendChild(col);
+
+        // Мигающий красный маячок и лёгкий пар из колонны
+        const beacon = el('circle', { cx: colX, cy: colY - ch - 1.5, r: '1.0', fill: '#ff3b30' });
+        beacon.appendChild(el('animate', {
+            attributeName: 'opacity', values: '1; 0.15; 1',
+            dur: '1.4s', repeatCount: 'indefinite'
+        }));
+        g.appendChild(beacon);
+
+        for (let j = 0; j < 3; j++) {
+            const puff = el('circle', { cx: colX, cy: colY - ch - 1, r: '1.4', fill: 'rgba(236, 240, 241, 0.65)', opacity: '0' });
+            const delay = j * 1.1;
+            puff.appendChild(el('animate', { attributeName: 'cy', values: `${colY - ch - 1}; ${colY - ch - 16}`, dur: '3.3s', begin: `${delay}s`, repeatCount: 'indefinite' }));
+            puff.appendChild(el('animate', { attributeName: 'cx', values: `${colX}; ${colX + 4.5}; ${colX + 8}`, dur: '3.3s', begin: `${delay}s`, repeatCount: 'indefinite' }));
+            puff.appendChild(el('animate', { attributeName: 'r', values: '1.1; 4.2', dur: '3.3s', begin: `${delay}s`, repeatCount: 'indefinite' }));
+            puff.appendChild(el('animate', { attributeName: 'opacity', values: '0.7; 0', dur: '3.3s', begin: `${delay}s`, repeatCount: 'indefinite' }));
+            g.appendChild(puff);
         }
 
-        // Высокая и средняя колонны
-        g.appendChild(drawColumn(5, 3, 5.5, 25));
-        g.appendChild(drawColumn(13, 0, 4.5, 18));
+        // 5. ОДНА ФАКЕЛЬНАЯ ТРУБА (Труба 2 — с живым огнём)
+        const flareX = 11.5;
+        const flareBaseY = 2.0;
+        const flareTopY = -24;
 
-        // 7. МИГАЮЩИЕ КРАСНЫЕ АВИАЦИОННЫЕ ОГНИ НА КОЛОННАХ
-        function addBeacon(bx, by, delaySec) {
-            const b = el('circle', {
-                cx: bx, cy: by, r: '1.1',
-                fill: '#ff3b30'
-            });
-            b.appendChild(el('animate', {
-                attributeName: 'opacity',
-                values: '1; 0.15; 1',
-                dur: '1.4s',
-                begin: `${delaySec}s`,
-                repeatCount: 'indefinite'
-            }));
-            return b;
-        }
-        g.appendChild(addBeacon(5, -23.5, 0));
-        g.appendChild(addBeacon(13, -19.2, 0.7));
-
-        // 8. ФАКЕЛЬНАЯ УСТАНОВКА И ЖИВОЕ ПЛАМЯ
-        const flareX = 21;
-        const flareBaseY = 2;
-        const flareTopY = -28;
-
-        // Ажурная мачта факела (сужающаяся кверху)
+        g.appendChild(el('ellipse', {
+            cx: flareX + 0.9, cy: flareBaseY + 0.4, rx: '2.8', ry: '1.2',
+            fill: 'rgba(0, 0, 0, 0.3)'
+        }));
         g.appendChild(el('polygon', {
-            points: `${flareX - 1.5},${flareBaseY} ${flareX - 0.6},${flareTopY} ${flareX + 0.6},${flareTopY} ${flareX + 1.5},${flareBaseY}`,
+            points: `${flareX - 1.3},${flareBaseY} ${flareX - 0.5},${flareTopY} ${flareX + 0.5},${flareTopY} ${flareX + 1.3},${flareBaseY}`,
             fill: '#7f8c8d', stroke: '#2d3436', 'stroke-width': '0.35'
         }));
-        // Оголовок горелки
         g.appendChild(el('rect', {
-            x: flareX - 1.1, y: flareTopY - 1.5, width: '2.2', height: '2',
+            x: flareX - 1.0, y: flareTopY - 1.4, width: '2.0', height: '1.8',
             fill: '#2d3436'
         }));
 
-        // Мягкое свечение вокруг факела
         const glow = el('circle', {
-            cx: flareX, cy: flareTopY - 6, r: '6.5',
+            cx: flareX, cy: flareTopY - 5.5, r: '5.5',
             fill: 'rgba(243, 156, 18, 0.4)'
         });
-        glow.style.filter = 'blur(2.5px)';
+        glow.style.filter = 'blur(2.2px)';
         glow.appendChild(el('animate', {
-            attributeName: 'opacity',
-            values: '0.35; 0.75; 0.35',
-            dur: '0.45s',
-            repeatCount: 'indefinite'
+            attributeName: 'opacity', values: '0.35; 0.75; 0.35',
+            dur: '0.45s', repeatCount: 'indefinite'
         }));
         g.appendChild(glow);
 
-        // Внешний оранжевый язык пламени (аккуратный, не громоздкий)
-        const outerFlame = el('path', {
-            d: `M ${flareX - 2.5},${flareTopY - 1} Q ${flareX},${flareTopY - 14} ${flareX + 2.5},${flareTopY - 1} Q ${flareX},${flareTopY + 1} ${flareX - 2.5},${flareTopY - 1} Z`,
-            fill: '#e67e22'
-        });
+        const fBase1 = `M ${flareX - 2.2},${flareTopY - 1} Q ${flareX - 0.9},${flareTopY - 12} ${flareX + 2.2},${flareTopY - 1} Q ${flareX},${flareTopY + 1} ${flareX - 2.2},${flareTopY - 1} Z`;
+        const fBase2 = `M ${flareX - 2.0},${flareTopY - 1} Q ${flareX + 1.3},${flareTopY - 15} ${flareX + 2.0},${flareTopY - 1} Q ${flareX},${flareTopY + 1} ${flareX - 2.0},${flareTopY - 1} Z`;
+
+        const outerFlame = el('path', { d: fBase1, fill: '#e67e22' });
         outerFlame.appendChild(el('animate', {
-            attributeName: 'd',
-            values:
-                `M ${flareX - 2.5},${flareTopY - 1} Q ${flareX - 1},${flareTopY - 14} ${flareX + 2.5},${flareTopY - 1} Q ${flareX},${flareTopY + 1} ${flareX - 2.5},${flareTopY - 1} Z;` +
-                `M ${flareX - 2.2},${flareTopY - 1} Q ${flareX + 1.5},${flareTopY - 17} ${flareX + 2.2},${flareTopY - 1} Q ${flareX},${flareTopY + 1} ${flareX - 2.2},${flareTopY - 1} Z;` +
-                `M ${flareX - 2.5},${flareTopY - 1} Q ${flareX - 1},${flareTopY - 14} ${flareX + 2.5},${flareTopY - 1} Q ${flareX},${flareTopY + 1} ${flareX - 2.5},${flareTopY - 1} Z`,
-            dur: '0.55s',
-            repeatCount: 'indefinite'
+            attributeName: 'd', values: `${fBase1};${fBase2};${fBase1}`,
+            dur: '0.55s', repeatCount: 'indefinite'
         }));
         g.appendChild(outerFlame);
 
-        // Внутреннее яркое желтое ядро пламени
-        const innerFlame = el('path', {
-            d: `M ${flareX - 1.2},${flareTopY - 1} Q ${flareX},${flareTopY - 8} ${flareX + 1.2},${flareTopY - 1} Z`,
-            fill: '#ffeaa7'
-        });
+        const fCore1 = `M ${flareX - 1.1},${flareTopY - 1} Q ${flareX - 0.4},${flareTopY - 7} ${flareX + 1.1},${flareTopY - 1} Z`;
+        const fCore2 = `M ${flareX - 0.9},${flareTopY - 1} Q ${flareX + 0.7},${flareTopY - 9} ${flareX + 0.9},${flareTopY - 1} Z`;
+
+        const innerFlame = el('path', { d: fCore1, fill: '#ffeaa7' });
         innerFlame.appendChild(el('animate', {
-            attributeName: 'd',
-            values:
-                `M ${flareX - 1.2},${flareTopY - 1} Q ${flareX - 0.5},${flareTopY - 8} ${flareX + 1.2},${flareTopY - 1} Z;` +
-                `M ${flareX - 1.0},${flareTopY - 1} Q ${flareX + 0.8},${flareTopY - 10} ${flareX + 1.0},${flareTopY - 1} Z;` +
-                `M ${flareX - 1.2},${flareTopY - 1} Q ${flareX - 0.5},${flareTopY - 8} ${flareX + 1.2},${flareTopY - 1} Z`,
-            dur: '0.4s',
-            repeatCount: 'indefinite'
+            attributeName: 'd', values: `${fCore1};${fCore2};${fCore1}`,
+            dur: '0.4s', repeatCount: 'indefinite'
         }));
         g.appendChild(innerFlame);
-
-        // 9. ЛЕГКИЙ ПАР/ДЫМ ИЗ КОЛОНН
-        const smokeSources = [
-            { x: 5, y: -23, color: 'rgba(236, 240, 241, 0.65)' },
-            { x: 13, y: -19, color: 'rgba(189, 195, 199, 0.55)' }
-        ];
-
-        smokeSources.forEach(src => {
-            for (let j = 0; j < 3; j++) {
-                const puff = el('circle', {
-                    cx: src.x,
-                    cy: src.y,
-                    r: '1.5',
-                    fill: src.color,
-                    opacity: '0'
-                });
-                const delay = j * 1.1;
-
-                puff.appendChild(el('animate', {
-                    attributeName: 'cy',
-                    values: `${src.y}; ${src.y - 16}`,
-                    dur: '3.3s',
-                    begin: `${delay}s`,
-                    repeatCount: 'indefinite'
-                }));
-                puff.appendChild(el('animate', {
-                    attributeName: 'cx',
-                    values: `${src.x}; ${src.x + 5}; ${src.x + 9}`,
-                    dur: '3.3s',
-                    begin: `${delay}s`,
-                    repeatCount: 'indefinite'
-                }));
-                puff.appendChild(el('animate', {
-                    attributeName: 'r',
-                    values: '1.2; 4.5',
-                    dur: '3.3s',
-                    begin: `${delay}s`,
-                    repeatCount: 'indefinite'
-                }));
-                puff.appendChild(el('animate', {
-                    attributeName: 'opacity',
-                    values: '0.7; 0',
-                    dur: '3.3s',
-                    begin: `${delay}s`,
-                    repeatCount: 'indefinite'
-                }));
-
-                g.appendChild(puff);
-            }
-        });
 
         return g;
     }
@@ -4738,7 +5295,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     // --- РАЗМЕЩЕНИЕ ЗАВОДА ---
     // Ставим его рядом с городом Салават
     const refinery = createRefinery();
-    refinery.setAttribute('transform', 'translate(185, 345) scale(0.35)'); // <-- УМЕНЬШЕНО В 2 РАЗА
+    refinery.setAttribute('transform', 'translate(185, 345) scale(0.6)'); // <-- УМЕНЬШЕНО В 2 РАЗА
     staticLayer.appendChild(refinery);
 
    /* ================================================================
@@ -4973,82 +5530,147 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     }
 
   /* ================================================================
-       КНОПКА ИИ (СТРОГО ВВЕРХУ)
+       КНОПКА ИИ (ЕДИНЫЙ СТИЛЬ С ТУМБЛЕРАМИ + БЕЗ КОНФЛИКТОВ ПЕРЕМЕННЫХ)
        ================================================================ */
-    
-    // Удаляем старую кнопку, если она случайно осталась в DOM
-    const oldAiBtn = document.querySelector('.ai-btn-wrapper') || document.getElementById('ai-btn');
-    if (oldAiBtn) oldAiBtn.remove();
+    (function initAiButton() {
+        const oldAiBtn = document.querySelector('.ai-btn-wrapper') || document.getElementById('ai-btn') || document.getElementById('ai-btn-top');
+        if (oldAiBtn) oldAiBtn.remove();
 
-    const aiBtn = document.createElement('button');
-    aiBtn.id = 'ai-btn-top';
-    
-    // Вставляем стили напрямую в JS, чтобы они точно сработали
-    aiBtn.style.cssText = `
-        position: fixed !important;
-        top: 16px !important;
-        right: 128px !important;
-        height: 44px !important;
-        width: auto !important;
-        min-width: 280px !important;
-        background: #fff !important;
-        color: #000 !important;
-        border: 2px solid #000 !important;
-        border-radius: 22px !important;
-        padding: 0 20px 0 10px !important;
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 10px !important;
-        font-family: 'Segoe UI', sans-serif !important;
-        font-weight: 800 !important;
-        font-size: 13px !important;
-        cursor: pointer !important;
-        z-index: 100002 !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25) !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-        transition: transform 0.2s ease !important;
-    `;
+        const aiBtn = document.createElement('button');
+        aiBtn.id = 'ai-btn-top';
+        aiBtn.setAttribute('aria-label', 'ИИ-помощник для маршрутов');
+        
+        aiBtn.style.cssText = `
+            position: fixed;
+            top: 16px;
+            right: 196px;
+            height: 44px;
+            border-radius: 22px;
+            padding: 0 18px 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            z-index: 100002;
+            margin: 0;
+            box-sizing: border-box;
+            outline: none;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.3s ease;
+        `;
 
-    // Текст и человечек в одну строку
-    aiBtn.innerHTML = `
-        <svg viewBox="0 0 40 40" style="width: 32px; height: 32px; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="10" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
-            <circle cx="16" cy="9" r="1.2" fill="currentColor"/>
-            <circle cx="20" cy="9" r="1.2" fill="currentColor"/>
-            <path d="M 16 12 Q 18 14 20 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M 18 15 L 18 25" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M 18 18 L 13 23" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            <g style="transform-origin: 18px 17px; animation: wave-arm 0.5s ease-in-out infinite alternate;">
-                <path d="M 18 17 L 26 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M 26 9 L 28 7 M 26 9 L 29 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </g>
-            <path d="M 18 25 L 13 33 M 18 25 L 23 33" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-        <span style="white-space: nowrap;">КУДА МЫ ПОЕДЕМ СЕГОДНЯ ?</span>
-    `;
-    
-    document.body.appendChild(aiBtn);
+         aiBtn.innerHTML = `
+            <div class="ai-avatar-badge">
+                <svg viewBox="0 0 40 40" style="width: 26px; height: 26px;" xmlns="http://w3.org">
+                    <!-- Внешний корпус компаса -->
+                    <circle cx="20" cy="20" r="15" fill="rgba(255, 255, 255, 0.18)" stroke="#ffffff" stroke-width="2"/>
+                    
+                    <!-- Риски сторон света (С, Ю, З, В) -->
+                    <line x1="20" y1="7" x2="20" y2="10" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="20" y1="30" x2="20" y2="33" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="7" y1="20" x2="10" y2="20" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="30" y1="20" x2="33" y2="20" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
 
-    // Добавляем анимацию руки в head (если еще нет)
-    if (!document.getElementById('wave-anim-style')) {
-        const style = document.createElement('style');
-        style.id = 'wave-anim-style';
-        style.textContent = `
-            @keyframes wave-arm {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(-40deg); }
+                    <!-- Анимированная магнитная стрелка компаса -->
+                    <g class="compass-needle" style="transform-origin: 20px 20px;">
+                        <!-- Северная половина стрелки (ярко-красная) -->
+                        <polygon points="20,9 23.2,20 16.8,20" fill="#ff4757"/>
+                        <!-- Южная половина стрелки (бело-серебристая) -->
+                        <polygon points="20,31 23.2,20 16.8,20" fill="#ffffff"/>
+                        <!-- Центральная ось -->
+                        <circle cx="20" cy="20" r="2.2" fill="#fbc531" stroke="#2d3436" stroke-width="0.6"/>
+                    </g>
+                </svg>
+            </div>
+            <span style="white-space: nowrap;">Куда поехать сегодня?</span>
+            <span class="ai-pill-tag">AI</span>
+        `;
+        
+        document.body.appendChild(aiBtn);
+
+        const oldAiStyle = document.getElementById('wave-anim-style');
+        if (oldAiStyle) oldAiStyle.remove();
+
+        const aiBtnStyle = document.createElement('style');
+        aiBtnStyle.id = 'wave-anim-style';
+        aiBtnStyle.textContent = `
+            @keyframes compass-seek {
+            0%   { transform: rotate(-28deg); }
+            30%  { transform: rotate(34deg); }
+            55%  { transform: rotate(-14deg); }
+            75%  { transform: rotate(18deg); }
+            100% { transform: rotate(-28deg); }
+        }
+        #ai-btn-top .compass-needle {
+            animation: compass-seek 4.5s ease-in-out infinite;
+        }
+        #ai-btn-top:hover .compass-needle {
+            animation-duration: 1.4s;
+        }
+            #ai-btn-top {
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                color: #1e272e;
+                border: 1.5px solid rgba(9, 132, 227, 0.35);
+                box-shadow: 0 4px 16px rgba(9, 132, 227, 0.22);
+            }
+            #ai-btn-top:hover {
+                transform: translateY(-2px) scale(1.02);
+                box-shadow: 0 6px 22px rgba(9, 132, 227, 0.38);
+                border-color: #0984e3;
+            }
+            #ai-btn-top:active { transform: scale(0.98); }
+            #ai-btn-top .ai-avatar-badge {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #0984e3, #00cec9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                box-shadow: 0 2px 6px rgba(9, 132, 227, 0.35);
+            }
+            #ai-btn-top .ai-pill-tag {
+                font-size: 10px;
+                font-weight: 800;
+                padding: 2px 6px;
+                border-radius: 8px;
+                background: rgba(9, 132, 227, 0.14);
+                color: #0984e3;
+                letter-spacing: 0.5px;
             }
             body.dark-mode #ai-btn-top {
-                background: #2a2a3a !important;
-                color: #ffd166 !important;
-                border-color: #ffd166 !important;
+                background: rgba(30, 30, 47, 0.9);
+                color: #f5f6fa;
+                border-color: rgba(108, 92, 231, 0.45);
+                box-shadow: 0 4px 18px rgba(15, 15, 35, 0.5);
+            }
+            body.dark-mode #ai-btn-top:hover {
+                box-shadow: 0 6px 24px rgba(108, 92, 231, 0.55);
+                border-color: #a29bfe;
+            }
+            body.dark-mode #ai-btn-top .ai-avatar-badge {
+                background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            }
+            body.dark-mode #ai-btn-top .ai-pill-tag {
+                background: rgba(162, 155, 254, 0.2);
+                color: #a29bfe;
+            }
+            @media (max-width: 600px) {
+                #ai-btn-top {
+                    top: 70px !important;
+                    right: 16px !important;
+                }
             }
         `;
-        document.head.appendChild(style);
-    }
+        document.head.appendChild(aiBtnStyle);
+    })();
 
 
 
@@ -5096,7 +5718,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
 // 👇 НАСТРОЙКИ (МЕНЯЙТЕ ЗДЕСЬ) 👇
 const ZONE_X = 220;     // Координата X
 const ZONE_Y = 100;     // Координата Y
-const ZONE_SCALE = 0.2; // Размер сцены
+const ZONE_SCALE = 0.3; // Размер сцены
 // 👆 ------------------------ 👆
 
 function createRecreationZone(x, y, scale) {
@@ -5110,81 +5732,82 @@ function createRecreationZone(x, y, scale) {
         return node;
     };
 
-    // 1. ВОДА (мягкое изометрическое озеро/залив с градиентом глубины)
+    // 1. ВОДА (Глубокое пресноводное башкирское озеро с мягкой береговой линией)
     g.appendChild(el('ellipse', {
-        cx: '0', cy: '4', rx: '56', ry: '30',
-        fill: '#0984e3', opacity: '0.25'
+        cx: '0', cy: '3', rx: '56', ry: '30',
+        fill: '#2b5470', opacity: '0.2'
     }));
+    // Прибрежное мелководье
     g.appendChild(el('ellipse', {
         cx: '0', cy: '0', rx: '54', ry: '28',
-        fill: '#74b9ff', stroke: '#0984e3', 'stroke-width': '1'
+        fill: '#5c93b5', stroke: '#3c6e8f', 'stroke-width': '1'
     }));
-    // Внутренняя более глубокая часть воды
+    // Основная глубина озера
     g.appendChild(el('ellipse', {
-        cx: '-4', cy: '2', rx: '40', ry: '20',
-        fill: '#4da3ff', opacity: '0.6'
+        cx: '-4', cy: '1.5', rx: '43', ry: '21.5',
+        fill: '#3c6e8f', opacity: '0.85'
+    }));
+    // Самая глубокая часть в центре
+    g.appendChild(el('ellipse', {
+        cx: '-7', cy: '2.5', rx: '28', ry: '13.5',
+        fill: '#2c5570', opacity: '0.65'
     }));
 
-    // 2. ОБЪЕМНЫЙ БЕРЕГ (Платформа с толщиной в изометрии)
-    // Нижняя темная грань берега (земля/песок в глубине)
+    // 2. ЕСТЕСТВЕННЫЙ БЕРЕГ И ЛУГ (Без тропического песка и «ступеньки» атолла)
+    // Прибрежная галечно-песчаная кромка
     g.appendChild(el('path', {
-        d: 'M -10,-14 Q 15,-28 42,-14 Q 54,-6 42,2 Q 15,12 -10,-2 Z',
-        fill: '#d6a23e', stroke: '#b8862d', 'stroke-width': '0.8'
+        d: 'M -10,-15 Q 15,-29 42,-15 Q 54,-7 42,1 Q 15,11 -10,-3 Z',
+        fill: '#a69882', stroke: '#877a66', 'stroke-width': '0.7'
     }));
-    // Верхняя светлая площадка песка
+    // Тень под травяным покровом
     g.appendChild(el('path', {
-        d: 'M -10,-18 Q 15,-32 42,-18 Q 54,-10 42,-2 Q 15,8 -10,-6 Z',
-        fill: '#ffeaa7'
+        d: 'M -4,-16 Q 16,-27 38,-16 Q 48,-10 38,-4 Q 16,4 -4,-7 Z',
+        fill: '#46703b'
     }));
-    // Объемный слой травы (с небольшой толщиной снизу)
+    // Естественный уральский луг (спокойный травянисто-зелёный)
     g.appendChild(el('path', {
-        d: 'M -2,-17 Q 16,-27 36,-17 Q 45,-11 36,-5 Q 16,2 -2,-8 Z',
-        fill: '#009473'
-    }));
-    // Верх травы
-    g.appendChild(el('path', {
-        d: 'M -2,-19 Q 16,-29 36,-19 Q 45,-13 36,-7 Q 16,0 -2,-10 Z',
-        fill: '#00b894'
+        d: 'M -4,-18 Q 16,-29 38,-18 Q 48,-12 38,-6 Q 16,2 -4,-9 Z',
+        fill: '#5c8d4e'
     }));
 
-    // 3. ПИРС С ОПОРАМИ (2.5D)
+    // 3. ДЕРЕВЯННЫЙ МОСТИК / ПИРС (Тёплая состаренная древесина)
     const pier = el('g', {});
     // Тень пирса на воде
     pier.appendChild(el('polygon', {
         points: '-18,4 2,-6 9,-2 -11,8',
-        fill: 'rgba(9, 132, 227, 0.35)'
+        fill: 'rgba(25, 45, 65, 0.35)'
     }));
-    // Сваи (опоры, уходящие в воду)
-    pier.appendChild(el('rect', { x: '-16', y: '0', width: '2', height: '5', fill: '#6d4c41' }));
-    pier.appendChild(el('rect', { x: '-8',  y: '3', width: '2', height: '5', fill: '#6d4c41' }));
+    // Сваи в воде
+    pier.appendChild(el('rect', { x: '-16', y: '0', width: '2', height: '5', fill: '#4e342e' }));
+    pier.appendChild(el('rect', { x: '-8',  y: '3', width: '2', height: '5', fill: '#4e342e' }));
     // Боковая толщина настила
     pier.appendChild(el('polygon', {
         points: '-18,0 -11,4 9,-6 9,-8 -11,2 -18,-2',
-        fill: '#8d6e63'
+        fill: '#6d4c41'
     }));
-    // Верхний деревянный настил
+    // Верхний настил (тёплое дерево)
     pier.appendChild(el('polygon', {
         points: '-18,-2 2,-12 9,-8 -11,2',
-        fill: '#d7ccc8', stroke: '#8d6e63', 'stroke-width': '0.6'
+        fill: '#b59474', stroke: '#6d4c41', 'stroke-width': '0.6'
     }));
+    // Причальный столбик на краю пирса
+    pier.appendChild(el('rect', { x: '-17', y: '-5', width: '1.8', height: '3.5', rx: '0.5', fill: '#5d4037' }));
     g.appendChild(pier);
 
-    // 4. ДЕРЕВЬЯ (Изометрические ели с тенью и объемом)
-    function drawPineTree(tx, ty, s) {
+    // 4. РАСТИТЕЛЬНОСТЬ БАШКОРТОСТАНА (Уральские ели, берёзка и прибрежный камыш)
+    // Функция отрисовки уральской ели/сосны (глубокий хвойный цвет)
+    function drawUralPine(tx, ty, s) {
         const tree = el('g', { transform: `translate(${tx}, ${ty}) scale(${s})` });
 
-        // Падающая изометрическая тень (вправо-вниз)
         tree.appendChild(el('ellipse', {
             cx: '5', cy: '1', rx: '9', ry: '4',
-            fill: 'rgba(0, 0, 0, 0.18)'
+            fill: 'rgba(0, 0, 0, 0.2)'
         }));
-        // Ствол
         tree.appendChild(el('rect', {
             x: '-1.5', y: '-6', width: '3', height: '6',
-            fill: '#5d4037'
+            fill: '#4e342e'
         }));
 
-        // 3 яруса хвои (левая сторона светлее, правая в тени)
         const tiers = [
             { y: -5,  w: 11, h: 12 },
             { y: -12, w: 9,  h: 11 },
@@ -5192,26 +5815,61 @@ function createRecreationZone(x, y, scale) {
         ];
 
         tiers.forEach(t => {
-            // Светлая левая часть
+            // Левая освещённая хвоя
             tree.appendChild(el('polygon', {
                 points: `0,${t.y - t.h} -${t.w},${t.y} 0,${t.y + 2}`,
-                fill: '#1dd1a1'
+                fill: '#3b6e4c'
             }));
-            // Теневая правая часть
+            // Правая теневая хвоя
             tree.appendChild(el('polygon', {
                 points: `0,${t.y - t.h} ${t.w},${t.y} 0,${t.y + 2}`,
-                fill: '#10ac84'
+                fill: '#274e34'
             }));
         });
 
         return tree;
     }
 
-    // Расставляем деревья по дальнему краю, чтобы не перекрывать берег и пирс
-    g.appendChild(drawPineTree(14, -22, 0.85));
-    g.appendChild(drawPineTree(26, -19, 1.05));
-    g.appendChild(drawPineTree(6,  -17, 0.75));
-    g.appendChild(drawPineTree(33, -12, 0.8));
+    // Функция отрисовки белоствольной берёзки (для контраста и колорита)
+    function drawBirch(bx, by, s) {
+        const birch = el('g', { transform: `translate(${bx}, ${by}) scale(${s})` });
+        birch.appendChild(el('ellipse', { cx: '4', cy: '1', rx: '7', ry: '3', fill: 'rgba(0,0,0,0.18)' }));
+        // Белый ствол с чёрными засечками
+        birch.appendChild(el('rect', { x: '-1', y: '-14', width: '2', height: '14', fill: '#f5f6fa' }));
+        birch.appendChild(el('line', { x1: '-1', y1: '-5', x2: '0.5', y2: '-5', stroke: '#2d3436', 'stroke-width': '0.8' }));
+        birch.appendChild(el('line', { x1: '-0.5', y1: '-9', x2: '1', y2: '-9', stroke: '#2d3436', 'stroke-width': '0.8' }));
+        // Пышная лиственная крона
+        birch.appendChild(el('circle', { cx: '2', cy: '-15', r: '6', fill: '#558b2f' }));
+        birch.appendChild(el('circle', { cx: '-2', cy: '-16', r: '6.5', fill: '#7cb342' }));
+        birch.appendChild(el('circle', { cx: '0', cy: '-20', r: '5.5', fill: '#8bc34a' }));
+        return birch;
+    }
+
+    // Прибрежный камыш (рогоз) у кромки воды
+    function drawReeds(rx, ry) {
+        const reeds = el('g', { transform: `translate(${rx}, ${ry})` });
+        [-2, 0, 2.5].forEach((offset, idx) => {
+            reeds.appendChild(el('line', {
+                x1: offset, y1: 0, x2: offset + (idx - 1) * 0.8, y2: -7,
+                stroke: '#557a46', 'stroke-width': '0.9', 'stroke-linecap': 'round'
+            }));
+            if (idx !== 1) {
+                reeds.appendChild(el('ellipse', {
+                    cx: offset + (idx - 1) * 0.7, cy: -5.5, rx: '0.8', ry: '1.8',
+                    fill: '#5d4037'
+                }));
+            }
+        });
+        return reeds;
+    }
+
+    // Расставляем хвойные деревья, берёзку и камыш
+    g.appendChild(drawUralPine(14, -22, 0.85));
+    g.appendChild(drawUralPine(26, -19, 1.05));
+    g.appendChild(drawBirch(5, -17, 0.85));      // Берёзка слева от елей
+    g.appendChild(drawUralPine(34, -12, 0.8));
+    g.appendChild(drawReeds(12, 1));             // Камыш у берега справа от пирса
+    g.appendChild(drawReeds(-8, -5));            // Камыш у основания пирса
 
     // 5. УВЕЛИЧЕННЫЙ ДЕТАЛИЗИРОВАННЫЙ КАТЕР В ИЗОМЕТРИИ
     const boatGroup = el('g', {
@@ -5221,7 +5879,7 @@ function createRecreationZone(x, y, scale) {
 
     // Внутренний контейнер для масштабирования катера (меняйте 1.45 на нужный размер)
     const boatScale = el('g', {
-        transform: 'scale(1.75)'
+        transform: 'scale(1.3)'
     });
 
     // Волны/рябь вокруг корпуса
@@ -5480,9 +6138,9 @@ function createWindTurbine(x, y, scale) {
  // ==========================================
     // КОМБАЙН И ПОЛОСА ПШЕНИЦЫ (БЕЗ ПЛАТФОРМЫ)
     // ==========================================
-    const HARVESTER_X = 105;      // Координата X
-    const HARVESTER_Y = 220;      // Координата Y
-    const HARVESTER_SCALE = 0.55; // Размер
+    const HARVESTER_X = 105;       // Координата X на карте
+    const HARVESTER_Y = 220;       // Координата Y на карте
+    const HARVESTER_SCALE = 0.7;   // Размер сцены
 
     function createHarvesterScene(x, y, scale) {
         const g = document.createElementNS(svgNS, 'g');
@@ -5493,22 +6151,6 @@ function createWindTurbine(x, y, scale) {
             for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
             return node;
         };
-
-        // 1. СЛЕД СЖАТОЙ СТЕРНИ ПОЗАДИ КОМБАЙНА
-        const stubble = el('g', { opacity: '0.75' });
-        stubble.appendChild(el('polygon', {
-            points: '-12,4 16,-10 28,-4 0,10',
-            fill: '#ffeaa7', opacity: '0.45'
-        }));
-        [
-            [6, -3], [11, -5], [16, -2], [2, -1], [8, 1], [14, 0]
-        ].forEach(([sx, sy]) => {
-            stubble.appendChild(el('line', {
-                x1: sx, y1: sy, x2: sx + 2, y2: sy - 1.5,
-                stroke: '#e1b12c', 'stroke-width': '1', 'stroke-linecap': 'round'
-            }));
-        });
-        g.appendChild(stubble);
 
         // 2. НЕСЖАТАЯ ПШЕНИЦА СПЕРЕДИ
         const wheatField = el('g', {});
@@ -5744,21 +6386,78 @@ function createWindTurbine(x, y, scale) {
             fill: '#b33939'
         }));
 
-        machine.appendChild(header);
-        g.appendChild(machine);
+         machine.appendChild(header);
 
+        // Собираем подвижный слой (Тень + Машина едут вместе, а полоса пшеницы остаётся на земле)
+        const harvesterMover = el('g', { class: 'harvester-mover' });
+        // Переносим тень (она была 2-м дочерним элементом g после wheatField) внутрь mover
+        const shadowEl = g.children[1];
+        if (shadowEl) harvesterMover.appendChild(shadowEl);
+        harvesterMover.appendChild(machine);
+
+        g.appendChild(harvesterMover);
         return g;
     }
 
-    // Добавляем комбайн на карту
+    // Добавляем комбайн на карту и запускаем плавный проезд по полю
     setTimeout(() => {
         const layer = document.getElementById('cities-layer') || svg;
         if (!layer) return;
 
+        const oldZone = document.getElementById('harvester-zone');
+        if (oldZone) oldZone.remove();
+
         const harvesterZone = createHarvesterScene(HARVESTER_X, HARVESTER_Y, HARVESTER_SCALE);
         harvesterZone.id = 'harvester-zone';
         layer.appendChild(harvesterZone);
-        console.log(`✅ Комбайн установлен в точку (${HARVESTER_X}, ${HARVESTER_Y})`);
+
+        const mover = harvesterZone.querySelector('.harvester-mover');
+        if (!mover) return;
+
+        // Траектория проезда строго вдоль изометрической оси поля (-26.5°):
+        // От исходной точки (8, -4) вперёд через колосья до (-22, 11) и плавный возврат
+        const startPos = { x: 8, y: -4 };
+        const endPos   = { x: -22, y: 11 };
+        const driveMs  = 6000; // 6 секунд на проход полосы
+
+        let direction = 1; // 1 = едет вперёд жаткой по пшенице, -1 = сдаёт назад на старт
+        let startTime = performance.now();
+        let pausedTime = 0;
+
+        function animateHarvester(now) {
+            if (window.isPaused || (typeof effectsEnabled !== 'undefined' && !effectsEnabled)) {
+                if (pausedTime === 0) pausedTime = now;
+                requestAnimationFrame(animateHarvester);
+                return;
+            } else if (pausedTime !== 0) {
+                startTime += (now - pausedTime);
+                pausedTime = 0;
+            }
+
+            const elapsed = now - startTime;
+            const rawT = Math.min(elapsed / driveMs, 1);
+            // Плавный разгон и торможение в конце полосы
+            const ease = rawT < 0.5 ? 2 * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 2) / 2;
+
+            const t = direction === 1 ? ease : (1 - ease);
+            const curX = startPos.x + (endPos.x - startPos.x) * t;
+            const curY = startPos.y + (endPos.y - startPos.y) * t;
+
+            mover.setAttribute('transform', `translate(${curX.toFixed(2)}, ${curY.toFixed(2)})`);
+
+            if (rawT < 1) {
+                requestAnimationFrame(animateHarvester);
+            } else {
+                direction *= -1;
+                setTimeout(() => {
+                    startTime = performance.now();
+                    requestAnimationFrame(animateHarvester);
+                }, 800); // Пауза 0.8 сек на краю поля
+            }
+        }
+
+        requestAnimationFrame(animateHarvester);
+        console.log(`✅ Комбайн установлен и запущен в точке (${HARVESTER_X}, ${HARVESTER_Y})`);
     }, 1000);
 
 });
