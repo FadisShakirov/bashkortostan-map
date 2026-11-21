@@ -6738,23 +6738,31 @@ function createWindTurbine(x, y, scale) {
                 transition: filter 0.25s ease, stroke-width 0.25s ease;
             }
 
-            /* Мобильная версия остаётся компактной лентой снизу */
-             @media (max-width: 768px) {
-                /* 1. Поднимаем саму карту вверх, освобождая нижнюю треть экрана под навигатор */
+            /* Адаптив для телефонов: карта ровно между верхними кнопками и нижним островком */
+            @media (max-width: 768px) {
                 body {
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: flex-start !important;
+                    align-items: center !important;
+                    padding-top: 64px !important; /* Безопасный отступ под верхние тумблеры */
+                    padding-bottom: 175px !important; /* Место под нижний туристический островок */
+                    box-sizing: border-box !important;
+                    min-height: 100dvh !important;
                     overflow-x: hidden !important;
                 }
+
+                /* Сама карта вписывается строго в свободное окно по центру без смещений вверх */
                 svg, #map-container, .map-wrapper {
-                    max-height: 62vh !important;
-                    margin-top: 8px !important;
-                    margin-bottom: auto !important;
-                    transform: translateY(-18px) !important;
+                    width: 100% !important;
+                    height: calc(100dvh - 245px) !important;
+                    max-height: 58vh !important;
+                    margin: auto 0 !important;
+                    transform: none !important; /* Убрали сдвиг вверх, который уводил карту под кнопки */
+                    object-fit: contain !important;
                 }
 
-                /* 2. Расширяем нижний туристический островок для подробных рекомендаций */
+                /* Нижний туристический островок */
                 #tourist-helper-island {
                     left: 10px;
                     right: 10px;
@@ -6762,12 +6770,12 @@ function createWindTurbine(x, y, scale) {
                     bottom: 10px;
                     transform: none;
                     width: auto;
-                    padding: 12px 14px;
+                    padding: 11px 13px;
                     border-radius: 20px;
                     z-index: 900;
                 }
                 .ti-header {
-                    margin-bottom: 8px;
+                    margin-bottom: 7px;
                     min-height: auto;
                 }
                 .ti-title {
@@ -6808,15 +6816,13 @@ function createWindTurbine(x, y, scale) {
                 .ti-row.active .ti-knob {
                     transform: translateX(18px);
                 }
-
-                /* Увеличенный блок рекомендаций снизу (вмещает 3–4 строки советов и маршрутов) */
                 .ti-hint-box {
-                    margin-top: 8px;
-                    padding: 10px 12px;
-                    font-size: 12.5px;
-                    line-height: 1.45;
-                    min-height: 68px;
-                    max-height: 105px;
+                    margin-top: 7px;
+                    padding: 9px 11px;
+                    font-size: 12px;
+                    line-height: 1.4;
+                    min-height: 60px;
+                    max-height: 95px;
                     overflow-y: auto;
                     border-radius: 13px;
                 }
