@@ -1316,67 +1316,110 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ================================================================
        ДВУХРЕЖИМНАЯ ПАЛИТРА КАРТЫ: ДЕНЬ (Изумрудный атлас) / НОЧЬ (Сапфировый неон)
        ================================================================ */
-    (function initDayNightMapPalette() {
+    (function initSeamlessMapPalette() {
         const oldStyle = document.getElementById('day-night-map-palette');
         if (oldStyle) oldStyle.remove();
+        const oldGradientLayer = document.getElementById('seamless-color-field');
+        if (oldGradientLayer) oldGradientLayer.remove();
 
-        const ZONES = {
-            taiga: [
-                'Белорецкий', 'Бурзянский', 'Учалинский', 'Архангельский', 'Гафурийский', 'Ишимбайский'
-            ],
-            northForest: [
-                'Караидельский', 'Нуримановский', 'Аскинский', 'Дуванский', 'Салаватский',
-                'Кигинский', 'Белокатайский', 'Мечетлинский', 'Бирский', 'Мишкинский',
-                'Балтачевский', 'Татышлинский', 'Янаульский', 'Калтасинский', 'Бураевский', 'Краснокамский'
-            ],
-            westSteppe: [
-                'Белебеевский', 'Туймазинский', 'Давлекановский', 'Альшеевский', 'Бакалинский',
-                'Шаранский', 'Ермекеевский', 'Бижбулякский', 'Миякинский', 'Стерлибашевский', 'Федоровский', 'Буздякский'
-            ],
-            southSteppe: [
-                'Баймакский', 'Абзелиловский', 'Хайбуллинский', 'Зилаирский', 'Зианчуринский',
-                'Кугарчинский', 'Куюргазинский', 'Мелеузовский'
-            ]
-        };
+        let defs = svg.querySelector('defs');
+        if (!defs) {
+            defs = document.createElementNS(svgNS, 'defs');
+            svg.insertBefore(defs, svg.firstChild);
+        }
 
+        // 1. Фильтр мягкого смешивания цветовых зон
+        const colorBlur = document.createElementNS(svgNS, 'filter');
+        colorBlur.setAttribute('id', 'landscape-color-blur');
+        colorBlur.setAttribute('x', '-15%');
+        colorBlur.setAttribute('y', '-15%');
+        colorBlur.setAttribute('width', '130%');
+        colorBlur.setAttribute('height', '130%');
+        const blur = document.createElementNS(svgNS, 'feGaussianBlur');
+        blur.setAttribute('stdDeviation', '28');
+        colorBlur.appendChild(blur);
+        defs.appendChild(colorBlur);
+
+        // 2. Обрезка строго по внешнему контуру республики
+        let clip = document.getElementById('bashkortostan-strict-clip');
+        if (!clip) {
+            clip = document.createElementNS(svgNS, 'clipPath');
+            clip.setAttribute('id', 'bashkortostan-strict-clip');
+            allDistricts.forEach(p => {
+                const c = p.cloneNode(false);
+                c.removeAttribute('id');
+                c.removeAttribute('class');
+                c.removeAttribute('filter');
+                clip.appendChild(c);
+            });
+            defs.appendChild(clip);
+        }
+
+        // 3. Стили для прозрачных кликабельных полигонов и двухрежимной палитры
         const style = document.createElement('style');
         style.id = 'day-night-map-palette';
         style.textContent = `
-            /* ☀️ ДНЕВНАЯ ТЕМА: Сочный природно-зелёный атлас */
-            .zone-taiga         { fill: #40916c !important; } /* Глубокая хвойная зелень гор */
-            .zone-northForest   { fill: #52b788 !important; } /* Свежая лесная зелень севера */
-            .zone-centralMeadow { fill: #74c69d !important; } /* Сочный луговой зелёный центра */
-            .zone-westSteppe    { fill: #95d5b2 !important; } /* Светлый мятно-травяной запада */
-            .zone-southSteppe   { fill: #a3c978 !important; } /* Тёплый оливково-степной юга */
-
-            /* 🌙 НОЧНАЯ ТЕМА: Глубокий сапфирово-неоновый стиль */
-            body.dark-mode .zone-taiga         { fill: #24488a !important; } /* Глубокий горный индиго */
-            body.dark-mode .zone-northForest   { fill: #2b59a8 !important; } /* Насыщенный северный сапфир */
-            body.dark-mode .zone-centralMeadow { fill: #3867d6 !important; } /* Яркий королевский синий центра */
-            body.dark-mode .zone-westSteppe    { fill: #4b7bec !important; } /* Светящийся лазурный запада */
-            body.dark-mode .zone-southSteppe   { fill: #3b6998 !important; } /* Прохладный степной кобальт юга */
-
-            /* Плавный переход цветов при переключении тумблера День/Ночь */
             [data-district-name] {
-                transition: fill 0.45s ease, filter 0.3s ease, stroke 0.25s ease;
+                fill: rgba(255, 255, 255, 0.01) !important;
+                transition: fill 0.3s ease, stroke 0.25s ease, filter 0.3s ease;
             }
+            [data-district-name]:hover {
+                fill: rgba(255, 255, 255, 0.14) !important;
+            }
+            .district-tour-highlighted {
+                fill: rgba(255, 195, 18, 0.22) !important;
+            }
+            .district-tour-dimmed {
+                fill: rgba(0, 0, 0, 0.28) !important;
+            }
+
+            /* ☀️ ДНЕВНЫЕ ЦВЕТА */
+            #seamless-color-field .bg-base      { fill: #74c69d; transition: fill 0.5s ease; }
+            #seamless-color-field .blob-taiga   { fill: #40916c; transition: fill 0.5s ease; }
+            #seamless-color-field .blob-north   { fill: #52b788; transition: fill 0.5s ease; }
+            #seamless-color-field .blob-west    { fill: #95d5b2; transition: fill 0.5s ease; }
+            #seamless-color-field .blob-south   { fill: #a3c978; transition: fill 0.5s ease; }
+
+            /* 🌙 НОЧНЫЕ ЦВЕТА (Неоновый сапфир) */
+            body.dark-mode #seamless-color-field .bg-base    { fill: #3867d6; }
+            body.dark-mode #seamless-color-field .blob-taiga { fill: #203f7a; }
+            body.dark-mode #seamless-color-field .blob-north { fill: #29529e; }
+            body.dark-mode #seamless-color-field .blob-west  { fill: #4b7bec; }
+            body.dark-mode #seamless-color-field .blob-south { fill: #345d8c; }
         `;
         document.head.appendChild(style);
 
-        allDistricts.forEach(path => {
-            const name = (path.dataset.districtName || '').trim();
-            path.style.removeProperty('fill');
-            path.classList.remove('zone-taiga', 'zone-northForest', 'zone-centralMeadow', 'zone-westSteppe', 'zone-southSteppe');
+        // 4. Собираем бесшовное цветовое поле
+        const colorField = document.createElementNS(svgNS, 'g');
+        colorField.setAttribute('id', 'seamless-color-field');
+        colorField.setAttribute('clip-path', 'url(#bashkortostan-strict-clip)');
+        colorField.style.pointerEvents = 'none';
 
-            let zoneKey = 'centralMeadow';
-            for (const [key, list] of Object.entries(ZONES)) {
-                if (list.some(d => name.toLowerCase().includes(d.toLowerCase()))) {
-                    zoneKey = key;
-                    break;
-                }
+        const makeEl = (tag, attrs) => {
+            const n = document.createElementNS(svgNS, tag);
+            for (const [k, v] of Object.entries(attrs)) {
+                n.setAttribute(k, v);
             }
-            path.classList.add(`zone-${zoneKey}`);
-        });
+            return n;
+        };
+
+        colorField.appendChild(makeEl('rect', { x: '0', y: '0', width: '430', height: '540', class: 'bg-base' }));
+
+        const blobsGroup = makeEl('g', { filter: 'url(#landscape-color-blur)' });
+        blobsGroup.appendChild(makeEl('ellipse', { cx: '185', cy: '75', rx: '145', ry: '75', class: 'blob-north' }));
+        blobsGroup.appendChild(makeEl('ellipse', { cx: '65', cy: '235', rx: '95', ry: '125', class: 'blob-west' }));
+        blobsGroup.appendChild(makeEl('ellipse', { cx: '325', cy: '250', rx: '105', ry: '135', class: 'blob-taiga' }));
+        blobsGroup.appendChild(makeEl('ellipse', { cx: '265', cy: '445', rx: '135', ry: '85', class: 'blob-south' }));
+        colorField.appendChild(blobsGroup);
+
+        // Вставляем строго перед первым районом без использования .at()
+        const districtsArray = Array.from(allDistricts || []);
+        const firstDistrict = districtsArray.shift();
+        if (firstDistrict && firstDistrict.parentNode) {
+            firstDistrict.parentNode.insertBefore(colorField, firstDistrict);
+        } else {
+            svg.insertBefore(colorField, svg.firstChild);
+        }
     })();
 
     /* ================================================================
