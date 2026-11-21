@@ -750,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
            
             }
             #theme-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
-            body.dark-mode #theme-toggle { background: #2a2a3a; color: #ffd166; }
+            body.dark-mode #theme-toggle { background: #000000; color: #000000; }
 
             /* --- АНИМАЦИИ ЖИВОТНЫХ --- */
             @keyframes walk-bob {
@@ -1314,13 +1314,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 /* ================================================================
-       ДВУХРЕЖИМНАЯ ПАЛИТРА КАРТЫ: ДЕНЬ (Изумрудный атлас) / НОЧЬ (Сапфировый неон)
+       ДВУХРЕЖИМНАЯ ПАЛИТРА КАРТЫ: ДЕНЬ (Изумрудный атлас) / НОЧЬ (Сапфировый неон + Огни городов)
        ================================================================ */
     (function initSeamlessMapPalette() {
         const oldStyle = document.getElementById('day-night-map-palette');
         if (oldStyle) oldStyle.remove();
         const oldGradientLayer = document.getElementById('seamless-color-field');
         if (oldGradientLayer) oldGradientLayer.remove();
+        const oldLightsLayer = document.getElementById('night-city-lights');
+        if (oldLightsLayer) oldLightsLayer.remove();
 
         let defs = svg.querySelector('defs');
         if (!defs) {
@@ -1340,7 +1342,23 @@ document.addEventListener('DOMContentLoaded', () => {
         colorBlur.appendChild(blur);
         defs.appendChild(colorBlur);
 
-        // 2. Обрезка строго по внешнему контуру республики
+        // 2. Радиальный градиент рассеянного городского света (мягкое затухание без резких границ)
+        if (!document.getElementById('city-night-glow-grad')) {
+            const radGrad = document.createElementNS(svgNS, 'radialGradient');
+            radGrad.setAttribute('id', 'city-night-glow-grad');
+            radGrad.setAttribute('cx', '50%');
+            radGrad.setAttribute('cy', '50%');
+            radGrad.setAttribute('r', '50%');
+            radGrad.innerHTML = `
+                <stop offset="0%"   stop-color="#ffeaa7" stop-opacity="0.95"/>
+                <stop offset="22%"  stop-color="#fdcb6e" stop-opacity="0.58"/>
+                <stop offset="55%"  stop-color="#e17055" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#e17055" stop-opacity="0"/>
+            `;
+            defs.appendChild(radGrad);
+        }
+
+        // 3. Обрезка строго по внешнему контуру республики
         let clip = document.getElementById('bashkortostan-strict-clip');
         if (!clip) {
             clip = document.createElementNS(svgNS, 'clipPath');
@@ -1355,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
             defs.appendChild(clip);
         }
 
-        // 3. Стили для прозрачных кликабельных полигонов и двухрежимной палитры
+        // 4. Стили для прозрачных кликабельных полигонов, палитры и ночного света
         const style = document.createElement('style');
         style.id = 'day-night-map-palette';
         style.textContent = `
@@ -1386,14 +1404,19 @@ document.addEventListener('DOMContentLoaded', () => {
             body.dark-mode #seamless-color-field .blob-north { fill: #29529e; }
             body.dark-mode #seamless-color-field .blob-west  { fill: #4b7bec; }
             body.dark-mode #seamless-color-field .blob-south { fill: #345d8c; }
+
+            /* ✨ РАССЕЯННЫЙ СВЕТ ГОРОДОВ (Виден только в ночном режиме) */
+            #night-city-lights {
+                opacity: 0;
+                mix-blend-mode: screen;
+                transition: opacity 0.65s ease;
+                pointer-events: none;
+            }
+            body.dark-mode #night-city-lights {
+                opacity: 1;
+            }
         `;
         document.head.appendChild(style);
-
-        // 4. Собираем бесшовное цветовое поле
-        const colorField = document.createElementNS(svgNS, 'g');
-        colorField.setAttribute('id', 'seamless-color-field');
-        colorField.setAttribute('clip-path', 'url(#bashkortostan-strict-clip)');
-        colorField.style.pointerEvents = 'none';
 
         const makeEl = (tag, attrs) => {
             const n = document.createElementNS(svgNS, tag);
@@ -1402,6 +1425,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return n;
         };
+
+        // 5. Собираем бесшовное цветовое поле
+        const colorField = makeEl('g', {
+            id: 'seamless-color-field',
+            'clip-path': 'url(#bashkortostan-strict-clip)'
+        });
+        colorField.style.pointerEvents = 'none';
 
         colorField.appendChild(makeEl('rect', { x: '0', y: '0', width: '430', height: '540', class: 'bg-base' }));
 
@@ -1412,13 +1442,69 @@ document.addEventListener('DOMContentLoaded', () => {
         blobsGroup.appendChild(makeEl('ellipse', { cx: '265', cy: '445', rx: '135', ry: '85', class: 'blob-south' }));
         colorField.appendChild(blobsGroup);
 
-        // Вставляем строго перед первым районом без использования .at()
+        // Вставляем цветовое поле строго перед первым районом
         const districtsArray = Array.from(allDistricts || []);
         const firstDistrict = districtsArray.shift();
         if (firstDistrict && firstDistrict.parentNode) {
             firstDistrict.parentNode.insertBefore(colorField, firstDistrict);
         } else {
             svg.insertBefore(colorField, svg.firstChild);
+        }
+
+        // 6. СЛОЙ РАССЕЯННОГО СВЕТА ГОРОДОВ ПО ЧИСЛЕННОСТИ НАСЕЛЕНИЯ
+        const CITY_POPULATION_LIGHTS = [
+            // Миллионник (Уфа — мощное агломерационное свечение)
+            { name: 'УФА',          x: 175.0, y: 195.0, r: 44, intensity: 1.00 },
+
+            // Крупные промышленные центры (100–280 тыс. чел.)
+            { name: 'Стерлитамак',  x: 168.6, y: 315.9, r: 28, intensity: 0.85 },
+            { name: 'Салават',      x: 167.8, y: 344.9, r: 22, intensity: 0.78 },
+            { name: 'Нефтекамск',   x: 72.7,  y: 47.1,  r: 20, intensity: 0.75 },
+            { name: 'Октябрьский',  x: 18.2,  y: 223.7, r: 20, intensity: 0.75 },
+
+            // Средние города (50–70 тыс. чел.)
+            { name: 'Туймазы',      x: 29.8,  y: 207.8, r: 16, intensity: 0.65 },
+            { name: 'Белорецк',     x: 325.0, y: 280.0, r: 16, intensity: 0.65 },
+            { name: 'Ишимбай',      x: 177.7, y: 334.1, r: 15, intensity: 0.62 },
+            { name: 'Кумертау',     x: 160.8, y: 436.5, r: 15, intensity: 0.60 },
+            { name: 'Сибай',        x: 343.7, y: 412.2, r: 15, intensity: 0.60 },
+            { name: 'Мелеуз',       x: 167.8, y: 387.2, r: 14, intensity: 0.58 },
+            { name: 'Белебей',      x: 55.4,  y: 262.8, r: 14, intensity: 0.58 },
+
+            // Малые города (15–48 тыс. чел.)
+            { name: 'Бирск',        x: 145.9, y: 123.0, r: 12, intensity: 0.52 },
+            { name: 'Учалы',        x: 388.3, y: 243.2, r: 12, intensity: 0.50 },
+            { name: 'Благовещенск', x: 175.5, y: 163.0, r: 12, intensity: 0.50 },
+            { name: 'Дюртюли',     x: 106.6, y: 116.1, r: 11, intensity: 0.48 },
+            { name: 'Янаул',        x: 111.9, y: 27.4,  r: 10, intensity: 0.45 },
+            { name: 'Давлеканово',  x: 114.5, y: 251.6, r: 10, intensity: 0.45 },
+            { name: 'Баймак',       x: 320.4, y: 427.0, r: 9.5, intensity: 0.42 },
+            { name: 'Межгорье',     x: 296.8, y: 250.4, r: 9,  intensity: 0.40 },
+            { name: 'Агидель',      x: 53.2,  y: 68.4,  r: 8.5, intensity: 0.38 }
+        ];
+
+        const lightsLayer = makeEl('g', {
+            id: 'night-city-lights',
+            'clip-path': 'url(#bashkortostan-strict-clip)'
+        });
+
+        CITY_POPULATION_LIGHTS.forEach(city => {
+            // Только мягкое рассеянное зарево без резкого центрального кружка
+            lightsLayer.appendChild(makeEl('circle', {
+                cx: city.x,
+                cy: city.y,
+                r: city.r,
+                fill: 'url(#city-night-glow-grad)',
+                opacity: city.intensity
+            }));
+        });
+
+        // Вставляем свечение поверх заливки районов и гор, но строго ПОД подписями городов и объектами
+        const citiesLayerEl = document.getElementById('cities-layer') || svg.lastChild;
+        if (citiesLayerEl && citiesLayerEl.parentNode) {
+            citiesLayerEl.parentNode.insertBefore(lightsLayer, citiesLayerEl);
+        } else {
+            svg.appendChild(lightsLayer);
         }
     })();
 
@@ -2448,11 +2534,89 @@ document.addEventListener('DOMContentLoaded', () => {
             innerG.appendChild(el('rect', { x: '-3.8', y: '-0.55', width: '1.1', height: '1.1', rx: '0.2', fill: '#ecf0f1', stroke: '#bdc3c7', 'stroke-width': '0.15' }));
             innerG.appendChild(el('rect', { x: '1.8', y: '-0.55', width: '1.1', height: '1.1', rx: '0.2', fill: '#ecf0f1', stroke: '#bdc3c7', 'stroke-width': '0.15' }));
 
-            // Задние габаритные огни
+             // Задние габаритные огни автобуса
             innerG.appendChild(el('rect', { x: '-5.55', y: '-1.3', width: '0.25', height: '0.65', rx: '0.1', fill: '#ff3b30' }));
             innerG.appendChild(el('rect', { x: '-5.55', y: '0.65', width: '0.25', height: '0.65', rx: '0.1', fill: '#ff3b30' }));
         }
 
+        // --- МЯГКИЙ РАССЕЯННЫЙ СВЕТ ФАР И ПАРНЫЕ СТОП-СИГНАЛЫ ---
+        if (!document.getElementById('vehicle-night-lights-style')) {
+            let defs = svg.querySelector('defs');
+            if (!defs) {
+                defs = document.createElementNS(svgNS, 'defs');
+                svg.insertBefore(defs, svg.firstChild);
+            }
+
+            const headGrad = document.createElementNS(svgNS, 'radialGradient');
+            headGrad.setAttribute('id', 'headlight-soft-grad');
+            headGrad.setAttribute('cx', '25%');
+            headGrad.setAttribute('cy', '50%');
+            headGrad.setAttribute('r', '50%');
+            headGrad.innerHTML = `
+                <stop offset="0%"   stop-color="#fff8d6" stop-opacity="0.9"/>
+                <stop offset="35%"  stop-color="#ffeaa7" stop-opacity="0.4"/>
+                <stop offset="70%"  stop-color="#fdcb6e" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#fdcb6e" stop-opacity="0"/>
+            `;
+            defs.appendChild(headGrad);
+
+            const tailGrad = document.createElementNS(svgNS, 'radialGradient');
+            tailGrad.setAttribute('id', 'taillight-glow-grad');
+            tailGrad.setAttribute('cx', '50%');
+            tailGrad.setAttribute('cy', '50%');
+            tailGrad.setAttribute('r', '50%');
+            tailGrad.innerHTML = `
+                <stop offset="0%"   stop-color="#ff3b30" stop-opacity="0.85"/>
+                <stop offset="45%"  stop-color="#ff3b30" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#ff3b30" stop-opacity="0"/>
+            `;
+            defs.appendChild(tailGrad);
+
+            const style = document.createElement('style');
+            style.id = 'vehicle-night-lights-style';
+            style.textContent = `
+                .vehicle-night-lights { opacity: 0; mix-blend-mode: screen; transition: opacity 0.5s ease; pointer-events: none; }
+                body.dark-mode .vehicle-night-lights { opacity: 1; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Параметры фар и разнесение задних габаритов (2 фонаря для авто/автобуса, 1 для мотоцикла)
+        const lightCfg = type === 'bus'
+            ? { frontX: 9, rearX: -5.7, rx: 5.5, ry: 3.4, tailR: 1.9, tailSpreadY: 1.05 }
+            : type === 'moto'
+                ? { frontX: 4.5, rearX: -2.6, rx: 2.5, ry: 2.0, tailR: 1.5, tailSpreadY: 0 }
+                : { frontX: 7.5, rearX: -3.8, rx: 4.0, ry: 2.7, tailR: 1.7, tailSpreadY: 0.85 };
+
+        const lightsG = el('g', { class: 'vehicle-night-lights' });
+
+        // Спереди: рассеянный свет фар
+        lightsG.appendChild(el('ellipse', {
+            cx: lightCfg.frontX,
+            cy: '0',
+            rx: lightCfg.rx,
+            ry: lightCfg.ry,
+            fill: 'url(#headlight-soft-grad)'
+        }));
+
+        // Сзади: парные стоп-сигналы для авто и автобусов, одинарный для мотоцикла
+        if (lightCfg.tailSpreadY > 0) {
+            lightsG.appendChild(el('circle', {
+                cx: lightCfg.rearX, cy: -lightCfg.tailSpreadY, r: lightCfg.tailR,
+                fill: 'url(#taillight-glow-grad)', opacity: '0.55'
+            }));
+            lightsG.appendChild(el('circle', {
+                cx: lightCfg.rearX, cy: lightCfg.tailSpreadY, r: lightCfg.tailR,
+                fill: 'url(#taillight-glow-grad)', opacity: '0.55'
+            }));
+        } else {
+            lightsG.appendChild(el('circle', {
+                cx: lightCfg.rearX, cy: '0', r: lightCfg.tailR,
+                fill: 'url(#taillight-glow-grad)', opacity: '0.55'
+            }));
+        }
+
+        innerG.appendChild(lightsG);
         vg.appendChild(innerG);
 
         const anim = document.createElementNS(svgNS, 'animateMotion');
@@ -2463,37 +2627,41 @@ document.addEventListener('DOMContentLoaded', () => {
         anim.setAttribute('fill', 'freeze');
 
         anim.addEventListener('end', () => {
-if (vg.parentNode) vg.parentNode.removeChild(vg);
-});
-vg.appendChild(anim);
-vehicleLayer.appendChild(vg);
-try {
-anim.beginElement();
-} catch (e) {
-anim.removeAttribute('begin');
-}
-setTimeout(() => {
-if (vg.parentNode) vg.parentNode.removeChild(vg);
-}, travelTime + 1000);
-}
-// Первые 3 единицы транспорта при загрузке карты
-setTimeout(() => {
-spawnVehicle('car');
-spawnVehicle('moto');
-spawnVehicle('bus');
-}, 1500);
-// Регулярный спавн: автобус выезжает примерно в 3 раза реже машин и мотоциклов
-setInterval(() => {
-if (typeof effectsEnabled !== 'undefined' && !effectsEnabled) return;
-const r = Math.random();
-let type = 'car';
-if (r < 0.14) {
-type = 'bus';   // ~14% (в 3 раза реже)
-} else if (r < 0.50) {
-type = 'moto';  // ~36%
-}
-spawnVehicle(type);
-}, CONFIG.vehicleIntervalMs || 4000);
+            if (vg.parentNode) vg.parentNode.removeChild(vg);
+        });
+        vg.appendChild(anim);
+        vehicleLayer.appendChild(vg);
+
+        try {
+            anim.beginElement();
+        } catch (e) {
+            anim.removeAttribute('begin');
+        }
+
+        setTimeout(() => {
+            if (vg.parentNode) vg.parentNode.removeChild(vg);
+        }, travelTime + 1000);
+    }
+
+    // Первые 3 единицы транспорта при загрузке карты
+    setTimeout(() => {
+        spawnVehicle('car');
+        spawnVehicle('moto');
+        spawnVehicle('bus');
+    }, 1500);
+
+    // Регулярный спавн транспорта
+    setInterval(() => {
+        if (typeof effectsEnabled !== 'undefined' && !effectsEnabled) return;
+        const r = Math.random();
+        let type = 'car';
+        if (r < 0.14) {
+            type = 'bus';
+        } else if (r < 0.50) {
+            type = 'moto';
+        }
+        spawnVehicle(type);
+    }, CONFIG.vehicleIntervalMs || 4000);
 
     /* ================================================================
        12. САМОЛЕТ (Прилет в Уфу — 2.5D стиль с цветными маяками)
