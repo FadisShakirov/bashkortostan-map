@@ -1449,76 +1449,77 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(showTemps, 2000);
     })();
 
-    // --- ЗАГРУЗКА РЕАЛЬНОЙ ПОГОДЫ (с резервным источником и защитой от блокировки) ---
+    // --- ЗАГРУЗКА РЕАЛЬНОЙ ПОГОДЫ (Через проверенный формат wttr.in/${lat},${lon}?format=j1) ---
     (async function loadBashkortostanWeather() {
-        // Вспомогательная функция отрисовки значения (всегда чистый белый цвет)
-        function applyTempToBadge(labelObj, rawTemp) {
-            if (!labelObj) return;
-            const temp = Math.round(rawTemp);
-            const sign = temp > 0 ? '+' : '';
-            labelObj.textEl.textContent = `${sign}${temp}°`;
-            labelObj.textEl.setAttribute('fill', '#ffffff');
+        const CACHE_KEY = 'bmap_wttr_j1_v4';
+        const CACHE_TTL = 15 * 60 * 1000; // Кэш на 15 минут
+
+        function renderTemps(tempsArray) {
+            tempsArray.forEach((rawTemp, idx) => {
+                const labelObj = tempLabels[idx];
+                if (!labelObj || typeof rawTemp !== 'number' || isNaN(rawTemp)) return;
+                const temp = Math.round(rawTemp);
+                const sign = temp > 0 ? '+' : '';
+                labelObj.textEl.textContent = `${sign}${temp}°`;
+            });
         }
 
+        // 1. Проверяем свежий кэш (младше 15 минут)
         try {
-            // 1. Основной быстрый пакетный запрос (новый синтаксис Open-Meteo: current=temperature_2m)
-            const lats = cities.map(c => c.lat).join(',');
-            const lons = cities.map(c => c.lon).join(',');
-            const url = `https://open-meteo.com{lats}&longitude=${lons}&current=temperature_2m`;
-
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Open-Meteo HTTP ' + response.status);
-            const data = await response.json();
-
-            const results = Array.isArray(data) ? data : [data];
-            let updatedCount = 0;
-
-            results.forEach((item, index) => {
-                const val = item?.current?.temperature_2m ?? item?.current_weather?.temperature;
-                if (typeof val === 'number') {
-                    applyTempToBadge(tempLabels[index], val);
-                    updatedCount++;
-                }
-            });
-
-            if (updatedCount > 0) {
-                console.log(`✅ Погода загружена для ${updatedCount} городов Башкортостана`);
-                return;
-            }
-            throw new Error('Пустой ответ от Open-Meteo');
-        } catch (err) {
-            console.warn('⚠️ Основной погодный сервис недоступен, пробуем резервный источник:', err.message);
-
-            try {
-                // 2. Резервный запрос по Уфе с учётом широтного градиента по республике
-                const res = await fetch('https://wttr.in');
-                if (!res.ok) throw new Error('wttr.in error');
-                const wData = await res.json();
-                const ufaTemp = parseFloat(wData?.current_condition?.at(0)?.temp_C);
-
-                if (!isNaN(ufaTemp)) {
-                    tempLabels.forEach(item => {
-                        // Корректировка температуры по широте и высоте гор (Белорецк/Учалы чуть прохладнее, юг теплее)
-                        const latShift = (54.735 - item.city.lat) * 0.8;
-                        const mountainShift = /белорецк|учалы|межгорье/i.test(item.city.name) ? -2 : 0;
-                        applyTempToBadge(item, ufaTemp + latShift + mountainShift);
-                    });
-                    console.log('✅ Погода загружена через резервный канал');
+            const cachedRaw = localStorage.getItem(CACHE_KEY);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+                if (Date.now() - cached.time < CACHE_TTL && Array.isArray(cached.temps)) {
+                    renderTemps(cached.temps);
                     return;
                 }
-            } catch (fallbackErr) {
-                console.warn('⚠️ Офлайн-режим: показываем сезонную сводку по регионам РБ');
             }
+        } catch (e) {}
 
-            // 3. Офлайн-резерв (если страница открыта локально без интернета или заблокирован fetch)
-            const month = new Date().getMonth(); // 0 = янв ... 10 = нояб
-            const seasonalBase = [-14, -13, -6, 5, 14, 19, 21, 19, 13, 4, -5, -11][month] ?? -4;
-            tempLabels.forEach((item, idx) => {
-                const latShift = (54.735 - item.city.lat) * 0.9;
-                const mountainShift = /белорецк|учалы|межгорье/i.test(item.city.name) ? -2 : 0;
-                const microVar = (idx % 3) - 1;
-                applyTempToBadge(item, seasonalBase + latShift + mountainShift + microVar);
+        // 2. Опрашиваем 6 опорных точек Башкортостана по вашим проверенным координатам и ?format=j1
+        const hubs = [
+            { name: 'Уфа',         lat: 54.73, lon: 55.96 },
+            { name: 'Белорецк',    lat: 53.96, lon: 58.40 },
+            { name: 'Стерлитамак', lat: 53.63, lon: 55.93 },
+            { name: 'Нефтекамск',  lat: 56.09, lon: 54.25 },
+            { name: 'Сибай',       lat: 52.71, lon: 58.67 },
+            { name: 'Октябрьский', lat: 54.48, lon: 53.47 }
+        ];
+
+        try {
+            const hubResults = await Promise.all(hubs.map(async hub => {
+                const url = `https://wttr.in/${hub.lat},${hub.lon}?format=j1`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                const current = data?.current_condition?.[0];
+                if (!current || current.temp_C === undefined) throw new Error('Нет данных');
+
+                return { ...hub, temp: parseFloat(current.temp_C) };
+            }));
+
+            // Распределяем реальную температуру по всем 21 городам от ближайшего метеоузла
+            const temps = cities.map(c => {
+                let nearest = hubResults[0];
+                let minDist = Infinity;
+                hubResults.forEach(h => {
+                    const d = Math.hypot(c.lat - h.lat, c.lon - h.lon);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearest = h;
+                    }
+                });
+                return nearest.temp;
             });
+
+            renderTemps(temps);
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), temps }));
+            } catch (e) {}
+            console.log('✅ Реальная погода по координатам (wttr.in j1) загружена:', temps);
+        } catch (error) {
+            console.error('Не удалось загрузить погоду для городов:', error);
         }
     })();
 
