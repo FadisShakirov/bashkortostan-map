@@ -391,12 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
         starsIntensity: 100,     // Количество звезд (ночь)
         starTwinkleSpeed: 0.001, // Скорость мерцания звезд
 
-        // 🚢 Настройки лайнера
-        shipIntervalMs: 85000,      
-        shipArriveMs: 36000,        // Медленно
-        shipStayMs: 5000,           
-        shipDepartMs: 36000,        
-        shipScale: 0.50,
+       
 
     
         // 📸 Настройки автопоказа фото
@@ -4276,7 +4271,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     // 👇 НАСТРОЙКИ ОРЛА (МЕНЯЙТЕ ЗДЕСЬ) 👇
     const EAGLE_X = 270;        // Координата X (над горами Белорецка / Бурзяна)
     const EAGLE_Y = 240;        // Координата Y
-    const EAGLE_SCALE = 0.5;    // Размер орла
+    const EAGLE_SCALE = 0.7;    // Размер орла
     const EAGLE_PAUSE_MS = 15000; // Пауза между вылетами (15 сек)
     // 👆 ------------------------------ 👆
 
@@ -4292,91 +4287,141 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
             return node;
         };
 
-        // Градиенты оперения степного орла (благородный тёмно-бурый и тёплый каштановый)
+        // Градиенты оперения степного орла
         const defs = el('defs', {});
-        const wingGrad = el('linearGradient', { id: `se-w-${uid}`, x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
-        wingGrad.innerHTML = '<stop offset="0%" stop-color="#7c4a27"/><stop offset="55%" stop-color="#4e2c14"/><stop offset="100%" stop-color="#261306"/>';
+        const wingGrad = el('linearGradient', { id: `se-w-${uid}`, x1: '0%', y1: '100%', x2: '80%', y2: '0%' });
+        wingGrad.innerHTML = '<stop offset="0%" stop-color="#3b200d"/><stop offset="55%" stop-color="#6e3f1e"/><stop offset="100%" stop-color="#9c6236"/>';
         defs.appendChild(wingGrad);
 
-        const bodyGrad = el('linearGradient', { id: `se-b-${uid}`, x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
-        bodyGrad.innerHTML = '<stop offset="0%" stop-color="#5e361a"/><stop offset="100%" stop-color="#2b1608"/>';
+        const bodyGrad = el('linearGradient', { id: `se-b-${uid}`, x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
+        bodyGrad.innerHTML = '<stop offset="0%" stop-color="#5e361a"/><stop offset="65%" stop-color="#3b200d"/><stop offset="100%" stop-color="#241105"/>';
         defs.appendChild(bodyGrad);
         g.appendChild(defs);
 
-        // 1. Тень на земле
-        const shadow = el('ellipse', { cx: '-2', cy: '22', rx: '20', ry: '5', fill: 'rgba(0, 0, 0, 0.28)' });
+        // 1. Тень на земле (повторяет размах крыльев)
+        const shadow = el('ellipse', { cx: '0', cy: '24', rx: '22', ry: '4.5', fill: 'rgba(0, 0, 0, 0.25)' });
         shadow.style.filter = 'blur(1.5px)';
         g.appendChild(shadow);
 
         const bird = el('g', {});
 
-        // 2. ДАЛЬНЕЕ КРЫЛО (плавно выходит из плеча, без резкого стыка)
-        const farWing = el('path', {
-            d: 'M 2,-2 C -2,-11 -11,-19 -24,-18 C -21,-15 -23,-13 -19,-11 C -21,-9 -17,-7 -13,-6 C -14,-4 -7,-1 0,0 Z',
-            fill: '#3b200d', stroke: '#1c0e04', 'stroke-width': '0.55', 'stroke-linejoin': 'round'
-        });
+        // 2. ДАЛЬНЕЕ КРЫЛО (уходит в перспективу: вверх-назад под изометрическим углом ~26.5°)
+        const farWing = el('g', {});
+        farWing.appendChild(el('path', {
+            d: `M 4,-2.5 
+                C 0,-7 -7,-11 -16,-12.5 
+                L -14,-10 L -18,-10 L -15,-7.8 L -18.5,-7.2 L -14.5,-5.5 
+                C -9,-4 -2,-2.5 3,-1.5 Z`,
+            fill: '#3d210e',
+            stroke: '#1c0e04',
+            'stroke-width': '0.5',
+            'stroke-linejoin': 'round'
+        }));
         farWing.appendChild(el('animateTransform', {
-            attributeName: 'transform', type: 'rotate',
-            values: '0 2 -2; 14 2 -2; -6 2 -2; 0 2 -2', dur: '1.8s', repeatCount: 'indefinite'
+            attributeName: 'transform',
+            type: 'rotate',
+            values: '0 4 -2; -5 4 -2; 4 4 -2; 0 4 -2',
+            dur: '2.4s',
+            repeatCount: 'indefinite'
         }));
         bird.appendChild(farWing);
 
-        // 3. ТЁМНО-БУРЫЙ ХВОСТ СТЕПНОГО ОРЛА (без белого пятна, с тонкой охристой каймой по краю)
+        // 3. ШИРОКИЙ ВЕЕРООБРАЗНЫЙ ХВОСТ (плавно продолжает спину)
         bird.appendChild(el('path', {
-            d: 'M -6,1 L -18,4.5 L -16.5,7.5 L -18.5,9.5 L -15,11 L -16,13 L -5,5 Z',
-            fill: '#361d0b', stroke: '#1c0e04', 'stroke-width': '0.5', 'stroke-linejoin': 'round'
+            d: 'M -8,1 L -21,2.5 L -20,5.2 L -21.5,7.2 L -19,9.2 L -19.5,11.2 L -7,5.5 Z',
+            fill: '#361d0b',
+            stroke: '#1c0e04',
+            'stroke-width': '0.5',
+            'stroke-linejoin': 'round'
         }));
-        // Едва заметная светло-бурая кайма на самом краю рулевых перьев (как у взрослого степного орла)
+        // Тонкая светло-охристая кайма по краю хвоста
         bird.appendChild(el('path', {
-            d: 'M -18,4.5 L -16.5,7.5 L -18.5,9.5 L -15,11 L -16,13',
-            fill: 'none', stroke: '#9c6b43', 'stroke-width': '0.7', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+            d: 'M -21,2.5 L -20,5.2 L -21.5,7.2 L -19,9.2 L -19.5,11.2',
+            fill: 'none',
+            stroke: '#a87449',
+            'stroke-width': '0.65',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round'
         }));
 
-        // 4. ОБТЕКАЕМЫЙ КОРПУС (единый плавный переход от шеи к хвосту)
+        // 4. ПОДЖАТЫЕ В ПОЛЁТЕ ЛАПЫ С КОГТЯМИ (как на референсе)
         bird.appendChild(el('path', {
-            d: 'M -7,1 C -5,-3 1,-4.5 7,-3.5 C 10,-2.8 11.5,-1 10.5,1.5 C 8,4.5 0,5 -7,1 Z',
-            fill: `url(#se-b-${uid})`, stroke: '#1c0e04', 'stroke-width': '0.6'
+            d: 'M -5,4.5 L -8.5,7.5 L -10.5,7.2 M -8.5,7.5 L -9.8,8.8',
+            fill: 'none',
+            stroke: '#d4a017',
+            'stroke-width': '0.8',
+            'stroke-linecap': 'round'
         }));
 
-        // 5. ГОЛОВА СТЕПНОГО ОРЛА (тёмно-бурая с рыжеватым затылком и тёмным клювом)
-        // Тёмно-бурая голова
+        // 5. ЕДИНЫЙ ОБТЕКАЕМЫЙ КОРПУС И ШЕЯ (без ступенек и переломов)
         bird.appendChild(el('path', {
-            d: 'M 6.5,-3.5 C 8.5,-5.8 11.8,-6 13.5,-4 C 12.5,-1.8 9.8,-1 7,-1.5 Z',
-            fill: '#4e2c14', stroke: '#1c0e04', 'stroke-width': '0.5'
+            d: `M -9,1 
+                C -6,-3.5 1,-5 8,-4.2 
+                C 11,-3.8 13,-3 14.5,-2 
+                C 13.5,0.5 10.5,2.5 6.5,4.2 
+                C 1,6 -4,5.5 -9,1 Z`,
+            fill: `url(#se-b-${uid})`,
+            stroke: '#1c0e04',
+            'stroke-width': '0.55',
+            'stroke-linejoin': 'round'
         }));
-        // Характерное рыжевато-охристое пятно на затылке степного орла
-        bird.appendChild(el('ellipse', {
-            cx: '8.5', cy: '-4.2', rx: '1.6', ry: '0.8',
-            transform: 'rotate(-15 8.5 -4.2)',
-            fill: '#b5763c', opacity: '0.85'
+
+        // 6. ГОЛОВА СТЕПНОГО ОРЛА (гармоничная посадка, рыжеватый затылок и хищный клюв)
+        // Светло-рыжий затылок (отличительный признак степного орла)
+        bird.appendChild(el('path', {
+            d: 'M 7.5,-4.2 C 9.5,-5.2 12,-5.0 13.5,-3.6 C 12,-2.8 9.5,-2.8 7.5,-4.2 Z',
+            fill: '#b5763c',
+            opacity: '0.9'
         }));
-        // Жёлтая восковица у основания клюва + тёмно-серый загнутый клюв
+        // Жёлтая восковица
         bird.appendChild(el('polygon', {
-            points: '12.5,-4.4 13.8,-4.2 13.5,-2.5 12.2,-2.6',
-            fill: '#e1b12c'
+            points: '13.6,-3.7 15.0,-3.4 14.6,-1.7 13.3,-1.9',
+            fill: '#f1c40f'
         }));
+        // Хищный загнутый клюв
         bird.appendChild(el('path', {
-            d: 'M 13.5,-4.2 C 15.8,-4.1 17.2,-2.8 16.8,-1.1 C 15.8,-2.2 14.6,-2.4 13.4,-2.4 Z',
-            fill: '#2f3640', stroke: '#111', 'stroke-width': '0.35'
+            d: 'M 14.8,-3.5 C 17.2,-3.3 18.6,-1.8 18.0,0.1 C 17.0,-1.1 15.8,-1.5 14.5,-1.6 Z',
+            fill: '#2c3e50',
+            stroke: '#111',
+            'stroke-width': '0.35',
+            'stroke-linejoin': 'round'
         }));
-        // Зоркий глаз
-        bird.appendChild(el('circle', { cx: '11.4', cy: '-3.8', r: '0.65', fill: '#111' }));
-        bird.appendChild(el('circle', { cx: '11.6', cy: '-4.0', r: '0.2', fill: '#fff' }));
+        // Глаз с надбровной дугой (суровый взгляд орла)
+        bird.appendChild(el('circle', { cx: '12.3', cy: '-3.0', r: '0.6', fill: '#111' }));
+        bird.appendChild(el('circle', { cx: '12.5', cy: '-3.2', r: '0.18', fill: '#fff' }));
+        bird.appendChild(el('line', {
+            x1: '11.4', y1: '-3.6', x2: '13.2', y2: '-3.3',
+            stroke: '#1c0e04', 'stroke-width': '0.45', 'stroke-linecap': 'round'
+        }));
 
-        // 6. БЛИЖНЕЕ ШИРОКОЕ КРЫЛО (естественный размах с маховыми «пальцами» перьев)
+        // 7. БЛИЖНЕЕ КРЫЛО (вынесено вперёд на зрителя: вниз-вправо вдоль изометрической оси ~26.5°)
         const nearWing = el('g', {});
         nearWing.appendChild(el('path', {
-            d: 'M 4,-1 C 2,6 -4,14 -16,19 C -14,15.5 -17,14.5 -13,11 C -16,10 -12,7.5 -9,5.5 C -11,3.5 -6,1 -1,-0.5 Z',
-            fill: `url(#se-w-${uid})`, stroke: '#1c0e04', 'stroke-width': '0.6', 'stroke-linejoin': 'round'
+            d: `M 4,-1 
+                C 8,3 12,8 15,14.5 
+                L 12,12.5 L 13,16.5 L 9.8,13.5 L 10,17.2 L 7.2,13.5 
+                C 4,9 1,4 -1,0.5 
+                C -1.5,-1 2,-2 4,-1 Z`,
+            fill: `url(#se-w-${uid})`,
+            stroke: '#1c0e04',
+            'stroke-width': '0.55',
+            'stroke-linejoin': 'round'
         }));
-        // Прорисовка линии кроющих перьев на крыле для объёма
+        // Линия перьев вдоль изометрического крыла
         nearWing.appendChild(el('path', {
-            d: 'M 2,0 C 0,5 -5,11 -11,14.5',
-            fill: 'none', stroke: '#8c5832', 'stroke-width': '0.65', 'stroke-linecap': 'round', opacity: '0.7'
+            d: 'M 3,-0.5 C 6,3 9,7.5 11,11.5',
+            fill: 'none',
+            stroke: '#a87449',
+            'stroke-width': '0.6',
+            'stroke-linecap': 'round',
+            opacity: '0.75'
         }));
         nearWing.appendChild(el('animateTransform', {
-            attributeName: 'transform', type: 'rotate',
-            values: '0 3 -1; -18 3 -1; 10 3 -1; 0 3 -1', dur: '1.8s', repeatCount: 'indefinite'
+            attributeName: 'transform',
+            type: 'rotate',
+            values: '0 3 -1; 6 3 -1; -5 3 -1; 0 3 -1',
+            dur: '2.4s',
+            repeatCount: 'indefinite'
         }));
         bird.appendChild(nearWing);
 
@@ -4785,22 +4830,17 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
                     currentScale = scale * (1 - (t - 0.8) / 0.2 * 0.5); 
                 }
 
-                if (animalType === 'eagle') {
-                    // Для 2.5D-орла (нарисован носом вправо): зеркалим по X, чтобы не летел вверх лапами
-                    const dirX = dx_t >= 0 ? 1 : -1;
-                    // Лёгкий естественный наклон при наборе высоты или снижении (не более +-15 градусов)
-                    const rawTilt = Math.atan2(dy_t, Math.abs(dx_t) + 15) * 180 / Math.PI;
-                    const tilt = Math.max(-15, Math.min(15, rawTilt)) * dirX;
+                // Единая защита от переворота вверх брюхом для 2.5D-орла и 2.5D-пчелы
+                const dirX = dx_t >= 0 ? 1 : -1;
+                // Лёгкий естественный наклон корпуса при наборе высоты или снижении (не более ±15° / ±18°)
+                const maxTilt = animalType === 'bee' ? 18 : 15;
+                const rawTilt = Math.atan2(dy_t, Math.abs(dx_t) + 15) * 180 / Math.PI;
+                const tilt = Math.max(-maxTilt, Math.min(maxTilt, rawTilt)) * dirX;
 
-                    wrapper.setAttribute(
-                        'transform',
-                        `translate(${x}, ${y}) rotate(${tilt.toFixed(1)}) scale(${currentScale * dirX}, ${currentScale})`
-                    );
-                } else {
-                    // Для пчелы оставляем вашу прежнюю логику без изменений
-                    const angle = Math.atan2(dy_t, dx_t) * 180 / Math.PI + 90;
-                    wrapper.setAttribute('transform', `translate(${x}, ${y}) rotate(${angle}) scale(${currentScale})`);
-                }
+                wrapper.setAttribute(
+                    'transform',
+                    `translate(${x.toFixed(1)}, ${y.toFixed(1)}) rotate(${tilt.toFixed(1)}) scale(${currentScale * dirX}, ${currentScale})`
+                );
 
                 if (t < 1) {
                     requestAnimationFrame(animateFlyer);
@@ -4926,7 +4966,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     // 👇 НАСТРОЙКИ ПОЛОЖЕНИЯ ЛАЙНЕРА (МЕНЯЙТЕ КООРДИНАТЫ ЗДЕСЬ) 👇
     const SHIP_X = 175;        // Координата X (поставьте точно на воду)
     const SHIP_Y = 205;        // Координата Y
-    const SHIP_SCALE = 0.40;   // Размер лайнера
+    const SHIP_SCALE = 0.9;   // Размер лайнера
     const SHIP_DIR = 1;        // Направление носа: 1 = вправо, -1 = влево
     // 👆 ------------------------------------------------------ 👆
 
@@ -5004,14 +5044,44 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
         return g;
     }
 
-   // --- УСТАНОВКА ЛАЙНЕРА В ТОЧКУ ---
+   // --- МЯГКИЙ ЦИКЛ ПОЯВЛЕНИЯ ЛАЙНЕРА: раз в 1 минуту (60 сек) на 5 секунд ---
     const cruiseShip = createIsometricLiner2026();
     cruiseShip.id = 'cruise-ship-docked';
     cruiseShip.setAttribute(
         'transform',
         `translate(${SHIP_X}, ${SHIP_Y}) scale(${SHIP_SCALE * SHIP_DIR}, ${SHIP_SCALE})`
     );
+    cruiseShip.style.opacity = '0';
+    // Длинный, бархатистый переход (1.8 сек) для плавного появления и исчезновения
+    cruiseShip.style.transition = 'opacity 1.8s ease-in-out';
     shipLayer.appendChild(cruiseShip);
+
+    (function startLinerCycle() {
+        const FADE_MS = 1800;   // Длительность плавного появления / растворения (1.8 сек)
+        const VISIBLE_MS = 5000; // Сколько секунд лайнер полностью виден на экране (5 сек)
+        const HIDE_MS = 60000;  // Пауза между появлениями (1 минута)
+
+        function showLiner() {
+            if ((typeof effectsEnabled !== 'undefined' && !effectsEnabled) || window.isPaused) {
+                setTimeout(showLiner, 5000);
+                return;
+            }
+
+            // Плавно проявляем лайнер из тумана
+            cruiseShip.style.opacity = '1';
+
+            // Ждём завершения плавного появления (1.8с) + 5 секунд полного показа, затем мягко растворяем
+            setTimeout(() => {
+                cruiseShip.style.opacity = '0';
+
+                // Ждём полного исчезновения (1.8с) + 1 минуту паузы до следующего появления
+                setTimeout(showLiner, FADE_MS + HIDE_MS);
+            }, FADE_MS + VISIBLE_MS);
+        }
+
+        // Первый плавный выход через 4 секунды после загрузки карты
+        setTimeout(showLiner, 4000);
+    })();
 
 /* ================================================================
        20. НЕФТЯНАЯ КАЧАЛКА И ЮРТЫ (SVG-анимации)
@@ -5604,135 +5674,180 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
             return node;
         };
 
-        // Уникальный ID для маски
-        const clipId = 'marmot-clip-' + Math.random().toString(36).substr(2, 5);
+        const clipId = 'marmot-burrow-clip-' + Math.random().toString(36).substr(2, 5);
         const defs = el('defs', {});
         const clipPath = el('clipPath', { id: clipId });
 
-        // Маска обрезает нижнюю часть сурка строго по внутренней дуге норы
+        // Маска срезает нижнюю часть сурка строго по внутренней дуге свежевырытой норы
         clipPath.appendChild(el('path', {
-            d: 'M -40,-60 L 40,-60 L 40,2 Q 0,8 -40,2 Z'
+            d: 'M -35,-55 L 35,-55 L 35,2 Q 0,7.5 -35,2 Z'
         }));
         defs.appendChild(clipPath);
         g.appendChild(defs);
 
-        // 1. ЗЕМЛЯНОЙ ХОЛМИК (БУТАН) И ТЕНЬ ВОКРУГ НОРЫ
-        g.appendChild(el('ellipse', {
-            cx: '0', cy: '3', rx: '24', ry: '11',
-            fill: '#8d6e63', opacity: '0.65'
-        }));
-        g.appendChild(el('ellipse', {
-            cx: '0', cy: '1.5', rx: '20', ry: '9.5',
-            fill: '#a1887f', stroke: '#6d4c41', 'stroke-width': '0.6'
-        }));
+        const DUR = '22s'; // Общий цикл сценки
 
-        // 2. ТЕМНЫЙ ВХОД В НОРУ (задний план)
-        g.appendChild(el('ellipse', {
-            cx: '0', cy: '0', rx: '15', ry: '7',
-            fill: '#1a110a', stroke: '#3e2723', 'stroke-width': '0.8'
-        }));
-
-        // 3. СТАТИЧНАЯ ГРУППА С МАСКОЙ
-        const maskedGroup = el('g', { 'clip-path': `url(#${clipId})` });
-
-        // 4. ДВИЖУЩАЯСЯ ГРУППА С СУРКОМ (вылезает из норы)
-        const marmotGroup = el('g', {});
-
-        // Пухлое грушевидное туловище (со светлым животиком)
-        marmotGroup.appendChild(el('path', {
-            d: 'M -10,5 C -11,-3 -8,-10 0,-10 C 8,-10 11,-3 10,5 Z',
-            fill: '#c49a6c', stroke: '#6d4c2f', 'stroke-width': '0.7'
-        }));
-        marmotGroup.appendChild(el('ellipse', {
-            cx: '0', cy: '-1', rx: '6.5', ry: '7.5',
-            fill: '#e6ccb2'
-        }));
-
-        // Сложенные на груди передние лапки с коготками
-        marmotGroup.appendChild(el('path', {
-            d: 'M -7.5,-4 Q -4,-2 -2,-3.5 M 7.5,-4 Q 4,-2 2,-3.5',
-            stroke: '#8b5a2b', 'stroke-width': '2.4', 'stroke-linecap': 'round', fill: 'none'
-        }));
-        marmotGroup.appendChild(el('circle', { cx: '-2.2', cy: '-3.5', r: '1.3', fill: '#d4a373' }));
-        marmotGroup.appendChild(el('circle', { cx: '2.2', cy: '-3.5', r: '1.3', fill: '#d4a373' }));
-
-        // --- ГОЛОВА СУРКА (осматривается по сторонам, когда вылез) ---
-        const headGroup = el('g', {});
-
-        // Маленькие округлые ушки по бокам головы
-        headGroup.appendChild(el('circle', {
-            cx: '-6.8', cy: '-17.5', r: '2.2',
-            fill: '#8b5a2b', stroke: '#5c3a21', 'stroke-width': '0.5'
-        }));
-        headGroup.appendChild(el('circle', {
-            cx: '6.8', cy: '-17.5', r: '2.2',
-            fill: '#8b5a2b', stroke: '#5c3a21', 'stroke-width': '0.5'
-        }));
-
-        // Голова с пухлыми щечками
-        headGroup.appendChild(el('path', {
-            d: 'M -7.5,-12 C -8.5,-16 -5,-19.5 0,-19.5 C 5,-19.5 8.5,-16 7.5,-12 C 7,-9.5 4,-8.5 0,-8.5 C -4,-8.5 -7,-9.5 -7.5,-12 Z',
-            fill: '#d4a373', stroke: '#6d4c2f', 'stroke-width': '0.65'
-        }));
-
-        // Темная «шапочка» на макушке (характерный окрас степного сурка-байбака)
-        headGroup.appendChild(el('path', {
-            d: 'M -5.5,-16.5 Q 0,-20 5.5,-16.5 Q 0,-17.5 -5.5,-16.5 Z',
-            fill: '#5c3a21'
-        }));
-
-        // Светлая мордочка и щечки
-        headGroup.appendChild(el('ellipse', { cx: '-2.3', cy: '-11.5', rx: '2.4', ry: '1.7', fill: '#faedcd' }));
-        headGroup.appendChild(el('ellipse', { cx: '2.3', cy: '-11.5', rx: '2.4', ry: '1.7', fill: '#faedcd' }));
-
-        // Крошечные белые резцы (зубки)
-        headGroup.appendChild(el('rect', {
-            x: '-1', y: '-10.2', width: '2', height: '1.3', rx: '0.3',
-            fill: '#ffffff', stroke: '#b0a89f', 'stroke-width': '0.2'
-        }));
-
-        // Розово-черный носик
-        headGroup.appendChild(el('ellipse', { cx: '0', cy: '-12.3', rx: '1.4', ry: '1', fill: '#2c1e16' }));
-
-        // Блестящие глазки-бусинки
-        headGroup.appendChild(el('circle', { cx: '-3.5', cy: '-14.8', r: '1.2', fill: '#111' }));
-        headGroup.appendChild(el('circle', { cx: '-3.1', cy: '-15.2', r: '0.4', fill: '#fff' }));
-        headGroup.appendChild(el('circle', { cx: '3.5', cy: '-14.8', r: '1.2', fill: '#111' }));
-        headGroup.appendChild(el('circle', { cx: '3.9', cy: '-15.2', r: '0.4', fill: '#fff' }));
-
-        // Анимация легкого поворота головы, когда сурок выглядывает
-        headGroup.appendChild(el('animateTransform', {
-            attributeName: 'transform',
-            type: 'rotate',
-            values: '0 0 -10; 0 0 -10; -8 0 -10; 8 0 -10; 0 0 -10; 0 0 -10',
-            keyTimes: '0; 0.45; 0.58; 0.72; 0.82; 1',
-            dur: '25s',
+        // 1. СВЕЖЕВЫРЫТЫЙ ЗЕМЛЯНОЙ ХОЛМИК (появляется, когда сурок откапывается, и исчезает в конце)
+        const moundGroup = el('g', { opacity: '0' });
+        moundGroup.appendChild(el('animate', {
+            attributeName: 'opacity',
+            values: '0; 0; 1; 1; 0; 0',
+            keyTimes: '0; 0.08; 0.16; 0.78; 0.86; 1',
+            dur: DUR,
             repeatCount: 'indefinite'
         }));
 
-        marmotGroup.appendChild(headGroup);
+        // Мягкая тень холмика на карте
+        moundGroup.appendChild(el('ellipse', {
+            cx: '0', cy: '3.5', rx: '21', ry: '9',
+            fill: 'rgba(0, 0, 0, 0.25)'
+        }));
+        // Насыпь рыхлой земли (неровный холмик без жёстких геометрических овалов)
+        moundGroup.appendChild(el('path', {
+            d: 'M -18,2 C -19,-3 -10,-7 0,-7 C 10,-7 19,-3 18,2 C 16,6 8,8 0,8 C -8,8 -16,6 -18,2 Z',
+            fill: '#6d4c41', stroke: '#4e342e', 'stroke-width': '0.5'
+        }));
+        // Комки свежей земли по краям насыпи
+        moundGroup.appendChild(el('circle', { cx: '-13', cy: '3.5', r: '1.8', fill: '#5d4037' }));
+        moundGroup.appendChild(el('circle', { cx: '14', cy: '3.0', r: '2.1', fill: '#5d4037' }));
+        moundGroup.appendChild(el('circle', { cx: '10', cy: '5.5', r: '1.4', fill: '#4e342e' }));
 
-        // ==========================================
-        // АНИМАЦИЯ ВЫЛЕЗАНИЯ ИЗ НОРЫ (Y)
-        // ==========================================
-        const moveAnim = el('animateTransform', {
+        // Тёмный вход в нору
+        moundGroup.appendChild(el('ellipse', {
+            cx: '0', cy: '0.5', rx: '12.5', ry: '5.5',
+            fill: '#1a100a'
+        }));
+        g.appendChild(moundGroup);
+
+        // 2. РАЗЛЕТАЮЩИЕСЯ КОМЬЯ ЗЕМЛИ ПРИ ОТКАПЫВАНИИ (фаза копания в начале цикла)
+        const dirtParticles = [
+            { x1: -2, y1: 1, x2: -16, y2: -11, x3: -22, y3: 4, r: 1.5, delay: '0.2s' },
+            { x1: 2,  y1: 1, x2: 15,  y2: -12, x3: 21,  y3: 3, r: 1.6, delay: '0.5s' },
+            { x1: 0,  y1: 0, x2: -9,  y2: -15, x3: -14, y3: 2, r: 1.2, delay: '0.8s' },
+            { x1: 1,  y1: 1, x2: 11,  y2: -14, x3: 17,  y3: 5, r: 1.4, delay: '1.1s' },
+            { x1: -1, y1: 0, x2: -13, y2: -9,  x3: -19, y3: 4, r: 1.3, delay: '1.4s' },
+            { x1: 2,  y1: 0, x2: 8,   y2: -16, x3: 13,  y3: 4, r: 1.2, delay: '1.7s' }
+        ];
+
+        dirtParticles.forEach(p => {
+            const clod = el('circle', { cx: p.x1, cy: p.y1, r: p.r, fill: '#4e342e', opacity: '0' });
+            // Полёт по параболе вверх и падение на землю
+            clod.appendChild(el('animate', {
+                attributeName: 'cx',
+                values: `${p.x1}; ${p.x2}; ${p.x3}; ${p.x3}`,
+                keyTimes: '0; 0.04; 0.09; 1',
+                dur: DUR, begin: p.delay, repeatCount: 'indefinite'
+            }));
+            clod.appendChild(el('animate', {
+                attributeName: 'cy',
+                values: `${p.y1}; ${p.y2}; ${p.y3}; ${p.y3}`,
+                keyTimes: '0; 0.04; 0.09; 1',
+                dur: DUR, begin: p.delay, repeatCount: 'indefinite'
+            }));
+            clod.appendChild(el('animate', {
+                attributeName: 'opacity',
+                values: '0; 1; 0.9; 0; 0',
+                keyTimes: '0; 0.01; 0.08; 0.11; 1',
+                dur: DUR, begin: p.delay, repeatCount: 'indefinite'
+            }));
+            g.appendChild(clod);
+        });
+
+        // 3. ОБЪЁМНЫЙ 2.5D-СУРОК В МАСКЕ (вылезает после того, как откопал нору)
+        const maskedGroup = el('g', { 'clip-path': `url(#${clipId})` });
+        const marmotGroup = el('g', { transform: 'translate(0, 26)' });
+
+        // Анимация вылезания наружу (после фазы копания) и ухода обратно
+        marmotGroup.appendChild(el('animateTransform', {
             attributeName: 'transform',
             type: 'translate',
             values: '0 26; 0 26; 0 0; 0 0; 0 26; 0 26',
-            keyTimes: '0; 0.3; 0.45; 0.8; 0.95; 1',
-            dur: '25s',
+            keyTimes: '0; 0.15; 0.24; 0.70; 0.78; 1',
+            dur: DUR,
             repeatCount: 'indefinite'
-        });
-        marmotGroup.appendChild(moveAnim);
+        }));
 
+        // Туловище в лёгком 2.5D-ракурсе (тёплый песочно-каштановый мех)
+        marmotGroup.appendChild(el('path', {
+            d: 'M -8.5,6 C -9.5,-2 -7,-9 0,-9 C 7,-9 9.5,-2 8.5,6 Z',
+            fill: '#b5835a', stroke: '#5c3a21', 'stroke-width': '0.65'
+        }));
+        // Светлое охристое брюшко
+        marmotGroup.appendChild(el('ellipse', {
+            cx: '0.8', cy: '0', rx: '5.2', ry: '6.5',
+            fill: '#e6ccb2'
+        }));
+
+        // Передние лапки с коготками, упирающиеся в край холмика
+        marmotGroup.appendChild(el('path', {
+            d: 'M -6,-2.5 C -4.5,-0.5 -3.5,1 -2,1.5',
+            stroke: '#7f4f24', 'stroke-width': '2.2', 'stroke-linecap': 'round', fill: 'none'
+        }));
+        marmotGroup.appendChild(el('path', {
+            d: 'M 6.5,-2.5 C 5,-0.5 4,1 2.5,1.5',
+            stroke: '#7f4f24', 'stroke-width': '2.2', 'stroke-linecap': 'round', fill: 'none'
+        }));
+
+        // --- ГОЛОВА СУРКА (осматривается по сторонам) ---
+        const headGroup = el('g', {});
+        headGroup.appendChild(el('animateTransform', {
+            attributeName: 'transform',
+            type: 'rotate',
+            values: '0 0 -9; 0 0 -9; -10 0 -9; 10 0 -9; -6 0 -9; 0 0 -9; 0 0 -9',
+            keyTimes: '0; 0.26; 0.36; 0.48; 0.58; 0.66; 1',
+            dur: DUR,
+            repeatCount: 'indefinite'
+        }));
+
+        // Маленькие округлые ушки
+        headGroup.appendChild(el('circle', { cx: '-5.8', cy: '-15.5', r: '1.9', fill: '#7f4f24', stroke: '#4e342e', 'stroke-width': '0.45' }));
+        headGroup.appendChild(el('circle', { cx: '6.2',  cy: '-15.5', r: '1.9', fill: '#7f4f24', stroke: '#4e342e', 'stroke-width': '0.45' }));
+
+        // Голова с характерным приплюснутым темени сурка-байбака
+        headGroup.appendChild(el('path', {
+            d: 'M -6.5,-10.5 C -7.2,-14.5 -4.2,-17.5 0.2,-17.5 C 4.5,-17.5 7.5,-14.5 6.8,-10.5 C 6.2,-8 3.5,-7.2 0.2,-7.2 C -3.2,-7.2 -6,-8 -6.5,-10.5 Z',
+            fill: '#c49a6c', stroke: '#5c3a21', 'stroke-width': '0.6'
+        }));
+
+        // Тёмно-бурая «шапочка» на лбу и макушке байбака
+        headGroup.appendChild(el('path', {
+            d: 'M -4.8,-14.8 Q 0.2,-18 5.2,-14.8 Q 0.2,-15.8 -4.8,-14.8 Z',
+            fill: '#4e342e'
+        }));
+
+        // Светлые щёчки и носовая часть
+        headGroup.appendChild(el('ellipse', { cx: '-1.5', cy: '-10.2', rx: '2.1', ry: '1.5', fill: '#faedcd' }));
+        headGroup.appendChild(el('ellipse', { cx: '2.5',  cy: '-10.2', rx: '2.1', ry: '1.5', fill: '#faedcd' }));
+
+        // Тёмный носик и тоненькие усики
+        headGroup.appendChild(el('ellipse', { cx: '0.6', cy: '-11.0', rx: '1.2', ry: '0.85', fill: '#2c1e16' }));
+        headGroup.appendChild(el('line', { x1: '-2.5', y1: '-10.2', x2: '-5.5', y2: '-10.8', stroke: '#4e342e', 'stroke-width': '0.25' }));
+        headGroup.appendChild(el('line', { x1: '3.5',  y1: '-10.2', x2: '6.5',  y2: '-10.8', stroke: '#4e342e', 'stroke-width': '0.25' }));
+
+        // Выразительные глазки-бусинки с бликом
+        headGroup.appendChild(el('circle', { cx: '-2.8', cy: '-13.2', r: '1.05', fill: '#111' }));
+        headGroup.appendChild(el('circle', { cx: '-2.5', cy: '-13.5', r: '0.35', fill: '#fff' }));
+        headGroup.appendChild(el('circle', { cx: '3.6',  cy: '-13.2', r: '1.05', fill: '#111' }));
+        headGroup.appendChild(el('circle', { cx: '3.9',  cy: '-13.5', r: '0.35', fill: '#fff' }));
+
+        marmotGroup.appendChild(headGroup);
         maskedGroup.appendChild(marmotGroup);
         g.appendChild(maskedGroup);
 
-        // 5. ПЕРЕДНИЙ ЗЕМЛЯНОЙ БОРТИК НОРЫ (перекрывает нижнюю кромку для 3D-глубины)
-        g.appendChild(el('path', {
-            d: 'M -15.5,0 Q 0,6.5 15.5,0 Q 16,4 0,7.5 Q -16,4 -15.5,0 Z',
-            fill: '#795548', stroke: '#4e342e', 'stroke-width': '0.5'
+        // 4. ПЕРЕДНИЙ ЗЕМЛЯНОЙ БРУСТВЕР (появляется вместе с холмиком и перекрывает нижний край сурка)
+        const frontRim = el('path', {
+            d: 'M -13,0.5 Q 0,5.5 13,0.5 Q 13.5,3.8 0,6.5 Q -13.5,3.8 -13,0.5 Z',
+            fill: '#5d4037', stroke: '#3e2723', 'stroke-width': '0.45',
+            opacity: '0'
+        });
+        frontRim.appendChild(el('animate', {
+            attributeName: 'opacity',
+            values: '0; 0; 1; 1; 0; 0',
+            keyTimes: '0; 0.08; 0.16; 0.78; 0.86; 1',
+            dur: DUR,
+            repeatCount: 'indefinite'
         }));
+        g.appendChild(frontRim);
 
         return g;
     }
@@ -5740,7 +5855,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     // --- РАЗМЕЩЕНИЕ СУРКА ---
     // Координаты Бижбулякского района (южнее Давлеканово)
     const marmot = createMarmot();
-    marmot.setAttribute('transform', 'translate(60, 320) scale(0.3)');
+    marmot.setAttribute('transform', 'translate(60, 320) scale(0.5)');
     staticLayer.appendChild(marmot);
 
  /* ================================================================
@@ -5883,50 +5998,89 @@ function createRecreationZone(x, y, scale) {
         return node;
     };
 
-    // 1. ВОДА (Глубокое пресноводное башкирское озеро с мягкой береговой линией)
-    g.appendChild(el('ellipse', {
-        cx: '0', cy: '3', rx: '56', ry: '30',
-        fill: '#2b5470', opacity: '0.2'
-    }));
-    // Прибрежное мелководье
-    g.appendChild(el('ellipse', {
-        cx: '0', cy: '0', rx: '54', ry: '28',
-        fill: '#5c93b5', stroke: '#3c6e8f', 'stroke-width': '1'
-    }));
-    // Основная глубина озера
-    g.appendChild(el('ellipse', {
-        cx: '-4', cy: '1.5', rx: '43', ry: '21.5',
-        fill: '#3c6e8f', opacity: '0.85'
-    }));
-    // Самая глубокая часть в центре
-    g.appendChild(el('ellipse', {
-        cx: '-7', cy: '2.5', rx: '28', ry: '13.5',
-        fill: '#2c5570', opacity: '0.65'
+    // Создаём мягкий фильтр размытия береговой кромки и градиент глубины (один раз в defs)
+    let defsForLake = svg.querySelector('defs');
+    if (!defsForLake) {
+        defsForLake = document.createElementNS(svgNS, 'defs');
+        svg.insertBefore(defsForLake, svg.firstChild);
+    }
+
+    if (!document.getElementById('lake-soft-edge')) {
+        const lakeFilter = document.createElementNS(svgNS, 'filter');
+        lakeFilter.setAttribute('id', 'lake-soft-edge');
+        lakeFilter.setAttribute('x', '-25%');
+        lakeFilter.setAttribute('y', '-25%');
+        lakeFilter.setAttribute('width', '150%');
+        lakeFilter.setAttribute('height', '150%');
+        const blur = document.createElementNS(svgNS, 'feGaussianBlur');
+        blur.setAttribute('stdDeviation', '2.6'); // Мягкое вплавление воды в землю
+        lakeFilter.appendChild(blur);
+        defsForLake.appendChild(lakeFilter);
+
+        const lakeGrad = document.createElementNS(svgNS, 'radialGradient');
+        lakeGrad.setAttribute('id', 'pavlovka-water-grad');
+        lakeGrad.setAttribute('cx', '42%');
+        lakeGrad.setAttribute('cy', '55%');
+        lakeGrad.setAttribute('r', '55%');
+        lakeGrad.innerHTML = `
+            <stop offset="0%"   stop-color="#224966" stop-opacity="0.92"/>
+            <stop offset="55%"  stop-color="#356b8c" stop-opacity="0.82"/>
+            <stop offset="85%"  stop-color="#538db0" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#538db0" stop-opacity="0"/>
+        `;
+        defsForLake.appendChild(lakeGrad);
+    }
+
+    // 1. ВОДА (Извилистый естественный водоём с заливами, мягко вплавленный в рельеф)
+    const waterGroup = el('g', { filter: 'url(#lake-soft-edge)' });
+
+    // Широкая прибрежная пойма / мелководье с заливами
+    waterGroup.appendChild(el('path', {
+        d: `M -48,4 
+            C -52,-8 -34,-18 -14,-21 
+            C 8,-24 34,-22 46,-11 
+            C 56,-2 48,12 30,19 
+            C 12,26 -14,28 -32,21 
+            C -45,16 -45,11 -48,4 Z`,
+        fill: 'url(#pavlovka-water-grad)'
     }));
 
-    // 2. ЕСТЕСТВЕННЫЙ БЕРЕГ И ЛУГ (Без тропического песка и «ступеньки» атолла)
-    // Прибрежная галечно-песчаная кромка
-    g.appendChild(el('path', {
-        d: 'M -10,-15 Q 15,-29 42,-15 Q 54,-7 42,1 Q 15,11 -10,-3 Z',
-        fill: '#a69882', stroke: '#877a66', 'stroke-width': '0.7'
+    // Внутреннее извилистое русло глубины (без геометрических кружочков)
+    waterGroup.appendChild(el('path', {
+        d: `M -36,3 
+            C -38,-6 -22,-13 -5,-15 
+            C 12,-17 28,-13 34,-5 
+            C 39,2 30,11 15,15 
+            C 0,19 -20,19 -30,13 
+            C -35,10 -34,7 -36,3 Z`,
+        fill: '#234b69',
+        opacity: '0.55'
     }));
-    // Тень под травяным покровом
-    g.appendChild(el('path', {
-        d: 'M -4,-16 Q 16,-27 38,-16 Q 48,-10 38,-4 Q 16,4 -4,-7 Z',
-        fill: '#46703b'
+    g.appendChild(waterGroup);
+
+    // 2. ЕСТЕСТВЕННЫЙ ЛЕСНОЙ МЫС (Без «островной» обводки, плавно сливается с картой)
+    const shoreGroup = el('g', {});
+    // Мягкая прибрежная кромка у воды
+    shoreGroup.appendChild(el('path', {
+        d: 'M -6,-14 C 10,-23 32,-22 41,-13 C 45,-8 38,-3 24,-3 C 10,-3 -4,-7 -6,-14 Z',
+        fill: '#8f8470',
+        opacity: '0.65',
+        filter: 'url(#lake-soft-edge)'
     }));
-    // Естественный уральский луг (спокойный травянисто-зелёный)
-    g.appendChild(el('path', {
-        d: 'M -4,-18 Q 16,-29 38,-18 Q 48,-12 38,-6 Q 16,2 -4,-9 Z',
-        fill: '#5c8d4e'
+    // Травянистый склон мыса (мягко вписан в ландшафт)
+    shoreGroup.appendChild(el('path', {
+        d: 'M -2,-15 C 12,-24 31,-23 39,-15 C 42,-11 35,-6 22,-6 C 9,-6 -1,-10 -2,-15 Z',
+        fill: '#4d7a42',
+        opacity: '0.88'
     }));
+    g.appendChild(shoreGroup);
 
     // 3. ДЕРЕВЯННЫЙ МОСТИК / ПИРС (Тёплая состаренная древесина)
     const pier = el('g', {});
     // Тень пирса на воде
     pier.appendChild(el('polygon', {
         points: '-18,4 2,-6 9,-2 -11,8',
-        fill: 'rgba(25, 45, 65, 0.35)'
+        fill: 'rgba(15, 32, 48, 0.35)'
     }));
     // Сваи в воде
     pier.appendChild(el('rect', { x: '-16', y: '0', width: '2', height: '5', fill: '#4e342e' }));
@@ -5936,10 +6090,10 @@ function createRecreationZone(x, y, scale) {
         points: '-18,0 -11,4 9,-6 9,-8 -11,2 -18,-2',
         fill: '#6d4c41'
     }));
-    // Верхний настил (тёплое дерево)
+    // Верхний настил
     pier.appendChild(el('polygon', {
         points: '-18,-2 2,-12 9,-8 -11,2',
-        fill: '#b59474', stroke: '#6d4c41', 'stroke-width': '0.6'
+        fill: '#b59474', stroke: '#6d4c41', 'stroke-width': '0.5'
     }));
     // Причальный столбик на краю пирса
     pier.appendChild(el('rect', { x: '-17', y: '-5', width: '1.8', height: '3.5', rx: '0.5', fill: '#5d4037' }));
@@ -6550,8 +6704,118 @@ function createWindTurbine(x, y, scale) {
         return g;
     }
 
-    // Добавляем комбайн на карту и запускаем плавный проезд по полю
-    setTimeout(() => {
+    // 👇 НАСТРОЙКА РАЗМЕРА РУЛОНОВ СЕНА (Меняйте 0.85, чтобы сделать крупнее или мельче) 👇
+    const HAY_BALE_SCALE = 0.85;
+
+    function drawIsometricHayBale(bx, by, scale) {
+        const g = document.createElementNS(svgNS, 'g');
+        g.setAttribute('transform', `translate(${bx}, ${by}) scale(${scale})`);
+
+        const el = (tag, attrs) => {
+            const node = document.createElementNS(svgNS, tag);
+            for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+            return node;
+        };
+
+        
+
+        // 3. Основное объёмное тело рулона (боковая часть в тени слева-снизу и светлая сверху)
+        g.appendChild(el('path', {
+            d: 'M -5.8,-3.5 C -7.2,-1.2 -6.5,2.2 -3.8,3.2 L 3.2,3.8 C 0.8,2.5 0.5,-1.5 2.5,-4.5 L -3.5,-6.0 C -4.6,-5.4 -5.3,-4.5 -5.8,-3.5 Z',
+            fill: '#d4a017', stroke: '#9c730c', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
+        }));
+        // Светлая верхняя часть боковины
+        g.appendChild(el('path', {
+            d: 'M -5.5,-3.8 L 2.2,-6.5 C 3.5,-6.2 4.6,-5.5 5.3,-4.5 L 1.8,-2.8 L -5.8,-2.2 Z',
+            fill: '#f6d365'
+        }));
+
+        // Текстура продольных соломинок на боковой стенке
+        const sideStraws = [
+            [-5.2, -3.2, 1.2, -5.6], [-5.8, -1.8, 0.6, -4.2], [-6.0, -0.4, 0.3, -2.8],
+            [-5.6, 0.9, 0.5, -1.3],  [-4.8, 2.1, 1.1, 0.2],   [-3.6, 2.9, 1.9, 1.6],
+            [-3.5, -4.6, 2.6, -6.2], [-4.5, -2.5, 1.5, -4.8], [-5.0, 0.2, 0.8, -2.0]
+        ];
+        sideStraws.forEach(([x1, y1, x2, y2], i) => {
+            g.appendChild(el('line', {
+                x1, y1, x2, y2,
+                stroke: i % 2 === 0 ? '#9c730c' : '#ffeaa7',
+                'stroke-width': '0.38',
+                'stroke-linecap': 'round',
+                opacity: '0.85'
+            }));
+        });
+
+        // 4. Правый круглый торец рулона с плотной спиралью скрученного сена
+        const face = el('g', { transform: 'translate(3.6, -0.6) rotate(-12)' });
+        face.appendChild(el('ellipse', {
+            cx: '0', cy: '0', rx: '3.5', ry: '4.4',
+            fill: '#e6b83a', stroke: '#8c6508', 'stroke-width': '0.4'
+        }));
+
+        // Спиральные витки сена (от края к центру)
+        [3.0, 2.3, 1.6, 0.9].forEach((rVal, idx) => {
+            face.appendChild(el('ellipse', {
+                cx: '0', cy: '0',
+                rx: rVal,
+                ry: (rVal * 1.25).toFixed(2),
+                fill: 'none',
+                stroke: idx % 2 === 0 ? '#9c730c' : '#fff0a6',
+                'stroke-width': '0.42',
+                'stroke-dasharray': idx % 2 === 0 ? '2.2 0.8' : '3.0 0.6'
+            }));
+        });
+        // Темная сердцевина скрутки
+        face.appendChild(el('circle', { cx: '0', cy: '0', r: '0.45', fill: '#7a5605' }));
+        g.appendChild(face);
+
+        return g;
+    }
+
+    function spawnHayBalesInDistricts(layer) {
+        const oldBales = document.getElementById('harvest-hay-bales');
+        if (oldBales) oldBales.remove();
+
+        const balesGroup = document.createElementNS(svgNS, 'g');
+        balesGroup.id = 'harvest-hay-bales';
+        balesGroup.style.pointerEvents = 'none';
+
+        // По ОДНОМУ рулону прямо у стыка границ Благоварского, Чишминского и Давлекановского районов
+        const baleSpots = [
+            { name: 'Благоварский',   x: 112, y: 204, delay: 0 },   // Сразу над границей стыка (юго-восток Благоварского)
+            { name: 'Чишминский',     x: 127, y: 218, delay: 300 }, // Сразу за границей справа (запад Чишминского)
+            { name: 'Давлекановский', x: 116, y: 228, delay: 600 }  // Сразу под границей снизу (северо-восток Давлекановского)
+        ];
+
+        baleSpots.forEach(spot => {
+            const bale = drawIsometricHayBale(spot.x, spot.y, HAY_BALE_SCALE);
+            bale.style.opacity = '0';
+            bale.style.transition = 'opacity 0.6s ease';
+            balesGroup.appendChild(bale);
+
+            setTimeout(() => {
+                if (bale.parentNode) bale.style.opacity = '1';
+            }, spot.delay);
+        });
+
+        layer.appendChild(balesGroup);
+
+        // Через 20 секунд плавно убираем рулоны сена
+        setTimeout(() => {
+            balesGroup.style.transition = 'opacity 0.8s ease';
+            balesGroup.style.opacity = '0';
+            setTimeout(() => {
+                if (balesGroup.parentNode) balesGroup.remove();
+            }, 850);
+        }, 20000);
+    }
+
+    function runHarvestCycle() {
+        if ((typeof effectsEnabled !== 'undefined' && !effectsEnabled) || window.isPaused) {
+            setTimeout(runHarvestCycle, 5000);
+            return;
+        }
+
         const layer = document.getElementById('cities-layer') || svg;
         if (!layer) return;
 
@@ -6560,56 +6824,75 @@ function createWindTurbine(x, y, scale) {
 
         const harvesterZone = createHarvesterScene(HARVESTER_X, HARVESTER_Y, HARVESTER_SCALE);
         harvesterZone.id = 'harvester-zone';
+        harvesterZone.style.opacity = '0';
+        harvesterZone.style.transition = 'opacity 0.7s ease';
         layer.appendChild(harvesterZone);
 
         const mover = harvesterZone.querySelector('.harvester-mover');
         if (!mover) return;
 
-        // Траектория проезда строго вдоль изометрической оси поля (-26.5°):
-        // От исходной точки (8, -4) вперёд через колосья до (-22, 11) и плавный возврат
-        const startPos = { x: 8, y: -4 };
-        const endPos   = { x: -22, y: 11 };
-        const driveMs  = 6000; // 6 секунд на проход полосы
+        // Постепенное срезание колосков пшеницы по мере движения комбайна
+        const wheatLines = Array.from(harvesterZone.querySelectorAll('line[stroke="#e1b12c"], line[stroke="#f39c12"]'));
+        const wheatHeads = Array.from(harvesterZone.querySelectorAll('ellipse[fill="#ffeaa7"], ellipse[fill="#fbc531"]'));
 
-        let direction = 1; // 1 = едет вперёд жаткой по пшенице, -1 = сдаёт назад на старт
+        const startPos = { x: 12, y: -6 };
+        const endPos   = { x: -24, y: 12 };
+        const driveMs  = 9000; // 9 секунд — неторопливый, реалистичный ход по полю
+
+        mover.setAttribute('transform', `translate(${startPos.x}, ${startPos.y})`);
+        requestAnimationFrame(() => { harvesterZone.style.opacity = '1'; });
+
         let startTime = performance.now();
         let pausedTime = 0;
 
-        function animateHarvester(now) {
+        function step(now) {
             if (window.isPaused || (typeof effectsEnabled !== 'undefined' && !effectsEnabled)) {
                 if (pausedTime === 0) pausedTime = now;
-                requestAnimationFrame(animateHarvester);
+                requestAnimationFrame(step);
                 return;
             } else if (pausedTime !== 0) {
                 startTime += (now - pausedTime);
                 pausedTime = 0;
             }
 
-            const elapsed = now - startTime;
-            const rawT = Math.min(elapsed / driveMs, 1);
-            // Плавный разгон и торможение в конце полосы
+            const rawT = Math.min((now - startTime) / driveMs, 1);
+            // Плавный старт и мягкая остановка в конце полосы
             const ease = rawT < 0.5 ? 2 * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 2) / 2;
 
-            const t = direction === 1 ? ease : (1 - ease);
-            const curX = startPos.x + (endPos.x - startPos.x) * t;
-            const curY = startPos.y + (endPos.y - startPos.y) * t;
-
+            const curX = startPos.x + (endPos.x - startPos.x) * ease;
+            const curY = startPos.y + (endPos.y - startPos.y) * ease;
             mover.setAttribute('transform', `translate(${curX.toFixed(2)}, ${curY.toFixed(2)})`);
 
+            // Постепенно убираем колоски, мимо которых уже прошла жатка
+            const cutThreshold = curX - 14;
+            wheatLines.forEach((line, i) => {
+                const wx = parseFloat(line.getAttribute('x1') || '0');
+                if (wx > cutThreshold) {
+                    line.style.opacity = '0.15';
+                    if (wheatHeads[i]) wheatHeads[i].style.opacity = '0';
+                }
+            });
+
             if (rawT < 1) {
-                requestAnimationFrame(animateHarvester);
+                requestAnimationFrame(step);
             } else {
-                direction *= -1;
+                // Комбайн закончил полосу: плавно скрываем его и запускаем появление рулонов сена!
+                harvesterZone.style.opacity = '0';
                 setTimeout(() => {
-                    startTime = performance.now();
-                    requestAnimationFrame(animateHarvester);
-                }, 800); // Пауза 0.8 сек на краю поля
+                    if (harvesterZone.parentNode) harvesterZone.remove();
+                    spawnHayBalesInDistricts(layer);
+                }, 700);
+
+                // Следующий выезд комбайна через 55 секунд
+                setTimeout(runHarvestCycle, 55000);
             }
         }
 
-        requestAnimationFrame(animateHarvester);
-        console.log(`✅ Комбайн установлен и запущен в точке (${HARVESTER_X}, ${HARVESTER_Y})`);
-    }, 1000);
+        requestAnimationFrame(step);
+    }
+
+    // Первый запуск цикла через 3 секунды после загрузки карты
+    setTimeout(runHarvestCycle, 3000);
 
 /* ================================================================
        ТУРИСТИЧЕСКИЙ МОДУЛЬ НАВИГАЦИИ (Справа под тумблерами, единый стиль)
@@ -7092,6 +7375,221 @@ function createWindTurbine(x, y, scale) {
         document.body.appendChild(island);
     })();
 
+
+ // ==========================================
+    // БЕЛЕБЕЕВСКИЙ СЫР (Отламывается неровными кусками + запуск раз в 20 сек)
+    // ==========================================
+    const CHEESE_X = 65;
+    const CHEESE_Y = 270;
+    const CHEESE_SCALE = 0.65;
+
+    function playBelebeyCheeseScene() {
+        if ((typeof effectsEnabled !== 'undefined' && !effectsEnabled) || window.isPaused) {
+            setTimeout(playBelebeyCheeseScene, 5000);
+            return;
+        }
+
+        const layer = document.getElementById('cities-layer') || svg;
+        if (!layer) return;
+
+        const oldScene = document.getElementById('belebey-cheese-scene');
+        if (oldScene) oldScene.remove();
+
+        const el = (tag, attrs) => {
+            const node = document.createElementNS(svgNS, tag);
+            for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+            return node;
+        };
+
+        let defs = svg.querySelector('defs');
+        if (!defs) {
+            defs = document.createElementNS(svgNS, 'defs');
+            svg.insertBefore(defs, svg.firstChild);
+        }
+
+        // Очищаем старую маску от прошлого цикла
+        const oldMask = document.getElementById('cheese-chunks-mask');
+        if (oldMask) oldMask.remove();
+
+        // 1. МАСКА ОТЛАМЫВАЮЩИХСЯ КУСКОВ (неровные ломаные ломтики вместо кружков!)
+        const mask = el('mask', { id: 'cheese-chunks-mask' });
+        // Белый фон — весь кусок сыра изначально целый
+        mask.appendChild(el('rect', { x: '-25', y: '-25', width: '50', height: '45', fill: '#ffffff' }));
+
+        // 5 неровных отломанных кусков (чёрные полигоны в маске, проявляются по очереди)
+        const brokenChunks = [
+            // Кусок 1: правый верхний угол
+            { points: '6,-11 16,-11 16,2 10,1 8,-4 5,-7', showAt: 1100 },
+            // Кусок 2: правый нижний ломоть
+            { points: '5,-7 10,1 16,2 16,11 6,9 7,3 4,-2', showAt: 2200 },
+            // Кусок 3: центральный клин с изломом
+            { points: '-2,-11 6,-11 5,-7 4,-2 7,3 6,9 -2,7 0,1 -3,-4', showAt: 3300 },
+            // Кусок 4: левая середина
+            { points: '-9,-9 -2,-11 -3,-4 0,1 -2,7 -9,5 -7,-1', showAt: 4400 },
+            // Кусок 5: острый носик сыра
+            { points: '-17,-7 -9,-9 -7,-1 -9,5 -17,4', showAt: 5500 }
+        ];
+
+        const chunkEls = brokenChunks.map(ch => {
+            const poly = el('polygon', {
+                points: ch.points,
+                fill: '#000000',
+                opacity: '0'
+            });
+            mask.appendChild(poly);
+            return { el: poly, showAt: ch.showAt };
+        });
+        defs.appendChild(mask);
+
+        // Главный контейнер сцены (плавно появляется в начале и плавно исчезает в конце)
+        const sceneG = el('g', {
+            id: 'belebey-cheese-scene',
+            transform: `translate(${CHEESE_X}, ${CHEESE_Y}) scale(${CHEESE_SCALE})`,
+            opacity: '0'
+        });
+        sceneG.style.transition = 'opacity 0.5s ease';
+
+        // 2. КОНТАКТНАЯ ТЕНЬ ПОД СЫРОМ
+        sceneG.appendChild(el('path', {
+            d: 'M -15,2 L 13,9 L 16,2 L -12,-3 Z',
+            fill: 'rgba(0, 0, 0, 0.25)',
+            mask: 'url(#cheese-chunks-mask)'
+        }));
+
+        // 3. ОСТРЫЙ КЛИН СЫРА С ДЫРКАМИ
+        const cheeseBody = el('g', { mask: 'url(#cheese-chunks-mask)' });
+
+        cheeseBody.appendChild(el('path', {
+            d: 'M -15,-3 Q -15.5,1.5 -14.5,2.5 L 12,8.5 Q 13.5,8.5 13.5,6.5 L 13.5,-2 Q 13.5,-3 12,-2.5 L -15,-3 Z',
+            fill: '#f5b027', stroke: '#d68910', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
+        }));
+
+        cheeseBody.appendChild(el('path', {
+            d: 'M -15,-3 L -5,-6.8 Q -3.5,-5.2 -2.2,-7.6 L 5,-10.2 Q 7,-10.5 8.5,-9 L 13.2,-3.2 Q 13.8,-2.3 12,-2.5 L -15,-3 Z',
+            fill: '#fbe870', stroke: '#f1c40f', 'stroke-width': '0.35', 'stroke-linejoin': 'round'
+        }));
+
+        function drawRefHole(hx, hy, rx, ry, isTop) {
+            const h = el('g', {});
+            h.appendChild(el('ellipse', { cx: hx, cy: hy, rx: rx, ry: ry, fill: isTop ? '#d97719' : '#c96a14' }));
+            h.appendChild(el('ellipse', {
+                cx: hx + (isTop ? 0.3 : 0.45), cy: hy + (isTop ? 0.25 : 0.2),
+                rx: rx * 0.78, ry: ry * 0.78, fill: isTop ? '#eb9328' : '#e0821d'
+            }));
+            return h;
+        }
+
+        cheeseBody.appendChild(drawRefHole(-11.5, -0.5, 0.9, 1.1, false));
+        cheeseBody.appendChild(drawRefHole(-7.0,  1.8,  1.2, 1.4, false));
+        cheeseBody.appendChild(drawRefHole(-0.5,  1.8,  2.4, 2.7, false));
+        cheeseBody.appendChild(drawRefHole(8.0,   3.5,  1.7, 2.0, false));
+        cheeseBody.appendChild(drawRefHole(-7.5, -4.0, 1.3, 0.65, true));
+        cheeseBody.appendChild(drawRefHole(3.5,  -7.8, 1.5, 0.75, true));
+        cheeseBody.appendChild(drawRefHole(6.5,  -4.8, 2.1, 1.1,  true));
+
+        sceneG.appendChild(cheeseBody);
+
+        // 4. МЫШКА (Двигается вслед за отломанными кусками)
+        const mouseMover = el('g', { transform: 'translate(15, 2)' });
+        mouseMover.style.transition = 'transform 0.35s ease-out';
+
+        // Сырные крошки при жевании
+        [
+            { dx: -4.2, dy: 2.5, dur: '0.45s', begin: '0s' },
+            { dx: -5.2, dy: 3.0, dur: '0.55s', begin: '0.2s' }
+        ].forEach(c => {
+            const crumb = el('circle', { cx: '-4.2', cy: '0.8', r: '0.45', fill: '#ffeaa7' });
+            crumb.appendChild(el('animate', { attributeName: 'cy', values: `0.8; ${c.dy}`, dur: c.dur, begin: c.begin, repeatCount: 'indefinite' }));
+            crumb.appendChild(el('animate', { attributeName: 'cx', values: `-4.2; ${c.dx}`, dur: c.dur, begin: c.begin, repeatCount: 'indefinite' }));
+            crumb.appendChild(el('animate', { attributeName: 'opacity', values: '1; 0', dur: c.dur, begin: c.begin, repeatCount: 'indefinite' }));
+            mouseMover.appendChild(crumb);
+        });
+
+        const mouseScale = el('g', { transform: 'scale(1.25)' });
+        const mouseBody = el('g', {});
+
+        mouseBody.appendChild(el('animateTransform', {
+            attributeName: 'transform',
+            type: 'rotate',
+            values: '0 -2 0; -11 -2 0; 4 -2 0; -11 -2 0; 0 -2 0',
+            dur: '0.4s',
+            repeatCount: 'indefinite'
+        }));
+
+        mouseBody.appendChild(el('ellipse', { cx: '0.5', cy: '2.2', rx: '4.2', ry: '1.4', fill: 'rgba(0,0,0,0.28)' }));
+
+        const tail = el('path', {
+            d: 'M 4.0,0.6 Q 8.5,-1.2 10.5,1.4',
+            fill: 'none', stroke: '#fd79a8', 'stroke-width': '0.65', 'stroke-linecap': 'round'
+        });
+        tail.appendChild(el('animate', {
+            attributeName: 'd',
+            values: 'M 4.0,0.6 Q 8.5,-1.2 10.5,1.4; M 4.0,0.6 Q 8.5,1.8 10.8,-0.4; M 4.0,0.6 Q 8.5,-1.2 10.5,1.4',
+            dur: '0.9s', repeatCount: 'indefinite'
+        }));
+        mouseBody.appendChild(tail);
+
+        mouseBody.appendChild(el('ellipse', { cx: '2.2', cy: '1.8', rx: '1.1', ry: '0.6', fill: '#fab1a0' }));
+        mouseBody.appendChild(el('ellipse', { cx: '-2.6', cy: '1.4', rx: '1.0', ry: '0.55', fill: '#fab1a0' }));
+
+        mouseBody.appendChild(el('path', {
+            d: 'M -4.5,0.4 C -3.2,-1.8 1.5,-2.4 4.2,-0.2 C 5.0,0.8 4.2,2.1 1.5,2.1 C -1.5,2.1 -3.5,1.3 -4.5,0.4 Z',
+            fill: '#95a5a6', stroke: '#636e72', 'stroke-width': '0.35'
+        }));
+
+        mouseBody.appendChild(el('circle', { cx: '-1.8', cy: '-1.7', r: '1.35', fill: '#7f8c8d', stroke: '#636e72', 'stroke-width': '0.3' }));
+        mouseBody.appendChild(el('circle', { cx: '-0.4', cy: '-1.9', r: '1.5', fill: '#b2bec3', stroke: '#636e72', 'stroke-width': '0.32' }));
+        mouseBody.appendChild(el('circle', { cx: '-0.4', cy: '-1.9', r: '0.8', fill: '#fab1a0' }));
+
+        mouseBody.appendChild(el('circle', { cx: '-2.4', cy: '-0.4', r: '0.55', fill: '#1e272e' }));
+        mouseBody.appendChild(el('circle', { cx: '-2.6', cy: '-0.6', r: '0.2', fill: '#ffffff' }));
+        mouseBody.appendChild(el('circle', { cx: '-4.5', cy: '0.4', r: '0.6', fill: '#fd79a8' }));
+
+        mouseBody.appendChild(el('line', { x1: '-4.2', y1: '0.1', x2: '-5.6', y2: '-0.6', stroke: '#2d3436', 'stroke-width': '0.2' }));
+        mouseBody.appendChild(el('line', { x1: '-4.2', y1: '0.5', x2: '-5.7', y2: '0.6', stroke: '#2d3436', 'stroke-width': '0.2' }));
+
+        mouseScale.appendChild(mouseBody);
+        mouseMover.appendChild(mouseScale);
+        sceneG.appendChild(mouseMover);
+
+        layer.appendChild(sceneG);
+
+        // Плавно проявляем сцену
+        requestAnimationFrame(() => { sceneG.style.opacity = '1'; });
+
+        // Пошаговые позиции мышки под каждый отломанный кусок
+        const mouseSteps = [
+            { x: 11, y: 4,   t: 1100 },
+            { x: 8,  y: 1,   t: 2200 },
+            { x: 2,  y: 1.5, t: 3300 },
+            { x: -4, y: 0.5, t: 4400 },
+            { x: -10, y: 0,  t: 5500 }
+        ];
+
+        // Запускаем отламывание кусков и продвижение мышки по расписанию
+        chunkEls.forEach((item, idx) => {
+            setTimeout(() => {
+                if (!sceneG.parentNode) return;
+                item.el.setAttribute('opacity', '1');
+                const step = mouseSteps[idx];
+                if (step) {
+                    mouseMover.setAttribute('transform', `translate(${step.x}, ${step.y})`);
+                }
+            }, item.showAt);
+        });
+
+        // Через 6.3 сек (когда весь сыр съеден) плавно убираем сцену и ждём 20 секунд до следующего раза
+        setTimeout(() => {
+            sceneG.style.opacity = '0';
+            setTimeout(() => {
+                if (sceneG.parentNode) sceneG.remove();
+                setTimeout(playBelebeyCheeseScene, 20000); // Пауза 20 секунд
+            }, 550);
+        }, 6300);
+    }
+
+    // Первый показ через 2 секунды после загрузки карты
+    setTimeout(playBelebeyCheeseScene, 2000);
 
 });
 
