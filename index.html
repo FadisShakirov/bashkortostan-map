@@ -6968,7 +6968,7 @@ function createWindTurbine(x, y, scale) {
     setTimeout(runHarvestCycle, 3000);
 
 /* ================================================================
-       ТУРИСТИЧЕСКИЙ МОДУЛЬ НАВИГАЦИИ (Справа под тумблерами, единый стиль)
+       ТУРИСТИЧЕСКИЙ МОДУЛЬ НАВИГАЦИИ (Тактильные кнопки Material Design, без скролла на мобильных)
        ================================================================ */
     (function initTouristHelperIsland() {
         const oldIsland = document.getElementById('tourist-helper-island');
@@ -6981,36 +6981,36 @@ function createWindTurbine(x, y, scale) {
             {
                 id: 'mountains',
                 icon: '🏔️',
-                label: 'Горы и хребты',
+                label: 'Горы',
                 color: '#e17055',
-                grad: 'linear-gradient(135deg, #e17055, #d63031)',
+                darkShadow: '#b34b32',
                 hint: 'Б. Иремель, Айгир, Малиновая, Банное, шихан Торатау',
                 districts: ['Белорецкий', 'Учалинский', 'Архангельский', 'Абзелиловский', 'Ишимбайский', 'Бурзянский']
             },
             {
                 id: 'rafting',
                 icon: '🚣',
-                label: 'Сплавы по рекам',
+                label: 'Сплавы',
                 color: '#0984e3',
-                grad: 'linear-gradient(135deg, #0984e3, #00cec9)',
+                darkShadow: '#065ca3',
                 hint: 'Реки Белая (Агидель), Зилим, Инзер, Ай, Нугуш, Юрюзань',
                 districts: ['Бурзянский', 'Белорецкий', 'Гафурийский', 'Мелеузовский', 'Салаватский', 'Караидельский', 'Архангельский']
             },
             {
                 id: 'caves',
                 icon: '🦇',
-                label: 'Пещеры и скалы',
+                label: 'Пещеры',
                 color: '#6c5ce7',
-                grad: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                darkShadow: '#4b3cb5',
                 hint: 'Шульган-Таш, Аскинская ледяная, Киндерлинская, Мурадымовское ущелье',
                 districts: ['Бурзянский', 'Архангельский', 'Гафурийский', 'Кугарчинский', 'Ишимбайский', 'Салаватский']
             },
             {
                 id: 'lakes',
                 icon: '💧',
-                label: 'Озёра и водопады',
-                color: '#00cec9',
-                grad: 'linear-gradient(135deg, #00b894, #00cec9)',
+                label: 'Озёра',
+                color: '#00a8a3',
+                darkShadow: '#007571',
                 hint: 'Аслыкуль, Кандрыкуль, Якты-Куль, Павловское вдхр., вдп. Гадельша и Куперля',
                 districts: ['Давлекановский', 'Туймазинский', 'Абзелиловский', 'Караидельский', 'Баймакский', 'Мелеузовский']
             },
@@ -7019,16 +7019,16 @@ function createWindTurbine(x, y, scale) {
                 icon: '♨️',
                 label: 'Санатории',
                 color: '#e84393',
-                grad: 'linear-gradient(135deg, #e84393, #fd79a8)',
+                darkShadow: '#b32469',
                 hint: 'Янган-Тау, Красноусольск, Ассы, Якты-Куль, Юматово',
-                districts: ['Салаватский', 'Гафурийский', 'Белорецкий', 'Абзелиловский', 'Уфимский']
+                districts: ['Салаватский', 'Гафурийский', 'Белорецкий', 'Абзелиловский', 'Уфимский', 'Аскинский']
             },
             {
                 id: 'ethno',
                 icon: '🏛️',
                 label: 'Этно и история',
-                color: '#f39c12',
-                grad: 'linear-gradient(135deg, #f39c12, #fbc531)',
+                color: '#e67e22',
+                darkShadow: '#b05a0e',
                 hint: 'Уфа, мавзолей Тура-хана, геопарк Торатау, Темясово, бортевой мёд',
                 districts: ['Уфимский', 'Чишминский', 'Ишимбайский', 'Баймакский', 'Бурзянский']
             },
@@ -7037,177 +7037,158 @@ function createWindTurbine(x, y, scale) {
                 icon: '🌲',
                 label: 'Заповедники',
                 color: '#00b894',
-                grad: 'linear-gradient(135deg, #00b894, #55efc4)',
+                darkShadow: '#008268',
                 hint: 'Нацпарк «Башкирия», Шульган-Таш, Башкирский и Южно-Уральский заповедники',
                 districts: ['Бурзянский', 'Мелеузовский', 'Белорецкий', 'Кугарчинский']
             }
         ];
 
-        // 2. СТИЛИ ПРАВОГО МОДУЛЯ (КРУПНЫЙ ДЛЯ ПК, ЕДИНЫЙ СТИЛЬ ТУМБЛЕРОВ, БЕЗ СМЕЩЕНИЯ КНОПОК)
+        // 2. СТИЛИ ТАКТИЛЬНЫХ КНОПОК (Material / Tactile 3D Push)
         const style = document.createElement('style');
         style.id = 'tourist-island-style';
         style.textContent = `
             #tourist-helper-island {
                 position: fixed;
                 right: 16px;
-                top: 76px;
-                width: 340px;
-                background: rgba(255, 255, 255, 0.92);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border: 1.5px solid rgba(9, 132, 227, 0.28);
-                border-radius: 24px;
-                padding: 18px 20px;
-                box-shadow: 0 10px 32px rgba(0, 0, 0, 0.16);
-                z-index: 100001;
+                top: 74px;
+                width: 288px;
+                background: rgba(255, 255, 255, 0.94);
+                border: 1.5px solid rgba(9, 132, 227, 0.22);
+                border-radius: 22px;
+                padding: 14px 16px;
+                box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+                z-index: 900;
                 font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-                transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+                transition: background 0.3s ease, border-color 0.3s ease;
                 box-sizing: border-box;
             }
             body.dark-mode #tourist-helper-island {
-                background: rgba(26, 28, 42, 0.92);
-                border-color: rgba(116, 185, 255, 0.28);
-                box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
+                background: rgba(24, 26, 38, 0.94);
+                border-color: rgba(116, 185, 255, 0.22);
+                box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
             }
 
             .ti-header {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                margin-bottom: 14px;
-                min-height: 28px;
+                margin-bottom: 11px;
+                min-height: 24px;
             }
             .ti-title {
-                font-size: 17px;
+                font-size: 15px;
                 font-weight: 800;
                 color: #1e272e;
-                letter-spacing: 0.2px;
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 6px;
             }
             body.dark-mode .ti-title { color: #f5f6fa; }
 
             .ti-reset {
-                background: rgba(231, 76, 60, 0.14);
+                background: rgba(231, 76, 60, 0.12);
                 color: #e74c3c;
-                border: 1px solid rgba(231, 76, 60, 0.3);
-                border-radius: 10px;
-                font-size: 13px;
+                border: 1px solid rgba(231, 76, 60, 0.28);
+                border-radius: 8px;
+                font-size: 12px;
                 font-weight: 700;
-                padding: 4px 11px;
+                padding: 3px 9px;
                 cursor: pointer;
                 visibility: hidden;
                 opacity: 0;
-                transition: opacity 0.2s ease, background 0.2s ease;
+                transition: opacity 0.2s ease, background 0.15s ease;
             }
             .ti-reset.visible {
                 visibility: visible;
                 opacity: 1;
             }
-            .ti-reset:hover { background: rgba(231, 76, 60, 0.24); }
+            .ti-reset:hover { background: rgba(231, 76, 60, 0.22); }
 
-            /* Список тумблеров фиксирован по вертикали — кнопки НИКОГДА не прыгают */
-            .ti-list {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
+            /* Сетка кнопок (2 колонки на ПК, плотная сетка без скролла на мобильных) */
+            .ti-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            /* Последняя широкая кнопка на всю ширину 2 колонок */
+            .ti-grid .ti-btn:last-child:nth-child(odd) {
+                grid-column: span 2;
             }
 
-            .ti-row {
-                display: flex;
+            /* Тактильная кнопка с физическим «проваливанием» при нажатии */
+            .ti-btn {
+                display: inline-flex;
                 align-items: center;
-                justify-content: space-between;
-                width: 100%;
-                padding: 8px 12px;
-                border-radius: 16px;
-                background: rgba(241, 242, 246, 0.85);
-                border: 1.5px solid transparent;
-                cursor: pointer;
-                transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-                box-sizing: border-box;
-                user-select: none;
-            }
-            body.dark-mode .ti-row {
-                background: rgba(42, 45, 68, 0.85);
-            }
-            .ti-row:hover {
-                background: #ffffff;
-                transform: translateX(-2px);
-            }
-            body.dark-mode .ti-row:hover {
-                background: #353956;
-            }
-            .ti-row.active {
-                background: #ffffff;
-                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-            }
-            body.dark-mode .ti-row.active {
-                background: #2e324d;
-            }
-
-            .ti-label-wrap {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                font-size: 15px;
-                font-weight: 700;
-                color: #2f3542;
-            }
-            body.dark-mode .ti-label-wrap { color: #f1f2f6; }
-            .ti-icon { font-size: 19px; line-height: 1; }
-
-            /* Тумблер-переключатель в едином стиле с верхней панелью */
-            .ti-switch {
-                position: relative;
-                width: 56px;
-                height: 30px;
-                border-radius: 15px;
-                background: #dfe6e9;
-                border: 1.5px solid rgba(0, 0, 0, 0.08);
-                flex-shrink: 0;
-                transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-                box-sizing: border-box;
-            }
-            body.dark-mode .ti-switch {
-                background: #202232;
-                border-color: rgba(255, 255, 255, 0.12);
-            }
-            .ti-knob {
-                position: absolute;
-                top: 2px;
-                left: 2px;
-                width: 23px;
-                height: 23px;
-                border-radius: 50%;
-                background: #ffffff;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
-                transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-            .ti-row.active .ti-knob {
-                transform: translateX(26px);
-            }
-
-            /* Фиксированная зона подсказки внизу: зарезервирована по высоте или плавно раскрывается вниз, не сдвигая кнопки выше! */
-            .ti-hint-box {
-                margin-top: 14px;
-                padding: 11px 13px;
-                border-radius: 14px;
-                background: rgba(9, 132, 227, 0.09);
+                justify-content: center;
+                gap: 6px;
+                padding: 8px 10px;
+                border-radius: 12px;
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                background: #f1f3f6;
                 color: #2d3436;
                 font-size: 13px;
-                line-height: 1.4;
-                min-height: 54px;
+                font-weight: 700;
+                cursor: pointer;
+                user-select: none;
+                /* Объёмная нижняя грань кнопки */
+                box-shadow: 0 3px 0 #cfd6df, 0 4px 8px rgba(0, 0, 0, 0.06);
+                transform: translateY(0);
+                transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease;
+                box-sizing: border-box;
+                -webkit-tap-highlight-color: transparent;
+            }
+            body.dark-mode .ti-btn {
+                background: #2c3047;
+                color: #dfe6e9;
+                border-color: rgba(255, 255, 255, 0.08);
+                box-shadow: 0 3px 0 #181a29, 0 4px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            .ti-btn:hover {
+                background: #ffffff;
+            }
+            body.dark-mode .ti-btn:hover {
+                background: #363b57;
+            }
+
+            /* Момент физического нажатия пальцем или мышью (кнопка проваливается вниз) */
+            .ti-btn:active {
+                transform: translateY(3px) !important;
+                box-shadow: 0 0px 0 transparent, 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+            }
+
+            /* Активное (вдавленное) состояние выбранной категории */
+            .ti-btn.active {
+                color: #ffffff !important;
+                border-color: rgba(255, 255, 255, 0.25);
+                transform: translateY(2px);
+            }
+
+            .ti-icon {
+                font-size: 15px;
+                line-height: 1;
+            }
+
+            /* Фиксированная зона подсказки снизу (кнопки выше никогда не смещаются) */
+            .ti-hint-box {
+                margin-top: 11px;
+                padding: 9px 11px;
+                border-radius: 12px;
+                background: rgba(9, 132, 227, 0.08);
+                color: #2d3436;
+                font-size: 12px;
+                line-height: 1.38;
+                min-height: 48px;
                 display: flex;
                 align-items: center;
                 box-sizing: border-box;
-                transition: background 0.25s ease;
             }
             body.dark-mode .ti-hint-box {
-                background: rgba(116, 185, 255, 0.12);
+                background: rgba(116, 185, 255, 0.11);
                 color: #dfe6e9;
             }
- /* Стили подсветки контуров районов на карте */
+
+            /* Подсветка районов на карте */
             .district-tour-dimmed {
                 filter: brightness(0.6) saturate(0.75) !important;
                 transition: filter 0.3s ease;
@@ -7220,93 +7201,75 @@ function createWindTurbine(x, y, scale) {
                 transition: filter 0.25s ease, stroke-width 0.25s ease;
             }
 
-            /* Адаптив для телефонов: карта ровно между верхними кнопками и нижним островком */
+            /* 📱 МОБИЛЬНАЯ ВЕРСИЯ: Всё на одном экране без горизонтального скролла */
             @media (max-width: 768px) {
                 body {
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: flex-start !important;
                     align-items: center !important;
-                    padding-top: 64px !important; /* Безопасный отступ под верхние тумблеры */
-                    padding-bottom: 175px !important; /* Место под нижний туристический островок */
+                    padding-top: 62px !important;
+                    padding-bottom: 195px !important;
                     box-sizing: border-box !important;
                     min-height: 100dvh !important;
                     overflow-x: hidden !important;
                 }
-
-                /* Сама карта вписывается строго в свободное окно по центру без смещений вверх */
                 svg, #map-container, .map-wrapper {
                     width: 100% !important;
-                    height: calc(100dvh - 245px) !important;
-                    max-height: 58vh !important;
+                    height: calc(100dvh - 260px) !important;
+                    max-height: 56vh !important;
                     margin: auto 0 !important;
-                    transform: none !important; /* Убрали сдвиг вверх, который уводил карту под кнопки */
+                    transform: none !important;
                     object-fit: contain !important;
                 }
 
-                /* Нижний туристический островок */
                 #tourist-helper-island {
-                    left: 10px;
-                    right: 10px;
+                    left: 8px;
+                    right: 8px;
                     top: auto;
-                    bottom: 10px;
-                    transform: none;
+                    bottom: 8px;
                     width: auto;
-                    padding: 11px 13px;
-                    border-radius: 20px;
-                    z-index: 900;
+                    padding: 10px 11px;
+                    border-radius: 18px;
                 }
                 .ti-header {
                     margin-bottom: 7px;
                     min-height: auto;
                 }
                 .ti-title {
-                    font-size: 14px;
-                }
-                .ti-list {
-                    flex-direction: row;
-                    overflow-x: auto;
-                    gap: 8px;
-                    padding-bottom: 4px;
-                    -webkit-overflow-scrolling: touch;
-                }
-                .ti-row {
-                    width: auto;
-                    padding: 7px 12px;
-                    border-radius: 14px;
-                    gap: 8px;
-                    flex-shrink: 0;
-                }
-                .ti-row:hover {
-                    transform: none;
-                }
-                .ti-label-wrap {
                     font-size: 13px;
+                }
+                /* Компактная многострочная сетка (flex-wrap) — все 7 кнопок видны сразу без скролла! */
+                .ti-grid {
+                    display: flex;
+                    flex-wrap: wrap;
                     gap: 6px;
                 }
+                .ti-btn {
+                    flex: 1 1 auto;
+                    padding: 6px 9px;
+                    font-size: 12px;
+                    border-radius: 10px;
+                    box-shadow: 0 2.5px 0 #cfd6df;
+                }
+                body.dark-mode .ti-btn {
+                    box-shadow: 0 2.5px 0 #181a29;
+                }
+                .ti-btn:active {
+                    transform: translateY(2.5px) !important;
+                }
+                .ti-btn.active {
+                    transform: translateY(1.5px);
+                }
                 .ti-icon {
-                    font-size: 16px;
-                }
-                .ti-switch {
-                    width: 40px;
-                    height: 22px;
-                }
-                .ti-knob {
-                    width: 15px;
-                    height: 15px;
-                }
-                .ti-row.active .ti-knob {
-                    transform: translateX(18px);
+                    font-size: 13.5px;
                 }
                 .ti-hint-box {
-                    margin-top: 7px;
-                    padding: 9px 11px;
-                    font-size: 12px;
-                    line-height: 1.4;
-                    min-height: 60px;
-                    max-height: 95px;
-                    overflow-y: auto;
-                    border-radius: 13px;
+                    margin-top: 8px;
+                    padding: 7px 9px;
+                    font-size: 11.5px;
+                    line-height: 1.35;
+                    min-height: 40px;
                 }
             }
         `;
@@ -7331,17 +7294,17 @@ function createWindTurbine(x, y, scale) {
         header.appendChild(resetBtn);
         island.appendChild(header);
 
-        const list = document.createElement('div');
-        list.className = 'ti-list';
+        const grid = document.createElement('div');
+        grid.className = 'ti-grid';
 
         const hintBox = document.createElement('div');
         hintBox.className = 'ti-hint-box';
-        const DEFAULT_HINT = 'Выберите направление выше, чтобы подсветить районы на карте.';
+        const DEFAULT_HINT = 'Нажмите на направление, чтобы подсветить районы на карте.';
         hintBox.innerHTML = `<span style="opacity:0.75;">${DEFAULT_HINT}</span>`;
 
         let activeCatId = null;
 
-        // 4. ФУНКЦИЯ ПОДСВЕТКИ КОНТУРОВ И ОБНОВЛЕНИЯ ТУМБЛЕРОВ
+        // 4. ФУНКЦИЯ ПОДСВЕТКИ КОНТУРОВ И ОБНОВЛЕНИЯ СОСТОЯНИЯ КНОПОК
         function applyTourFilter(cat) {
             const districtPaths = svg.querySelectorAll('[data-district-name]');
 
@@ -7353,15 +7316,10 @@ function createWindTurbine(x, y, scale) {
                     p.style.removeProperty('stroke-width');
                     p.style.removeProperty('filter');
                 });
-                list.querySelectorAll('.ti-row').forEach(row => {
-                    row.classList.remove('active');
-                    row.style.borderColor = 'transparent';
-                    const sw = row.querySelector('.ti-switch');
-                    if (sw) {
-                        sw.style.background = '';
-                        sw.style.borderColor = '';
-                        sw.style.boxShadow = '';
-                    }
+                grid.querySelectorAll('.ti-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.background = '';
+                    btn.style.boxShadow = '';
                 });
                 resetBtn.classList.remove('visible');
                 hintBox.innerHTML = `<span style="opacity:0.75;">${DEFAULT_HINT}</span>`;
@@ -7372,23 +7330,16 @@ function createWindTurbine(x, y, scale) {
             activeCatId = cat.id;
             resetBtn.classList.add('visible');
 
-            // Обновляем состояние всех тумблеров
-            list.querySelectorAll('.ti-row').forEach(row => {
-                const isThis = row.dataset.catId === cat.id;
-                row.classList.toggle('active', isThis);
-                row.style.borderColor = isThis ? cat.color : 'transparent';
-
-                const sw = row.querySelector('.ti-switch');
-                if (sw) {
-                    if (isThis) {
-                        sw.style.background = cat.grad;
-                        sw.style.borderColor = 'rgba(255, 255, 255, 0.35)';
-                        sw.style.boxShadow = `0 3px 10px ${cat.color}66`;
-                    } else {
-                        sw.style.background = '';
-                        sw.style.borderColor = '';
-                        sw.style.boxShadow = '';
-                    }
+            // Обновляем тактильное состояние всех кнопок
+            grid.querySelectorAll('.ti-btn').forEach(btn => {
+                const isThis = btn.dataset.catId === cat.id;
+                btn.classList.toggle('active', isThis);
+                if (isThis) {
+                    btn.style.background = cat.color;
+                    btn.style.boxShadow = `0 1.5px 0 ${cat.darkShadow}, inset 0 2px 4px rgba(0,0,0,0.18)`;
+                } else {
+                    btn.style.background = '';
+                    btn.style.boxShadow = '';
                 }
             });
 
@@ -7408,29 +7359,18 @@ function createWindTurbine(x, y, scale) {
                 }
             });
 
-            // Текст обновляется в зарезервированном нижнем блоке — кнопки выше не сдвигаются ни на пиксель!
             hintBox.innerHTML = `<div><strong style="color:${cat.color}">${cat.icon} Топ-места:</strong> ${cat.hint}</div>`;
         }
 
-        // Создаём строки с тумблерами
+        // Создаём тактильные кнопки
         TOUR_CATEGORIES.forEach(cat => {
-            const row = document.createElement('div');
-            row.className = 'ti-row';
-            row.dataset.catId = cat.id;
-            row.setAttribute('role', 'switch');
-            row.setAttribute('aria-checked', 'false');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ti-btn';
+            btn.dataset.catId = cat.id;
+            btn.innerHTML = `<span class="ti-icon">${cat.icon}</span><span>${cat.label}</span>`;
 
-            row.innerHTML = `
-                <div class="ti-label-wrap">
-                    <span class="ti-icon">${cat.icon}</span>
-                    <span>${cat.label}</span>
-                </div>
-                <div class="ti-switch">
-                    <div class="ti-knob"></div>
-                </div>
-            `;
-
-            row.addEventListener('click', () => {
+            btn.addEventListener('click', () => {
                 if (activeCatId === cat.id) {
                     applyTourFilter(null);
                 } else {
@@ -7438,12 +7378,12 @@ function createWindTurbine(x, y, scale) {
                 }
             });
 
-            list.appendChild(row);
+            grid.appendChild(btn);
         });
 
         resetBtn.addEventListener('click', () => applyTourFilter(null));
 
-        island.appendChild(list);
+        island.appendChild(grid);
         island.appendChild(hintBox);
         document.body.appendChild(island);
     })();
