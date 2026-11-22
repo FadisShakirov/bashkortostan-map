@@ -4917,7 +4917,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
 
             const wrapper = document.createElementNS(svgNS, 'g');
             // Масштаб (пчела меньше орла)
-            const scale = CONFIG.animalScale * (animalCfg.scaleMultiplier || 1) * (animalType === 'eagle' ? 1.5 : 3); 
+            const scale = CONFIG.animalScale * (animalCfg.scaleMultiplier || 1) * (animalType === 'eagle' ? 2 : 4); 
             
             const animalContent = animalType === 'eagle' ? createEagle() : createBee();
             
