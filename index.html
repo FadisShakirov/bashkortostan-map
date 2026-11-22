@@ -69,15 +69,62 @@
         filter: brightness(1.6) drop-shadow(0 0 10px rgba(255,255,255,0.8)) !important;
     }
 
-    :root {
-        --road-color: #ffffff;
-        --road-width: 2;
+     :root {
+        --road-color: #3b4046;        /* Дневной цвет графитового асфальта */
+        --road-width: 2.2;
         --road-opacity: 0.4;
-        --district-label-opacity: 0.8;
-        --city-label-opacity: 0.9;
+        --district-label-opacity: 0.6;
+        --city-label-opacity: 1;
+    }
+
+    body.dark-mode {
+        --road-color: #ffb961;        /* Приглушённый тёпло-жёлтый свет трассы ночью */
+        --road-opacity: 0.05;
     }
 
     #roads-layer { pointer-events: none; }
+
+    .road-regional {
+        fill: none;
+        stroke: var(--road-color);
+        stroke-width: var(--road-width);
+        stroke-opacity: var(--road-opacity);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: stroke 0.4s ease, stroke-opacity 0.4s ease;
+    }
+
+    /* Слои фактуры асфальта (видны только днём, ночью плавно скрываются) */
+    .road-shoulder,
+    .road-asphalt-grain-light,
+    .road-asphalt-grain-dark {
+        fill: none;
+        pointer-events: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: opacity 0.4s ease;
+    }
+
+    body.dark-mode .road-shoulder,
+    body.dark-mode .road-asphalt-grain-light,
+    body.dark-mode .road-asphalt-grain-dark {
+        opacity: 0 !important;
+    }
+
+    /* Ночной мягкий ореол фонарей вдоль трассы */
+    .road-night-halo {
+        fill: none;
+        stroke: #f1c40f;
+        stroke-width: 4.5;
+        stroke-opacity: 0;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        pointer-events: none;
+        transition: stroke-opacity 0.4s ease;
+    }
+    body.dark-mode .road-night-halo {
+        stroke-opacity: 0.14;
+    }
 
     .road-regional {
         fill: none;
@@ -91,7 +138,7 @@
 
     .city { pointer-events: none; }
     .city-halo { fill: rgba(255,255,255,0.7); }
-    .city-dot { fill: #d63031; stroke: #fff; stroke-width: 0.8; }
+    .city-dot { fill: #d63031; stroke: #fff; stroke-width: 0.2; }
     .city-capital .city-dot { fill: #e17055; }
     .city-capital .city-name { font-size: 7px; }
 
@@ -5798,7 +5845,7 @@ spawnRoamingAnimal('Зилаирский',    createRoeDeer, { scale: 0.45, spee
     // --- РАЗМЕЩЕНИЕ ЗАВОДА ---
     // Ставим его рядом с городом Салават
     const refinery = createRefinery();
-    refinery.setAttribute('transform', 'translate(185, 345) scale(0.6)'); // <-- УМЕНЬШЕНО В 2 РАЗА
+    refinery.setAttribute('transform', 'translate(190, 351) scale(0.9)'); // <-- УМЕНЬШЕНО В 2 РАЗА
     staticLayer.appendChild(refinery);
 
    /* ================================================================

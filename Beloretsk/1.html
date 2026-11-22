@@ -269,10 +269,14 @@
         padding: 10px 6px; 
         border-radius: 12px; 
         text-decoration: none;
+        font-family: inherit;
         font-weight: 700; 
         font-size: 13px;
-        color: #fff; 
-        border: none; 
+        /* Единый стиль: белые в светлом режиме и OLED-чёрные в тёмном (через переменные --pill-*) */
+        background: var(--pill-bg);
+        color: var(--pill-text);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 10px rgba(0,0,0,0.08);
         cursor: pointer; 
         width: 100%; 
         height: 100%;
@@ -280,16 +284,21 @@
         box-sizing: border-box; 
         white-space: nowrap;
         transform: translateY(0);
-        transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+        transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
     }
 
-    .action-btn:hover { filter: brightness(1.08); }
+    .action-btn:hover {
+        filter: brightness(1.05);
+    }
+
     .action-btn:active {
         transform: translateY(3px) !important;
         box-shadow: 0 0 0 transparent !important;
     }
+
+    .action-btn svg { width: 19px; height: 19px; fill: currentColor; flex-shrink: 0; }
     .car-btn   { background: #0984e3; box-shadow: 0 3px 0 #065ca3, 0 4px 10px rgba(0,0,0,0.18); }
     .bus-btn   { background: #e17055; box-shadow: 0 3px 0 #b34b32, 0 4px 10px rgba(0,0,0,0.18); }
     .train-btn { background: #00b894; box-shadow: 0 3px 0 #008268, 0 4px 10px rgba(0,0,0,0.18); }
@@ -538,6 +547,19 @@
         ];
 
         const ATTRACTIONS_DATA = [
+             {
+                id: 'card-iremel',
+                categories: ['mountains', 'nature'],
+                image: 'parkiremel.jpg',
+                alt: 'Природный парк Иремель',
+                title: 'Природный парк «Иремель»',
+                shortDesc: 'Вторая по величине вершина Южного Урала (1582 м) и священная гора башкир. Место силы с суровой красотой горной тундры, курумниками и панорамами на десятки километров вокруг.',
+                fullDesc: 'Природный парк «Иремель» создан для сохранения уникальных горных экосистем вокруг массива Большой Иремель (1582 м). Считается, что гора обладает мощной положительной энергетикой, а в древности башкиры считали её священной и запрещали подниматься на вершину без особой нужды. На пути к плато сменяются четыре природных пояса: от реликтовой темнохвойной тайги до альпийских лугов и горной тундры с каменными реками-курумниками. Основной заезд на автомобиле осуществляется через село Тюлюк, где расположен контрольно-пропускной пункт парка.',
+                yandexUrl: 'https://yandex.ru' + '/maps/?rtext=~54.6142,58.7845&rtt=auto',
+                dgisUrl: 'https://2gis.ru' + '/geo/58.7845,54.6142',
+                busUrl: 'https://автовокзалы-рб.рф',
+                trainUrl: 'https://rzd.ru'
+            },
             {
                 id: 'card-aygir',
                 categories: ['mountains', 'rafting'],
@@ -546,10 +568,10 @@
                 title: 'Достопримечательность: Айгир',
                 shortDesc: 'Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами.',
                 fullDesc: 'Айгир — это не просто скалы, а настоящая «Мекка» для туристов Южного Урала. Здесь, на северном склоне хребта Караташ, возвышаются знаменитые «Зубы Шурале» (их также называют Орлиными скалами). С высоты около 689 метров открывается захватывающая панорама на изгиб реки Малый Инзер и окрестные горные хребты. Рядом с горой течёт одноимённый водопад, особенно красивый весной и летом. Место овеяно легендами: по одной из них, название происходит от башкирского «айғыр» — «жеребец». Сюда приезжают ради рассветов, фотосессий и треккинга — маршруты подходят как для новичков, так и для опытных путешественников.',
-                yandexUrl: 'https://yandex.ru',
-                dgisUrl: 'https://2gis.ru',
+                yandexUrl: 'https://yandex.ru/maps/?rtext=~Айгир&rtt=auto" target="_blank',
+                dgisUrl: 'https://2gis.ru/geo/57.696168,54.122716',
                 busUrl: 'https://автовокзалы-рб.рф',
-                trainUrl: 'https://rzd.ru'
+                trainUrl: 'https://автовокзалы-рб.рф'
             },
             {
                 id: 'card-abzakovo',
@@ -559,10 +581,10 @@
                 title: 'Горнолыжный комплекс «Абзаково»',
                 shortDesc: 'Один из самых современных курортов Башкортостана. Зимой здесь катаются на лыжах и сноуборде, а летом — гуляют, отдыхают у воды и посещают аквапарк. «Уральская Швейцария» — так называют это место за красоту гор и высокий уровень сервиса.',
                 fullDesc: 'Курорт «Абзаково» работает круглый год и предлагает 13 трасс общей протяжённостью около 18 км с перепадом высот до 320 метров. Трассы проходят через лесной массив, поэтому катание сопровождается потрясающими видами на горы. Для профессионалов подготовлены склоны, соответствующие стандартам FIS. Пять современных подъёмников доставляют на вершины до 5000 человек в час, а система искусственного заснеживания гарантирует стабильное покрытие. Помимо горнолыжного спорта, здесь есть аквапарк, спа-комплекс, зоопарк, хаски-город и развлекательный центр. Опытные инструкторы помогут новичкам, а пункты проката, кафе и медпункт работают прямо у подъёмников.',
-                yandexUrl: 'https://yandex.ru',
-                dgisUrl: 'https://2gis.ru',
+                yandexUrl: 'https://yandex.ru/maps/?rtext=~Абзаково&rtt=auto',
+                dgisUrl: 'https://2gis.ru/geo/58.590899,53.831546',
                 busUrl: 'https://автовокзалы-рб.рф',
-                trainUrl: 'https://rzd.ru'
+                trainUrl: 'https://ticket.rzd.ru/'
             },
             {
                 id: 'card-inzer',
@@ -572,10 +594,10 @@
                 title: 'Инзерские зубчатки',
                 shortDesc: 'Живописный горный хребет в междуречье Большого Инзера и Тирляна. Главная особенность — скальный цирк из причудливых скал-«зубцов» высотой до 35 метров. Пейзажи напоминают декорации к фильму «Аватар».',
                 fullDesc: 'Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды.',
-                yandexUrl: 'https://yandex.ru',
-                dgisUrl: 'https://2gis.ru',
+                yandexUrl: 'https://yandex.ru/maps/?rtext=~Инзерские%20зубчатки&rtt=auto',
+                dgisUrl: 'https://2gis.ru/geo/58.3622,54.2639',
                 busUrl: 'https://автовокзалы-рб.рф',
-                trainUrl: 'https://rzd.ru'
+                trainUrl: 'https://ticket.rzd.ru/'
             }
         ];
 
@@ -804,25 +826,28 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
     }
 
         // ==========================================
-        // 3. ОРИГИНАЛЬНЫЕ ССЫЛКИ НА АГРЕГАТОРЫ
-        // ==========================================
-        function initDistrictServices() {
-            const titleEl = document.querySelector('h1');
-            const districtName = titleEl ? titleEl.textContent.trim() : 'Белорецкий район';
-            const foodQuery = encodeURIComponent(`кафе и рестораны ${districtName}`);
+    // 2. ССЫЛКИ НА АГРЕГАТОРЫ (Еда и Жилье)
+    // ==========================================
+    function initDistrictServices() {
+        const titleEl = document.querySelector('h1');
+        const districtName = titleEl ? titleEl.textContent.trim() : 'Белорецкий район';
+        
+        const foodQuery = encodeURIComponent(`кафе и рестораны ${districtName}`);
+        const hotelQuery = encodeURIComponent(`отели ${districtName}`);
 
-            const links = {
-                'yandex-food': `https://yandex.ru{foodQuery}`,
-                '2gis-food': `https://2gis.ru`,
-                'yandex-travel': `https://yandex.ru`,
-                'ostrovok': `https://ostrovok.ru`
-            };
+        const links = {
+            'yandex-food': `https://yandex.ru/maps/?mode=search&text=${foodQuery}`,
+            '2gis-food': `https://2gis.ru/search/%D0%BA%D0%B0%D1%84%D0%B5%20%D0%B8%20%D1%80%D0%B5%D1%81%D1%82%D0%BE%D1%80%D0%B0%D0%BD%D1%8B%20%D0%91%D0%B5%D0%BB%D0%BE%D1%80%D0%B5%D1%86%D0%BA%D0%B8%D0%B9%20%D1%80%D0%B0%D0%B9%D0%BE%D0%BD?m=57.850882%2C54.047921%2F9.11`,
+            'yandex-travel': `https://travel.yandex.ru/hotels/beloretsky-district/`,
+            'ostrovok': `https://ostrovok.ru/hotel/russia/beloreck/`,
+          
+        };
 
-            for (const [key, url] of Object.entries(links)) {
-                const linkEl = document.querySelector(`a[data-service="${key}"]`);
-                if (linkEl) linkEl.href = url;
-            }
+        for (const [key, url] of Object.entries(links)) {
+            const linkEl = document.querySelector(`a[data-service="${key}"]`);
+            if (linkEl) linkEl.href = url;
         }
+    }
 
         // ==========================================
         // 4. ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ

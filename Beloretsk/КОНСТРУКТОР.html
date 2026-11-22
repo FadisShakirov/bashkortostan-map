@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор достопримечательностей — Карта Башкортостана</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1e272e;
+            --muted: #576574;
+            --border: #dfe4ea;
+            --accent: #0984e3;
+            --accent-hover: #0770c2;
+            --success: #00b894;
+            --danger: #e74c3c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .header {
+            max-width: 1280px;
+            margin: 0 auto 20px auto;
+            background: var(--card);
+            padding: 18px 24px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .header h1 { font-size: 20px; font-weight: 800; }
+        .header p { font-size: 13.5px; color: var(--muted); }
+
+        .layout {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            background: #fafbfc;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: #ffffff;
+        }
+
+        textarea { resize: vertical; min-height: 75px; }
+
+        .cat-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: #f8f9fa;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .cat-chip input { display: none; }
+        .cat-chip.checked {
+            background: #e3f2fd;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 11px;
+            border: none;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.08s ease, opacity 0.2s;
+        }
+
+        .btn:active { transform: translateY(2px); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-outline { background: #f1f3f6; color: var(--text); border: 1px solid var(--border); }
+        .btn-danger  { background: rgba(231, 76, 60, 0.12); color: var(--danger); padding: 6px 10px; font-size: 12px; }
+
+        .form-actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Список добавленных карточек */
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fafbfc;
+        }
+
+        .item-info strong { display: block; font-size: 14.5px; }
+        .item-info span { font-size: 12px; color: var(--muted); }
+
+        .item-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+        /* Окно готового кода */
+        pre.code-output {
+            background: #14161f;
+            color: #a3e635;
+            padding: 16px;
+            border-radius: 14px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12.5px;
+            line-height: 1.45;
+            overflow-x: auto;
+            max-height: 360px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .helper-box {
+            background: #eef6fc;
+            border: 1px solid #cce5ff;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 12.5px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>🛠️ Визуальный конструктор карточек района</h1>
+        <p>Заполните поля простым текстом — конструктор сам соберёт ссылки и сгенерирует код <code>ATTRACTIONS_DATA</code></p>
+    </div>
+    <div style="display:flex; gap:8px;">
+        <button type="button" class="btn btn-outline" onclick="openImportModal()">📥 Загрузить свой код</button>
+        <button type="button" class="btn btn-outline" onclick="resetToBeloretsk()">🔄 Пример: Белорецкий р-н</button>
+    </div>
+</div>
+
+<div class="layout">
+    <!-- ЛЕВАЯ ПАНЕЛЬ: ФОРМА ДОБАВЛЕНИЯ / РЕДАКТИРОВАНИЯ -->
+    <div class="panel">
+        <div class="panel-title">
+            <span id="form-mode-title">➕ Добавить достопримечательность</span>
+            <button type="button" class="btn btn-outline" id="cancel-edit-btn" style="display:none; padding:5px 10px; font-size:12px;" onclick="clearForm()">Отмена</button>
+        </div>
+
+        <form id="place-form" onsubmit="savePlace(event)">
+            <input type="hidden" id="edit-index" value="-1">
+
+            <div class="form-grid">
+                <div class="full-width">
+                    <label>Название достопримечательности *</label>
+                    <input type="text" id="f-title" placeholder="Например: Гора Ямантау или Скалы Айгир" required oninput="autoFillLinks()">
+                </div>
+
+                <div>
+                    <label>Имя файла фото в папке района *</label>
+                    <input type="text" id="f-image" placeholder="Например: aygir.jpg" required>
+                </div>
+
+                <div>
+                    <label>Краткая подпись к фото (alt)</label>
+                    <input type="text" id="f-alt" placeholder="Например: Скалы Айгир">
+                </div>
+
+                <div class="full-width">
+                    <label>Категории (выберите одну или несколько)</label>
+                    <div class="cat-checkboxes" id="f-categories"></div>
+                </div>
+
+                <div class="full-width">
+                    <label>Краткое описание (видно сразу в карточке) *</label>
+                    <textarea id="f-short" placeholder="2–3 ярких предложения о том, чем знаменито это место..." required></textarea>
+                </div>
+
+                <div class="full-width">
+                    <label>Подробное описание (раскрывается при клике на карточку)</label>
+                    <textarea id="f-full" style="min-height:105px;" placeholder="История, легенды, высота, советы туристам..."></textarea>
+                </div>
+
+                <!-- Блок умной генерации ссылок -->
+                <div class="full-width" style="border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+                    <label style="color:var(--accent);">📍 Настройка маршрутов (заполняется автоматически из названия)</label>
+                </div>
+
+                <div>
+                    <label>Точка для Яндекс Карт (после ~)</label>
+                    <input type="text" id="f-yandex-query" placeholder="Айгир">
+                </div>
+
+                <div>
+                    <label>Координаты из 2ГИС (долгота,широта)</label>
+                    <input type="text" id="f-dgis-coords" placeholder="57.696168,54.122716">
+                </div>
+
+                <div>
+                    <label>Ссылка на автобус</label>
+                    <input type="text" id="f-bus" value="https://автовокзалы-рб.рф">
+                </div>
+
+                <div>
+                    <label>Ссылка на поезд / электричку</label>
+                    <input type="text" id="f-train" value="https://rzd.ru">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submit-btn">💾 Добавить в список</button>
+                <button type="button" class="btn btn-outline" onclick="clearForm()">Очистить поля</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ: СПИСОК КАРТОЧЕК И ГОТОВЫЙ КОД -->
+    <div class="panel">
+        <div class="panel-title">
+            <span>📋 Карточки в этом районе (<span id="items-count">0</span>)</span>
+        </div>
+
+        <div class="items-list" id="items-list"></div>
+
+        <div class="panel-title" style="margin-top:10px;">
+            <span>📦 Готовый код для вставки в 1.html</span>
+            <button type="button" class="btn btn-success" id="copy-btn" onclick="copyGeneratedCode()">📋 Скопировать код</button>
+        </div>
+
+        <pre class="code-output" id="code-output"></pre>
+
+        <div class="helper-box">
+            <strong>Куда вставить:</strong> откройте файл <code>1.html</code> нужного района, найдите строку <code>const ATTRACTIONS_DATA = [ ... ];</code> и замените её на скопированный код.
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ИМПОРТА СУЩЕСТВУЮЩЕГО КОДА -->
+<div id="import-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:18px; padding:22px; max-width:650px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+        <h3 style="margin-bottom:8px;">📥 Вставьте существующий массив <code>ATTRACTIONS_DATA</code></h3>
+        <p style="font-size:13px; color:#576574; margin-bottom:12px;">Скопируйте из вашего <code>1.html</code> блок начиная с <code>[</code> и заканчивая <code>];</code> — конструктор разберёт его в удобные карточки для редактирования.</p>
+        <textarea id="import-textarea" style="min-height:180px; font-family:monospace; font-size:12px;" placeholder="const ATTRACTIONS_DATA = [ ... ];"></textarea>
+        <div style="margin-top:14px; display:flex; gap:10px; justify-content:flex-end;">
+            <button type="button" class="btn btn-outline" onclick="closeImportModal()">Отмена</button>
+            <button type="button" class="btn btn-primary" onclick="runImportCode()">Загрузить в конструктор</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const AVAILABLE_CATEGORIES = [
+        { id: 'mountains', icon: '🏔️', label: 'Горы и скалы' },
+        { id: 'ski',       icon: '🎿', label: 'Горнолыжки' },
+        { id: 'spa',       icon: '♨️', label: 'Санатории' },
+        { id: 'rafting',   icon: '🚣', label: 'Сплавы' },
+        { id: 'nature',    icon: '🌲', label: 'Заповедники' }
+    ];
+
+    // Предзагруженные 3 достопримечательности Белорецкого района
+    const BELORETSK_DEFAULT = [
+        {
+            id: 'card-aygir',
+            categories: ['mountains', 'rafting'],
+            image: 'aygir.jpg',
+            alt: 'Скалы Айгир',
+            title: 'Достопримечательность: Айгир',
+            shortDesc: 'Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами.',
+            fullDesc: 'Айгир — это не просто скалы, а настоящая «Мекка» для туристов Южного Урала. Здесь, на северном склоне хребта Караташ, возвышаются знаменитые «Зубы Шурале» (их также называют Орлиными скалами). С высоты около 689 метров открывается захватывающая панорама на изгиб реки Малый Инзер и окрестные горные хребты. Рядом с горой течёт одноимённый водопад, особенно красивый весной и летом. Место овеяно легендами: по одной из них, название происходит от башкирского «айғыр» — «жеребец». Сюда приезжают ради рассветов, фотосессий и треккинга — маршруты подходят как для новичков, так и для опытных путешественников.',
+            yandexUrl: 'https://yandex.ru',
+            dgisUrl: 'https://2gis.ru',
+            busUrl: 'https://автовокзалы-рб.рф',
+            trainUrl: 'https://rzd.ru'
+        },
+        {
+            id: 'card-abzakovo',
+            categories: ['ski', 'spa'],
+            image: 'Abzakovo.jpg',
+            alt: 'Горнолыжный комплекс Абзаково',
+            title: 'Горнолыжный комплекс «Абзаково»',
+            shortDesc: 'Один из самых современных курортов Башкортостана. Зимой здесь катаются на лыжах и сноуборде, а летом — гуляют, отдыхают у воды и посещают аквапарк. «Уральская Швейцария» — так называют это место за красоту гор и высокий уровень сервиса.',
+            fullDesc: 'Курорт «Абзаково» работает круглый год и предлагает 13 трасс общей протяжённостью около 18 км с перепадом высот до 320 метров. Трассы проходят через лесной массив, поэтому катание сопровождается потрясающими видами на горы. Для профессионалов подготовлены склоны, соответствующие стандартам FIS. Пять современных подъёмников доставляют на вершины до 5000 человек в час, а система искусственного заснеживания гарантирует стабильное покрытие. Помимо горнолыжного спорта, здесь есть аквапарк, спа-комплекс, зоопарк, хаски-город и развлекательный центр. Опытные инструкторы помогут новичкам, а пункты проката, кафе и медпункт работают прямо у подъёмников.',
+            yandexUrl: 'https://yandex.ru',
+            dgisUrl: 'https://2gis.ru',
+            busUrl: 'https://автовокзалы-рб.рф',
+            trainUrl: 'https://rzd.ru'
+        },
+        {
+            id: 'card-inzer',
+            categories: ['mountains', 'nature'],
+            image: 'Inzerskie-zubchatki.jpg',
+            alt: 'Инзерские зубчатки',
+            title: 'Инзерские зубчатки',
+            shortDesc: 'Живописный горный хребет в междуречье Большого Инзера и Тирляна. Главная особенность — скальный цирк из причудливых скал-«зубцов» высотой до 35 метров. Пейзажи напоминают декорации к фильму «Аватар».',
+            fullDesc: 'Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды.',
+            yandexUrl: 'https://yandex.ru',
+            dgisUrl: 'https://2gis.ru',
+            busUrl: 'https://автовокзалы-рб.рф',
+            trainUrl: 'https://rzd.ru'
+        }
+    ];
+
+    let places = JSON.parse(JSON.stringify(BELORETSK_DEFAULT));
+
+    // Отрисовка чипсов категорий в форме
+    function renderCategoryChips(selected = []) {
+        const box = document.getElementById('f-categories');
+        box.innerHTML = AVAILABLE_CATEGORIES.map(c => {
+            const isChecked = selected.includes(c.id);
+            return `
+                <label class="cat-chip ${isChecked ? 'checked' : ''}" onclick="toggleChip(this)">
+                    <input type="checkbox" value="${c.id}" ${isChecked ? 'checked' : ''}>
+                    <span>${c.icon}</span><span>${c.label}</span>
+                </label>
+            `;
+        }).join('');
+    }
+
+    function toggleChip(labelEl) {
+        setTimeout(() => {
+            const cb = labelEl.querySelector('input');
+            labelEl.classList.toggle('checked', cb.checked);
+        }, 0);
+    }
+
+    // Автоподстановка поисковой точки Яндекса из названия
+    function autoFillLinks() {
+        const editIdx = parseInt(document.getElementById('edit-index').value, 10);
+        if (editIdx !== -1) return; // При редактировании не затираем вручную введённые данные
+        const rawTitle = document.getElementById('f-title').value.trim();
+        const cleanName = rawTitle.replace(/^Достопримечательность:\s*/i, '').replace(/[«»"]/g, '');
+        document.getElementById('f-yandex-query').value = cleanName;
+        if (!document.getElementById('f-alt').value) {
+            document.getElementById('f-alt').placeholder = cleanName || 'Скалы Айгир';
+        }
+    }
+
+    // Сохранение новой или отредактированной карточки
+    function savePlace(e) {
+        e.preventDefault();
+        const editIdx = parseInt(document.getElementById('edit-index').value, 10);
+        const title = document.getElementById('f-title').value.trim();
+        const image = document.getElementById('f-image').value.trim();
+        const alt = document.getElementById('f-alt').value.trim() || title;
+        const shortDesc = document.getElementById('f-short').value.trim();
+        const fullDesc = document.getElementById('f-full').value.trim() || shortDesc;
+
+        const selectedCats = Array.from(document.querySelectorAll('#f-categories input:checked')).map(cb => cb.value);
+        if (selectedCats.length === 0) selectedCats.push('mountains');
+
+        const yQuery = document.getElementById('f-yandex-query').value.trim() || title;
+        const dCoords = document.getElementById('f-dgis-coords').value.trim().replace(/\s+/g, '');
+        const busUrl = document.getElementById('f-bus').value.trim() || 'https://автовокзалы-рб.рф';
+        const trainUrl = document.getElementById('f-train').value.trim() || 'https://rzd.ru';
+
+        const yandexUrl = yQuery.startsWith('http')
+            ? yQuery
+            : `https://yandex.ru{encodeURIComponent(yQuery)}&rtt=auto`;
+
+        const dgisUrl = dCoords.startsWith('http')
+            ? dCoords
+            : (dCoords ? `https://2gis.ru{dCoords}` : `https://2gis.ru{encodeURIComponent(yQuery)}`);
+
+        const idSlug = 'card-' + (editIdx !== -1 ? places[editIdx].id.replace(/^card-/, '') : Math.random().toString(36).slice(2, 7));
+
+        const itemObj = {
+            id: idSlug,
+            categories: selectedCats,
+            image,
+            alt,
+            title,
+            shortDesc,
+            fullDesc,
+            yandexUrl,
+            dgisUrl,
+            busUrl,
+            trainUrl
+        };
+
+        if (editIdx === -1) {
+            places.push(itemObj);
+        } else {
+            places[editIdx] = itemObj;
+        }
+
+        clearForm();
+        renderAll();
+    }
+
+    // Загрузка карточки в форму для редактирования
+    function editPlace(index) {
+        const p = places[index];
+        document.getElementById('edit-index').value = index;
+        document.getElementById('form-mode-title').textContent = `✏️ Редактирование: ${p.title}`;
+        document.getElementById('submit-btn').textContent = '✅ Сохранить изменения';
+        document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
+
+        document.getElementById('f-title').value = p.title;
+        document.getElementById('f-image').value = p.image;
+// Загрузка карточки в форму для редактирования
+    function editPlace(index) {
+        const p = places[index];
+        document.getElementById('edit-index').value = index;
+        document.getElementById('form-mode-title').textContent = `✏️ Редактирование: ${p.title}`;
+        document.getElementById('submit-btn').textContent = '✅ Сохранить изменения';
+        document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
+
+        document.getElementById('f-title').value = p.title;
+        document.getElementById('f-image').value = p.image;
+        document.getElementById('f-alt').value = p.alt;
+        document.getElementById('f-short').value = p.shortDesc;
+        document.getElementById('f-full').value = p.fullDesc;
+        document.getElementById('f-bus').value = p.busUrl;
+        document.getElementById('f-train').value = p.trainUrl;
+
+        // Извлекаем название из ссылки Яндекса и координаты из 2ГИС
+        const yMatch = p.yandexUrl.match(/rtext=~([^&]+)/);
+        document.getElementById('f-yandex-query').value = yMatch ? decodeURIComponent(yMatch[1]) : p.yandexUrl;
+
+        const dMatch = p.dgisUrl.match(/geo\/([^/?]+)/);
+        document.getElementById('f-dgis-coords').value = dMatch ? dMatch[1] : p.dgisUrl;
+
+        renderCategoryChips(p.categories);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deletePlace(index) {
+        if (!confirm(`Удалить «${places[index].title}»?`)) return;
+        places.splice(index, 1);
+        if (parseInt(document.getElementById('edit-index').value, 10) === index) clearForm();
+        renderAll();
+    }
+
+    function clearForm() {
+        document.getElementById('place-form').reset();
+        document.getElementById('edit-index').value = '-1';
+        document.getElementById('form-mode-title').textContent = '➕ Добавить достопримечательность';
+        document.getElementById('submit-btn').textContent = '💾 Добавить в список';
+        document.getElementById('cancel-edit-btn').style.display = 'none';
+        document.getElementById('f-bus').value = 'https://автовокзалы-рб.рф';
+        document.getElementById('f-train').value = 'https://rzd.ru';
+        renderCategoryChips([]);
+    }
+
+    // Экранирование одинарных кавычек при генерации JS-кода
+    function esc(str) {
+        return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
+    }
+
+    // Отрисовка списка и генерация чистого JS-кода
+    function renderAll() {
+        const listEl = document.getElementById('items-list');
+        const countEl = document.getElementById('items-count');
+        const codeEl = document.getElementById('code-output');
+
+        countEl.textContent = places.length;
+
+        listEl.innerHTML = places.map((p, idx) => {
+            const catNames = p.categories.map(cid => {
+                const found = AVAILABLE_CATEGORIES.find(c => c.id === cid);
+                return found ? `${found.icon} ${found.label}` : cid;
+            }).join(', ');
+
+            return `
+                <div class="item-row">
+                    <div class="item-info">
+                        <strong>${idx + 1}. ${p.title}</strong>
+                        <span>Фото: <code>${p.image}</code> • ${catNames}</span>
+                    </div>
+                    <div class="item-btns">
+                        <button type="button" class="btn btn-outline" style="padding:6px 10px; font-size:12px;" onclick="editPlace(${idx})">✏️</button>
+                        <button type="button" class="btn btn-danger" onclick="deletePlace(${idx})">🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Формируем идеально отформатированный код ATTRACTIONS_DATA
+        const blocks = places.map(p => `            {
+                id: '${esc(p.id)}',
+                categories: [${p.categories.map(c => `'${esc(c)}'`).join(', ')}],
+                image: '${esc(p.image)}',
+                alt: '${esc(p.alt)}',
+                title: '${esc(p.title)}',
+                shortDesc: '${esc(p.shortDesc)}',
+                fullDesc: '${esc(p.fullDesc)}',
+                yandexUrl: '${esc(p.yandexUrl)}',
+                dgisUrl: '${esc(p.dgisUrl)}',
+                busUrl: '${esc(p.busUrl)}',
+                trainUrl: '${esc(p.trainUrl)}'
+            }`);
+
+        codeEl.textContent = `        const ATTRACTIONS_DATA = [\n${blocks.join(',\n')}\n        ];`;
+    }
+
+    function copyGeneratedCode() {
+        const text = document.getElementById('code-output').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copy-btn');
+            const orig = btn.textContent;
+            btn.textContent = '✅ Скопировано!';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+        });
+    }
+
+    function resetToBeloretsk() {
+        places = JSON.parse(JSON.stringify(BELORETSK_DEFAULT));
+        clearForm();
+        renderAll();
+    }
+
+    // Импорт существующего кода из 1.html
+    function openImportModal() {
+        document.getElementById('import-modal').style.display = 'flex';
+    }
+    function closeImportModal() {
+        document.getElementById('import-modal').style.display = 'none';
+    }
+    function runImportCode() {
+        let raw = document.getElementById('import-textarea').value.trim();
+        if (!raw) return;
+        try {
+            raw = raw.replace(/^[\s\S]*?\[/, '[').replace(/\];?\s*$/, ']');
+            const parsed = (new Function('return ' + raw))();
+            if (Array.isArray(parsed)) {
+                places = parsed;
+                clearForm();
+                renderAll();
+                closeImportModal();
+            } else {
+                alert('Не удалось распознать массив карточек.');
+            }
+        } catch (err) {
+            alert('Ошибка в синтаксисе вставленного кода: ' + err.message);
+        }
+    }
+
+    // Старт
+    renderCategoryChips([]);
+    renderAll();
+</script>
+</body>
+</html>
