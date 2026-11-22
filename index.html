@@ -809,9 +809,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function resizeCanvas() {
-        // Снижаем внутреннее разрешение холста в 2 раза (0.5):
-        // для мягких облаков разницы не видно, а нагрузка на GPU падает в 4 раза!
-        const resScale = 0.5;
+        const isDark = document.body.classList.contains('dark-mode');
+        // Ночью используем реальную плотность пикселей экрана (Retina/4K) для кристально чётких звёзд,
+        // а днём оставляем 0.5 для лёгких воздушных облаков
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const resScale = isDark ? dpr : 0.5;
+
         width = canvas.width = Math.floor(window.innerWidth * resScale);
         height = canvas.height = Math.floor(window.innerHeight * resScale);
         canvas.style.width = window.innerWidth + 'px';
@@ -2586,23 +2589,34 @@ document.addEventListener('DOMContentLoaded', () => {
             document.head.appendChild(style);
         }
 
-        // Параметры фар и разнесение задних габаритов (2 фонаря для авто/автобуса, 1 для мотоцикла)
+        // Параметры фар и габаритов (ваши точные настройки пучка света + 2 фары для авто/автобуса)
         const lightCfg = type === 'bus'
-            ? { frontX: 9, rearX: -5.7, rx: 5.5, ry: 3.4, tailR: 1.9, tailSpreadY: 1.05 }
+            ? { frontX: 9,   rearX: -5.7, rx: 5.5, ry: 3.4, headSpreadY: 1.05, tailR: 1.9, tailSpreadY: 1.05 }
             : type === 'moto'
-                ? { frontX: 4.5, rearX: -2.6, rx: 2.5, ry: 2.0, tailR: 1.5, tailSpreadY: 0 }
-                : { frontX: 7.5, rearX: -3.8, rx: 4.0, ry: 2.7, tailR: 1.7, tailSpreadY: 0.85 };
+                ? { frontX: 4.5, rearX: -2.6, rx: 2.5, ry: 2.0, headSpreadY: 0,    tailR: 1.5, tailSpreadY: 0 }
+                : { frontX: 7.5, rearX: -3.8, rx: 4.0, ry: 2.7, headSpreadY: 0.85, tailR: 1.7, tailSpreadY: 0.85 };
 
         const lightsG = el('g', { class: 'vehicle-night-lights' });
 
-        // Спереди: рассеянный свет фар
-        lightsG.appendChild(el('ellipse', {
-            cx: lightCfg.frontX,
-            cy: '0',
-            rx: lightCfg.rx,
-            ry: lightCfg.ry,
-            fill: 'url(#headlight-soft-grad)'
-        }));
+        // Спереди: 2 фары с вашими точными параметрами rx/ry для авто и автобуса, 1 для мотоцикла
+        if (lightCfg.headSpreadY > 0) {
+            lightsG.appendChild(el('ellipse', {
+                cx: lightCfg.frontX, cy: -lightCfg.headSpreadY,
+                rx: lightCfg.rx, ry: lightCfg.ry,
+                fill: 'url(#headlight-soft-grad)'
+            }));
+            lightsG.appendChild(el('ellipse', {
+                cx: lightCfg.frontX, cy: lightCfg.headSpreadY,
+                rx: lightCfg.rx, ry: lightCfg.ry,
+                fill: 'url(#headlight-soft-grad)'
+            }));
+        } else {
+            lightsG.appendChild(el('ellipse', {
+                cx: lightCfg.frontX, cy: '0',
+                rx: lightCfg.rx, ry: lightCfg.ry,
+                fill: 'url(#headlight-soft-grad)'
+            }));
+        }
 
         // Сзади: парные стоп-сигналы для авто и автобусов, одинарный для мотоцикла
         if (lightCfg.tailSpreadY > 0) {
@@ -3328,7 +3342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 2. Серебристая рыбка (хариус / таймень), прыгающая по дуге
-        const fishScale = 0.8;
+        const fishScale = 1;
         const fishWrapper = el('g', { transform: `scale(${fishScale * dir}, ${fishScale})` });
         const fishBody = el('g', { opacity: '0' });
 
@@ -7087,7 +7101,7 @@ function createWindTurbine(x, y, scale) {
             }
         ];
 
-        // 2. СТИЛИ ТАКТИЛЬНЫХ КНОПОК (Material / Tactile 3D Push)
+        // 2. СТИЛИ ТАКТИЛЬНЫХ КНОПОК (OLED Pure Black в ночном режиме)
         const style = document.createElement('style');
         style.id = 'tourist-island-style';
         style.textContent = `
@@ -7106,10 +7120,11 @@ function createWindTurbine(x, y, scale) {
                 transition: background 0.3s ease, border-color 0.3s ease;
                 box-sizing: border-box;
             }
+            /* OLED-чёрный фон и тонкая рамка островка */
             body.dark-mode #tourist-helper-island {
-                background: rgba(24, 26, 38, 0.94);
-                border-color: rgba(116, 185, 255, 0.22);
-                box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+                background: #000000;
+                border: 1px solid #1e1e1e;
+                box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95);
             }
 
             .ti-header {
@@ -7127,7 +7142,7 @@ function createWindTurbine(x, y, scale) {
                 align-items: center;
                 gap: 6px;
             }
-            body.dark-mode .ti-title { color: #f5f6fa; }
+            body.dark-mode .ti-title { color: #d2d6dc; }
 
             .ti-reset {
                 background: rgba(231, 76, 60, 0.12);
@@ -7142,19 +7157,23 @@ function createWindTurbine(x, y, scale) {
                 opacity: 0;
                 transition: opacity 0.2s ease, background 0.15s ease;
             }
+            body.dark-mode .ti-reset {
+                background: #0d0505;
+                border-color: #3a1212;
+                color: #ff6b6b;
+            }
             .ti-reset.visible {
                 visibility: visible;
                 opacity: 1;
             }
             .ti-reset:hover { background: rgba(231, 76, 60, 0.22); }
 
-            /* Сетка кнопок (2 колонки на ПК, плотная сетка без скролла на мобильных) */
+            /* Сетка кнопок */
             .ti-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
-            /* Последняя широкая кнопка на всю ширину 2 колонок */
             .ti-grid .ti-btn:last-child:nth-child(odd) {
                 grid-column: span 2;
             }
@@ -7174,37 +7193,39 @@ function createWindTurbine(x, y, scale) {
                 font-weight: 700;
                 cursor: pointer;
                 user-select: none;
-                /* Объёмная нижняя грань кнопки */
                 box-shadow: 0 3px 0 #cfd6df, 0 4px 8px rgba(0, 0, 0, 0.06);
                 transform: translateY(0);
-                transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease;
+                transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
                 box-sizing: border-box;
                 -webkit-tap-highlight-color: transparent;
             }
+            /* OLED-чёрные кнопки в неактивном состоянии */
             body.dark-mode .ti-btn {
-                background: #2c3047;
-                color: #dfe6e9;
-                border-color: rgba(255, 255, 255, 0.08);
-                box-shadow: 0 3px 0 #181a29, 0 4px 10px rgba(0, 0, 0, 0.3);
+                background: #070707;
+                color: #aeb4be;
+                border: 1px solid #222222;
+                box-shadow: 0 3px 0 #171717;
             }
 
             .ti-btn:hover {
                 background: #ffffff;
             }
             body.dark-mode .ti-btn:hover {
-                background: #363b57;
+                background: #111111;
+                color: #ffffff;
+                border-color: #333333;
             }
 
-            /* Момент физического нажатия пальцем или мышью (кнопка проваливается вниз) */
+            /* Момент физического нажатия */
             .ti-btn:active {
                 transform: translateY(3px) !important;
-                box-shadow: 0 0px 0 transparent, 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+                box-shadow: 0 0px 0 transparent !important;
             }
 
-            /* Активное (вдавленное) состояние выбранной категории */
+            /* Активное (вдавленное) состояние выбранной категории — светится своим цветом */
             .ti-btn.active {
                 color: #ffffff !important;
-                border-color: rgba(255, 255, 255, 0.25);
+                border-color: rgba(255, 255, 255, 0.25) !important;
                 transform: translateY(2px);
             }
 
@@ -7213,7 +7234,7 @@ function createWindTurbine(x, y, scale) {
                 line-height: 1;
             }
 
-            /* Фиксированная зона подсказки снизу (кнопки выше никогда не смещаются) */
+            /* Фиксированная зона подсказки снизу */
             .ti-hint-box {
                 margin-top: 11px;
                 padding: 9px 11px;
@@ -7227,9 +7248,11 @@ function createWindTurbine(x, y, scale) {
                 align-items: center;
                 box-sizing: border-box;
             }
+            /* OLED-чёрный блок подсказки */
             body.dark-mode .ti-hint-box {
-                background: rgba(116, 185, 255, 0.11);
-                color: #dfe6e9;
+                background: #060606;
+                border: 1px solid #1a1a1a;
+                color: #9ca3af;
             }
 
             /* Подсветка районов на карте */
@@ -7297,7 +7320,7 @@ function createWindTurbine(x, y, scale) {
                     box-shadow: 0 2.5px 0 #cfd6df;
                 }
                 body.dark-mode .ti-btn {
-                    box-shadow: 0 2.5px 0 #181a29;
+                    box-shadow: 0 2.5px 0 #171717;
                 }
                 .ti-btn:active {
                     transform: translateY(2.5px) !important;
