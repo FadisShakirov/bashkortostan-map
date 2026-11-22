@@ -7824,8 +7824,365 @@ function createWindTurbine(x, y, scale) {
         });
     })();
 
+/* ================================================================
+       ГЕОГРАФИЧЕСКИ ТОЧНАЯ РАСТИТЕЛЬНОСТЬ РАЙОНОВ БАШКОРТОСТАНА (Авто-генерация + HD-запекание)
+       ================================================================ */
+    (function initGeoForestsLayer() {
+        const oldPlain = document.getElementById('plain-landscape-layer');
+        if (oldPlain) oldPlain.remove();
+        const oldBakedPlain = document.getElementById('baked-plain-landscape-img');
+        if (oldBakedPlain) oldBakedPlain.remove();
 
-});
+        if (!document.getElementById('plain-landscape-style')) {
+            const st = document.createElement('style');
+            st.id = 'plain-landscape-style';
+            st.textContent = `
+                #plain-landscape-layer, #baked-plain-landscape-img {
+                    opacity: 0.92;
+                    transition: opacity 0.5s ease;
+                    pointer-events: none;
+                }
+                body.dark-mode #plain-landscape-layer,
+                body.dark-mode #baked-plain-landscape-img {
+                    opacity: 0.14;
+                }
+            `;
+            document.head.appendChild(st);
+        }
+
+        // 1. Классификация районов по реальным природным зонам Башкирии:
+        // count — сколько рощиц на район; pineRatio — доля хвойных деревьев (0 = только лиственные, 1 = чистая тайга)
+        const FOREST_ZONES = {
+            // 🌲 Хвойная тайга и горно-лесная зона (высокая лесистость, преобладают сосна/ель)
+            taiga: {
+                districts: ['Караидельский', 'Нуримановский', 'Белорецкий', 'Бурзянский', 'Дуванский', 'Белокатайский', 'Кигинский', 'Салаватский', 'Мечетлинский'],
+                grovesCount: 3, pineRatio: 0.85
+            },
+            // 🌲🌳 Смешанные хвойно-широколиственные леса (север и предгорья)
+            mixed: {
+                districts: ['Янаульский', 'Краснокамский', 'Татышлинский', 'Аскинский', 'Балтачевский', 'Бураевский', 'Бирский', 'Мишкинский', 'Благовещенский', 'Иглинский', 'Архангельский', 'Гафурийский', 'Ишимбайский', 'Зилаирский'],
+                grovesCount: 2, pineRatio: 0.50
+            },
+            // 🌳 Широколиственные дубравы, липняки и берёзовые рощи (запад и южные предгорья)
+            broadleaf: {
+                districts: ['Бакалинский', 'Шаранский', 'Туймазинский', 'Белебеевский', 'Ермекеевский', 'Бижбулякский', 'Миякинский', 'Стерлибашевский', 'Фёдоровский', 'Мелеузовский', 'Кугарчинский', 'Зианчуринский', 'Куюргазинский'],
+                grovesCount: 2, pineRatio: 0.15
+            },
+            // 🌾 Лесостепь и степь (редкие берёзовые колки — 1 аккуратная рощица на район)
+            steppe: {
+                districts: ['Илишевский', 'Дюртюлинский', 'Чекмагушевский', 'Кушнаренковский', 'Благоварский', 'Чишминский', 'Давлекановский', 'Альшеевский', 'Кармаскалинский', 'Аургазинский', 'Стерлитамакский', 'Уфимский', 'Учалинский', 'Абзелиловский', 'Баймакский', 'Хайбуллинский'],
+                grovesCount: 1, pineRatio: 0.10
+            }
+        };
+
+        function getDistrictForestProfile(districtName) {
+            const clean = (districtName || '').trim();
+            for (const zone of Object.values(FOREST_ZONES)) {
+                if (zone.districts.some(d => clean.toLowerCase().includes(d.toLowerCase()))) {
+                    return zone;
+                }
+            }
+            return { grovesCount: 1, pineRatio: 0.25 };
+        }
+
+        // Детерминированный генератор псевдослучайных чисел (чтобы рощи всегда стояли на одних и тех же красивых местах)
+        let seed = 4219;
+        function seededRand() {
+            seed = (seed * 16807) % 2147483647;
+            return (seed - 1) / 2147483646;
+        }
+
+        const el = (tag, attrs) => {
+            const node = document.createElementNS(svgNS, tag);
+            for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+            return node;
+        };
+
+        // Собираем координаты всех подписей и городов, чтобы деревья НИКОГДА не залезали на текст
+        const forbiddenZones = [];
+        svg.querySelectorAll('.district-label, .city-name, .city').forEach(node => {
+            try {
+                const b = node.getBBox();
+                if (b && b.width > 0) {
+                    forbiddenZones.push({
+                        x1: b.x - 6, y1: b.y - 6,
+                        x2: b.x + b.width + 6, y2: b.y + b.height + 6
+                    });
+                }
+            } catch (e) {}
+        });
+
+        function isSafeSpot(x, y) {
+            for (let i = 0; i < forbiddenZones.length; i++) {
+                const z = forbiddenZones[i];
+                if (x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2) return false;
+            }
+            return true;
+        }
+
+        // Отрисовка 2.5D-дерева (сосна/ель или берёза/дуб)
+        function drawMiniTree(tx, ty, isPine, scale = 0.85) {
+            const tg = el('g', { transform: `translate(${tx.toFixed(1)}, ${ty.toFixed(1)}) scale(${scale})` });
+            tg.appendChild(el('ellipse', { cx: '1.1', cy: '0.5', rx: '2.3', ry: '1.0', fill: 'rgba(25, 55, 35, 0.24)' }));
+            tg.appendChild(el('rect', { x: '-0.35', y: '-1.6', width: '0.7', height: '1.8', fill: '#5d4037' }));
+
+            if (isPine) {
+                tg.appendChild(el('polygon', { points: '-2.2,-1.2 0,-4.4 2.2,-1.2', fill: '#2d6a4f' }));
+                tg.appendChild(el('polygon', { points: '-1.7,-2.9 0,-6.0 1.7,-2.9', fill: '#40916c' }));
+            } else {
+                // Берёза / дуб (чередуем тёплый зелёный и изумрудный оттенки листвы)
+                const isWarm = seededRand() > 0.5;
+                tg.appendChild(el('circle', { cx: '0', cy: '-3.1', r: '2.2', fill: isWarm ? '#43a047' : '#2e7d32' }));
+                tg.appendChild(el('circle', { cx: '-0.55', cy: '-3.7', r: '1.4', fill: isWarm ? '#81c784' : '#66bb6a' }));
+            }
+            return tg;
+        }
+
+        const plainLayer = el('g', {
+            id: 'plain-landscape-layer',
+            'clip-path': 'url(#bashkortostan-strict-clip)'
+        });
+
+        const placedGroves = [];
+        const pt = svg.createSVGPoint();
+
+        // Проходим по каждому району и подбираем свободные полянки внутри его границ
+        allDistricts.forEach(path => {
+            const name = path.dataset.districtName || '';
+            const profile = getDistrictForestProfile(name);
+            let bbox;
+            try { bbox = path.getBBox(); } catch (e) { return; }
+            if (!bbox || bbox.width < 12 || bbox.height < 12) return;
+
+            let placed = 0;
+            let attempts = 0;
+            while (placed < profile.grovesCount && attempts < 45) {
+                attempts++;
+                // Отступаем от краёв bbox к центру района, чтобы деревья не висели на самой границе
+                const rx = bbox.x + bbox.width * (0.2 + seededRand() * 0.6);
+                const ry = bbox.y + bbox.height * (0.2 + seededRand() * 0.6);
+
+                pt.x = rx;
+                pt.y = ry;
+                // Проверяем: точка строго внутри полигона района, не на тексте и не ближе 15px к соседней роще
+                if (path.isPointInFill && !path.isPointInFill(pt)) continue;
+                if (!isSafeSpot(rx, ry)) continue;
+                if (placedGroves.some(g => Math.hypot(g.x - rx, g.y - ry) < 15)) continue;
+
+                placedGroves.push({ x: rx, y: ry });
+                forbiddenZones.push({ x1: rx - 9, y1: ry - 9, x2: rx + 9, y2: ry + 9 });
+                placed++;
+
+                // Мягкая лесная полянка под рощей
+                plainLayer.appendChild(el('ellipse', {
+                    cx: rx.toFixed(1), cy: (ry + 0.8).toFixed(1), rx: '6.2', ry: '3.0',
+                    fill: 'rgba(45, 106, 79, 0.16)'
+                }));
+
+                // Формируем группу из 3–4 деревьев с учётом породного состава района
+                const treeCount = 3 + (seededRand() > 0.6 ? 1 : 0);
+                const offsets = [
+                    { dx: -2.6, dy: -0.4 },
+                    { dx: 2.2,  dy: -1.0 },
+                    { dx: -0.3, dy: 2.1 },
+                    { dx: 2.8,  dy: 1.4 }
+                ].slice(0, treeCount).sort((a, b) => a.dy - b.dy);
+
+                offsets.forEach(off => {
+                    const isPine = seededRand() < profile.pineRatio;
+                    plainLayer.appendChild(drawMiniTree(rx + off.dx, ry + off.dy, isPine, 0.82));
+                });
+            }
+        });
+
+        const colorField = document.getElementById('seamless-color-field');
+        if (colorField && colorField.nextSibling) {
+            colorField.parentNode.insertBefore(plainLayer, colorField.nextSibling);
+        } else {
+            svg.insertBefore(plainLayer, svg.firstChild);
+        }
+
+        // Запекаем весь лесной покров в лёгкую HD-картинку (0% нагрузки на GPU)
+        setTimeout(() => {
+            const defs = svg.querySelector('defs');
+            if (!defs || !plainLayer.parentNode) return;
+
+            const scaleFactor = 3;
+            const w = 430, h = 540;
+            const tempSvg = document.createElementNS(svgNS, 'svg');
+            tempSvg.setAttribute('xmlns', 'http://w3.org');
+            tempSvg.setAttribute('width', w * scaleFactor);
+            tempSvg.setAttribute('height', h * scaleFactor);
+            tempSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+            tempSvg.appendChild(defs.cloneNode(true));
+            const cloned = plainLayer.cloneNode(true);
+            cloned.style.opacity = '1';
+            tempSvg.appendChild(cloned);
+
+            const svgBlob = new Blob([new XMLSerializer().serializeToString(tempSvg)], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            const img = new Image();
+            img.onload = function () {
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = w * scaleFactor;
+offCanvas.height = h * scaleFactor;
+offCanvas.getContext('2d').drawImage(img, 0, 0, offCanvas.width, offCanvas.height);
+URL.revokeObjectURL(url);
+try 
+{
+const bakedImg = document.createElementNS(svgNS, 'image');
+bakedImg.setAttribute('id', 'baked-plain-landscape-img');
+bakedImg.setAttribute('x', '0');
+bakedImg.setAttribute('y', '0');
+bakedImg.setAttribute('width', w);
+bakedImg.setAttribute('height', h);
+bakedImg.setAttribute('href', offCanvas.toDataURL('image/png')
+);
+plainLayer.parentNode.replaceChild(bakedImg, plainLayer);
+} catch (e) {}
+};
+img.src = url;
+}, 550);
+})
+();
+
+/* ================================================================
+       МЯГКИЙ 3D-РЕЛЬЕФ РАВНИН И ВОЗВЫШЕННОСТЕЙ (Видимые пологие увалы + HD-запекание)
+       ================================================================ */
+    (function initSoftPlainsRelief() {
+        const oldRelief = document.getElementById('soft-plains-relief-layer');
+        if (oldRelief) oldRelief.remove();
+        const oldBaked = document.getElementById('baked-soft-plains-img');
+        if (oldBaked) oldBaked.remove();
+        const oldFilter = document.getElementById('soft-plains-relief-filter');
+        if (oldFilter) oldFilter.remove();
+
+        let defs = svg.querySelector('defs');
+        if (!defs) {
+            defs = document.createElementNS(svgNS, 'defs');
+            svg.insertBefore(defs, svg.firstChild);
+        }
+
+        // Стили наложения (меняйте opacity от 0.35 до 0.70, чтобы регулировать выраженность холмов)
+        const oldStyle = document.getElementById('soft-plains-relief-style');
+        if (oldStyle) oldStyle.remove();
+
+        const st = document.createElementNS(svgNS, 'style');
+        st.id = 'soft-plains-relief-style';
+        st.textContent = `
+            #soft-plains-relief-layer, #baked-soft-plains-img {
+                opacity: 0.9;
+                mix-blend-mode: overlay;
+                transition: opacity 0.5s ease;
+                pointer-events: none;
+            }
+            body.dark-mode #soft-plains-relief-layer,
+            body.dark-mode #baked-soft-plains-img {
+                opacity: 0.15;
+            }
+        `;
+        document.head.appendChild(st);
+
+        const el = (tag, attrs) => {
+            const node = document.createElementNS(svgNS, tag);
+            for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+            return node;
+        };
+
+        // 1. Создаём фильтр пологих холмов-увалов (широкая волна + достаточная высота для читаемой светотени)
+        const filter = el('filter', {
+            id: 'soft-plains-relief-filter',
+            x: '-5%', y: '-5%', width: '110%', height: '110%'
+        });
+
+        filter.appendChild(el('feTurbulence', {
+            type: 'fractalNoise',
+            baseFrequency: '0.0062', // Широкие плавные увалы и долины
+            numOctaves: '3',
+            seed: '38',
+            result: 'plainsNoise'
+        }));
+
+        const lighting = el('feDiffuseLighting', {
+            in: 'plainsNoise',
+            'lighting-color': '#fffaf0',
+            surfaceScale: '77',          // Достаточная высота склонов, чтобы холмы читались глазом
+            diffuseConstant: '1.25'
+        });
+        lighting.appendChild(el('feDistantLight', {
+            azimuth: '315',
+            elevation: '38'              // Боковой солнечный свет формирует мягкие тени на склонах
+        }));
+        filter.appendChild(lighting);
+        defs.appendChild(filter);
+
+        // 2. Накладываем рельеф строго внутри границ республики
+        const reliefLayer = el('g', {
+            id: 'soft-plains-relief-layer',
+            'clip-path': 'url(#bashkortostan-strict-clip)'
+        });
+
+        reliefLayer.appendChild(el('rect', {
+            x: '0', y: '0', width: '430', height: '540',
+            filter: 'url(#soft-plains-relief-filter)'
+        }));
+
+        // Вставляем сразу над цветовым полем, но ПОД рощицами деревьев, дорогами и горами
+        const colorField = document.getElementById('seamless-color-field');
+        if (colorField && colorField.nextSibling) {
+            colorField.parentNode.insertBefore(reliefLayer, colorField.nextSibling);
+        } else {
+            svg.insertBefore(reliefLayer, svg.firstChild);
+        }
+
+        // 3. Запекаем в HD-картинку через 450 мс и удаляем фильтр (0% нагрузки на GPU)
+        setTimeout(() => {
+            if (!reliefLayer.parentNode) return;
+
+            const scaleFactor = 3;
+            const w = 430, h = 540;
+            const tempSvg = document.createElementNS(svgNS, 'svg');
+            tempSvg.setAttribute('xmlns', 'http://w3.org');
+            tempSvg.setAttribute('width', w * scaleFactor);
+            tempSvg.setAttribute('height', h * scaleFactor);
+            tempSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+            tempSvg.appendChild(defs.cloneNode(true));
+            const cloned = reliefLayer.cloneNode(true);
+            cloned.style.opacity = '1';
+            cloned.style.mixBlendMode = 'normal';
+            tempSvg.appendChild(cloned);
+
+            const svgBlob = new Blob([new XMLSerializer().serializeToString(tempSvg)], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            const img = new Image();
+            img.onload = function () {
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = w * scaleFactor;
+                offCanvas.height = h * scaleFactor;
+                offCanvas.getContext('2d').drawImage(img, 0, 0, offCanvas.width, offCanvas.height);
+                URL.revokeObjectURL(url);
+
+                try {
+                    const bakedImg = document.createElementNS(svgNS, 'image');
+                    bakedImg.setAttribute('id', 'baked-soft-plains-img');
+                    bakedImg.setAttribute('x', '0');
+                    bakedImg.setAttribute('y', '0');
+                    bakedImg.setAttribute('width', w);
+                    bakedImg.setAttribute('height', h);
+                    bakedImg.setAttribute('href', offCanvas.toDataURL('image/png'));
+
+                    reliefLayer.parentNode.replaceChild(bakedImg, reliefLayer);
+                    const fToRemove = document.getElementById('soft-plains-relief-filter');
+                    if (fToRemove) fToRemove.remove();
+                } catch (e) {}
+            };
+            img.src = url;
+        }, 450);
+    })();
+
+                    });
 
 </script>
 </body>
