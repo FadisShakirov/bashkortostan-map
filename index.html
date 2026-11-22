@@ -1657,19 +1657,32 @@ document.addEventListener('DOMContentLoaded', () => {
        7. ГЛОБАЛЬНАЯ ПАУЗА ПРИ КЛИКЕ + ОПТИМИЗИРОВАННЫЙ АВТОПОКАЗ ФОТО
        ================================================================ */
     
-    // 1. Глобальный флаг паузы
+    // 1. Глобальный флаг паузы (без блокировки системного requestAnimationFrame для анимации попапа!)
     window.isPaused = false; 
 
-    // 2. Умный перехват requestAnimationFrame (без спама setTimeout при паузе)
-    const pausedCallbacks = [];
-    const originalRequestAnimationFrame = window.requestAnimationFrame;
-    window.requestAnimationFrame = function(callback) {
-        if (window.isPaused) {
-            pausedCallbacks.push(callback);
-            return 0;
+    // Вспомогательная функция для возобновления анимаций при закрытии окна района
+    window.resumeMapAnimations = function() {
+        window.isPaused = false;
+        document.body.classList.remove('animations-paused');
+        const svgMap = document.getElementById('bashkortostan-map') || svg;
+        if (svgMap && svgMap.unpauseAnimations && (typeof effectsEnabled === 'undefined' || effectsEnabled)) {
+            svgMap.unpauseAnimations();
         }
-        return originalRequestAnimationFrame.call(window, callback);
     };
+
+    // 2. Обработчик клика по району (пауза фоновых эффектов, не мешающая анимации открытия карточки и 1.html)
+    allDistricts.forEach(path => {
+        path.addEventListener('click', () => {
+            // Ставим фоновые эффекты на паузу с небольшой задержкой (50 мс), 
+            // чтобы основной обработчик клика и анимация вызова карточки района успели запуститься без помех
+            setTimeout(() => {
+                window.isPaused = true;
+                document.body.classList.add('animations-paused');
+                const svgMap = document.getElementById('bashkortostan-map') || svg;
+                if (svgMap && svgMap.pauseAnimations) svgMap.pauseAnimations();
+            }, 50);
+        });
+    });
 
     // Вспомогательная функция для возобновления всех замороженных JS-анимаций при закрытии окна района
     window.resumeMapAnimations = function() {
