@@ -45,11 +45,15 @@
     }
 
     .card-wrapper {
-        position: relative; width: 100%; min-height: 100vh; overflow: hidden; isolation: isolate; 
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        overflow-x: clip;
+        isolation: isolate;
     }
     
     .bg-layer {
-        position: absolute; inset: 0; background-image: url('blank.jpg'); 
+        position: fixed; inset: 0; background-image: url('blank.jpg'); 
         background-size: cover; background-position: center; z-index: 0;
         transform: scale(1.15);
         animation: 
@@ -72,7 +76,7 @@
     }
 
     .clouds-layer {
-        position: absolute; inset: 0; z-index: 1; pointer-events: none;
+        position: fixed; inset: 0; z-index: 1; pointer-events: none;
         background: rgba(0, 0, 0, 0.05); contain: strict; 
     }
 
@@ -80,6 +84,33 @@
     .cloud-part { position: absolute; background: radial-gradient(circle at 35% 35%, #ffffff, #dcdcdc); border-radius: 50%; }
     .cloud-back { filter: blur(40px); opacity: 0.5; }
     .cloud-mid { filter: blur(25px); opacity: 0.75; }
+
+
+/* ================= НОЧНОЙ РЕЖИМ ДЛЯ НЕБА, ОБЛАКОВ И ФОНА ================= */
+    body.dark .clouds-layer {
+        background: rgba(4, 9, 24, 0.55); /* Глубокий ночной полумрак поверх неба */
+        transition: background 0.5s ease;
+    }
+
+    body.dark .cloud-part {
+        /* Реалистичные тёмно-синеватые ночные облака с лёгким лунным отблеском сверху */
+        background: radial-gradient(circle at 35% 30%, #263859 0%, #17223b 55%, #0c1324 100%);
+    }
+
+    body.dark .cloud-back {
+        opacity: 0.65;
+    }
+
+    body.dark .cloud-mid {
+        opacity: 0.85;
+    }
+
+    /* Затемняем фоновую фотографию ночью (останавливая дневную вспышку яркости) */
+    body.dark .bg-layer {
+        animation: bgFlight var(--bg-speed) ease-in-out infinite alternate;
+        filter: brightness(0.42) contrast(1.08) saturate(0.85);
+        transition: filter 0.5s ease;
+    }
 
     .content-wrapper {
         position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
@@ -353,10 +384,23 @@
     }
     .carousel img:hover { transform: scale(1.02); }
 
-    /* ================= ВЕРХНЯЯ ПАНЕЛЬ (ПОГОДА И СЕРВИСЫ) ================= */
+/* ================= ВЕРХНЯЯ ПАНЕЛЬ (МЯГКОЕ КОНТУРНОЕ СВЕЧЕНИЕ БЕЗ НАЛОЖЕНИЯ) ================= */
+    /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
     .top-right-controls {
-        position: absolute; top: 20px; right: 20px; z-index: 20;
-        display: flex; align-items: center; gap: 10px;
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column-reverse; /* Ставит погоду на самый верх, а кнопки под ней */
+        align-items: flex-end;
+        gap: 10px;
+        pointer-events: none; /* Пропускает клики мимо пустых промежутков между кнопками */
+    }
+
+    .weather-widget,
+    .top-services-widget {
+        pointer-events: auto;
     }
 
     .weather-widget {
@@ -368,38 +412,86 @@
     }
     #weather-icon { font-size: 18px; line-height: 1; }
 
-    .top-services-widget { display: flex; align-items: center; gap: 10px; }
-    .service-dropdown { position: relative; }
-
-    .service-pill-btn {
-        display: flex; align-items: center; gap: 7px; padding: 8px 14px;
-        background: var(--card-bg);
-        border: 1px solid var(--card-border); border-radius: 14px;
-        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 15px rgba(0,0,0,0.1);
-        font-family: inherit; font-weight: 700; font-size: 13.5px;
-        color: var(--pill-text); cursor: pointer;
-        transform: translateY(0);
-        transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease;
+    .top-services-widget {
+        display: flex;
+        flex-direction: column; /* Кнопки сервисов друг под другом */
+        align-items: flex-end;
+        gap: 10px;
     }
 
-    .service-pill-btn:hover { filter: brightness(1.05); }
+    .service-dropdown { position: relative; }
+
+    /* Плавное контурное сияние днём (синий) */
+    @keyframes contourGlowDay {
+        0%, 100% {
+            border-color: rgba(9, 132, 227, 0.35);
+            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 4px rgba(9, 132, 227, 0.15);
+        }
+        50% {
+            border-color: #0984e3;
+            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 12px rgba(9, 132, 227, 0.55), inset 0 0 6px rgba(9, 132, 227, 0.18);
+        }
+    }
+
+    /* Плавное контурное сияние ночью (жёлтый) */
+    @keyframes contourGlowNight {
+        0%, 100% {
+            border-color: rgba(255, 209, 102, 0.3);
+            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 4px rgba(255, 209, 102, 0.12);
+        }
+        50% {
+            border-color: #ffd166;
+            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 13px rgba(255, 209, 102, 0.5), inset 0 0 6px rgba(255, 209, 102, 0.16);
+        }
+    }
+
+    .service-pill-btn {
+        display: flex; align-items: center; gap: 7px; padding: 8px 15px;
+        background: var(--card-bg);
+        border: 1.5px solid rgba(9, 132, 227, 0.35);
+        border-radius: 14px;
+        font-family: inherit; font-weight: 800; font-size: 13.5px;
+        color: var(--pill-text); cursor: pointer;
+        transform: translateY(0);
+        animation: contourGlowDay 3s ease-in-out infinite;
+        transition: transform 0.08s ease, background 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.dark .service-pill-btn {
+        animation-name: contourGlowNight;
+        border-color: rgba(255, 209, 102, 0.3);
+    }
+
+    .service-pill-btn:hover {
+        filter: brightness(1.05);
+    }
+
+    /* Чёткое проваливание при нажатии */
     .service-pill-btn:active {
+        animation: none !important;
         transform: translateY(3px) !important;
         box-shadow: 0 0 0 transparent !important;
     }
 
+    /* Выпадающее меню открывается влево, чтобы не перекрывать нижнюю кнопку */
     .service-menu {
-        position: absolute; top: calc(100% + 8px); right: 0;
-        min-width: 190px; background: var(--card-bg); border: 1px solid var(--card-border);
-        border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        position: absolute;
+        top: 0;
+        right: calc(100% + 10px);
+        min-width: 185px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.35);
         display: flex; flex-direction: column; gap: 6px; padding: 8px;
         z-index: 1000; opacity: 0; pointer-events: none;
-        transform: translateY(-10px) scale(0.95);
+        transform: translateX(10px) scale(0.95);
         transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     body.dark .service-menu { background: #080808; border-color: #222; }
-    .service-menu.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+    .service-menu.active { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
 
     .service-menu a {
         display: block; padding: 10px 12px; border-radius: 9px;
