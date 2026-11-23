@@ -911,15 +911,11 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
         });
 
           // ========== ОБЛАКА ПОВЕРХ ФОНА (ОРИГИНАЛЬНЫЙ ВИД + ИСПРАВЛЕНИЕ ПРОПАДАНИЯ) ==========
-        const cloudsContainer = document.getElementById('clouds-container');
-        const isMobile = window.innerWidth <= 768;
-        const TARGET_FPS = isMobile ? 16 : 24; // 16 FPS для телефонов, 24 FPS для ПК — глазу плавно, батарее легко
+         const cloudsContainer = document.getElementById('clouds-container');
+        const TARGET_FPS = 30; 
         const FRAME_TIME = 1000 / TARGET_FPS;
         const cloudsData = [];
         let lastRender = 0;
-        let viewportW = window.innerWidth;
-
-        window.addEventListener('resize', () => { viewportW = window.innerWidth; });
 
         function createCloud(layerClass, speedMin, speedMax) {
             const cloud = document.createElement('div');
@@ -931,8 +927,6 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
 
             const numParts = Math.floor(Math.random() * 4) + 3; 
             let currentLeftOffset = 0;
-            let maxRightEdge = 0;
-
             for (let i = 0; i < numParts; i++) {
                 const part = document.createElement('div');
                 part.className = 'cloud-part';
@@ -942,19 +936,11 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
                 part.style.height = `${size}px`;
                 part.style.top = `${offsetY}px`;
                 part.style.left = `${currentLeftOffset}px`;
-
-                maxRightEdge = Math.max(maxRightEdge, currentLeftOffset + size);
                 currentLeftOffset += size * 0.95; 
                 cloud.appendChild(part);
             }
-
             cloudsContainer.appendChild(cloud);
-            cloudsData.push({
-                element: cloud,
-                widthPx: maxRightEdge + 120, // Учитываем ширину облака + размытие blur(40px)
-                durationMs,
-                startTime: performance.now() + delayMs
-            });
+            cloudsData.push({ element: cloud, durationMs, startTime: performance.now() + delayMs });
         }
 
         for (let i = 0; i < 5; i++) createCloud('cloud-back', 60, 150);
@@ -969,11 +955,9 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
                 const c = cloudsData[i];
                 const elapsed = time - c.startTime;
                 if (elapsed < 0) continue; 
-
                 const progress = (elapsed % c.durationMs) / c.durationMs;
-                // Облако гарантированно заходит из-за левого края и полностью уходит за правый
-                const currentX = -c.widthPx + (viewportW + c.widthPx) * progress;
-                c.element.style.transform = `translate3d(${currentX}px, 0, 0)`;
+                const currentX = -100 + 200 * progress;
+                c.element.style.transform = `translate3d(${currentX}vw, 0, 0)`;
             }
         }
         requestAnimationFrame(animateAllClouds);
