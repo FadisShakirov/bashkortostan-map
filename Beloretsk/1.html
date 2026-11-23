@@ -766,6 +766,114 @@ html, body {
         .cloud-back { filter: blur(30px); }
         .cloud-mid { filter: blur(20px); }
     }
+
+/* ==========================================
+       СЛАЙД-ШОУ ИЗ 3 ФОТО ВНУТРИ КАРТОЧКИ (ПО КЛИКУ НА ФОТО)
+       ========================================== */
+    .attraction > img {
+        cursor: zoom-in;
+    }
+
+    .attraction.photo-mode {
+        cursor: zoom-out;
+        padding: 14px !important;
+    }
+
+    .attraction.photo-mode > img,
+    .attraction.photo-mode .attraction-info {
+        display: none !important;
+    }
+
+    .card-slideshow {
+        display: none;
+        position: relative;
+        width: 100%;
+        height: 430px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #080808;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .attraction.photo-mode .card-slideshow {
+        display: block;
+        animation: slideshowFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes slideshowFadeIn {
+        from { opacity: 0; transform: scale(0.97); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+
+    .card-slideshow img.slide-img {
+        position: absolute;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 14px;
+        opacity: 0;
+        transition: opacity 0.85s ease-in-out;
+        pointer-events: none;
+    }
+
+    .card-slideshow img.slide-img.active {
+        opacity: 1;
+    }
+
+    .slideshow-dots {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    .slideshow-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .slideshow-dot.active {
+        width: 22px;
+        border-radius: 6px;
+        background: #ffffff;
+    }
+
+    body.dark .slideshow-dot.active {
+        background: #ffd166;
+    }
+
+    .slideshow-hint {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 5px 11px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        backdrop-filter: blur(6px);
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+        .card-slideshow {
+            height: 270px;
+        }
+    }
     </style>
 </head>
 <body>
@@ -1018,10 +1126,86 @@ btn.addEventListener('click', () => applyCategoryFilter(btn.dataset.cat));
 });
 resetBtn.addEventListener('click', () => applyCategoryFilter(null));
 })();
- // ========== РАСКРЫТИЕ КАРТОЧЕК ==========
+ // ========== ПЛАВНОЕ РАСКРЫТИЕ КАРТОЧЕК (ТЕКСТ ИЛИ СЛАЙД-ШОУ ИЗ 3 ФОТО) ==========
         document.querySelectorAll('.attraction').forEach(card => {
+            const mainImg = card.querySelector(':scope > img');
+            let slideTimer = null;
+
+            function stopPhotoMode() {
+                clearInterval(slideTimer);
+                slideTimer = null;
+                card.classList.remove('photo-mode', 'expanded');
+                const oldBox = card.querySelector('.card-slideshow');
+                if (oldBox) oldBox.remove();
+            }
+
+            function startPhotoMode() {
+                card.classList.remove('expanded');
+                card.classList.add('expanded', 'photo-mode');
+
+                const rawSrc = mainImg.getAttribute('src');
+                const dotIdx = rawSrc.lastIndexOf('.');
+                const base = dotIdx !== -1 ? rawSrc.slice(0, dotIdx) : rawSrc;
+                const ext  = dotIdx !== -1 ? rawSrc.slice(dotIdx) : '.jpg';
+                const candidates = [rawSrc, `${base}2${ext}`, `${base}3${ext}`];
+
+                const box = document.createElement('div');
+                box.className = 'card-slideshow';
+                box.innerHTML = `<div class="slideshow-hint">✕ Нажмите на фото, чтобы закрыть</div>`;
+
+                const dotsWrap = document.createElement('div');
+                dotsWrap.className = 'slideshow-dots';
+                box.appendChild(dotsWrap);
+                card.appendChild(box);
+
+                const slides = [];
+                const dots = [];
+                let currentIdx = 0;
+
+                function showSlide(idx) {
+                    if (slides.length === 0) return;
+                    currentIdx = idx % slides.length;
+                    slides.forEach((img, i) => img.classList.toggle('active', i === currentIdx));
+                    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIdx));
+                }
+
+                candidates.forEach(src => {
+                    const probe = new Image();
+                    probe.onload = () => {
+                        const slideImg = document.createElement('img');
+                        slideImg.src = src;
+                        slideImg.className = 'slide-img';
+                        box.insertBefore(slideImg, dotsWrap);
+
+                        const dot = document.createElement('span');
+                        dot.className = 'slideshow-dot';
+                        dotsWrap.appendChild(dot);
+
+                        slides.push(slideImg);
+                        dots.push(dot);
+
+                        if (slides.length === 1) showSlide(0);
+                        if (slides.length === 2 && !slideTimer) {
+                            slideTimer = setInterval(() => showSlide(currentIdx + 1), 3000);
+                        }
+                    };
+                    probe.src = src;
+                });
+            }
+
+            if (mainImg) {
+                mainImg.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    startPhotoMode();
+                });
+            }
+
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.action-btn') || e.target.closest('.nav-dropdown')) return;
+                if (card.classList.contains('photo-mode')) {
+                    stopPhotoMode();
+                    return;
+                }
                 card.classList.toggle('expanded');
             });
         });
