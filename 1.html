@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Белорецкий район</title>
+    <style>
+    :root {
+        --bg-color: #f8f9fa;
+        --text-color: #333;
+        --card-bg: rgba(255, 255, 255, 0.94); 
+        --card-border: rgba(0, 0, 0, 0.08);
+        --heading-color: #2c3e50;
+        --subheading-color: #555;
+        --shadow: 0 10px 40px rgba(0,0,0,0.15);
+        --pill-bg: #f1f3f6;
+        --pill-text: #2c3e50;
+        --pill-shadow: #cfd6df;
+        
+        --bg-speed: 60s; 
+        --lighting-cycle: 40s;      
+        --brightness-max: 1.6;      
+        --brightness-min: 0.4;      
+        --brightness-normal: 1;     
+    }
+
+    /* 🖤 ЧИСТЫЙ OLED-ЧЁРНЫЙ ТЁМНЫЙ РЕЖИМ */
+    body.dark {
+        --bg-color: #000000;
+        --text-color: #eee;
+        --card-bg: rgba(5, 5, 5, 0.94);
+        --card-border: #1f1f1f;
+        --heading-color: #ffd166;
+        --subheading-color: #a8aeb8;
+        --shadow: 0 12px 40px rgba(0,0,0,0.9);
+        --pill-bg: #080808;
+        --pill-text: #c8cdd5;
+        --pill-shadow: #1c1c1c;
+    }
+html, body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        width: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        box-sizing: border-box;
+    }
+
+    .card-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+    }
+    
+    .bg-layer {
+        position: fixed;
+        inset: 0;
+        background-image: url('blank.jpg'); 
+        background-size: cover;
+        background-position: center;
+        z-index: 0;
+        transform: scale(1.15) translateZ(0);
+        -webkit-transform: scale(1.15) translateZ(0);
+        animation: 
+            bgFlight var(--bg-speed) ease-in-out infinite alternate,
+            bgLighting var(--lighting-cycle) ease-in-out infinite;
+        will-change: transform, filter;
+    }
+
+    @keyframes bgFlight {
+        0% { transform: scale(1.15) translate3d(0%, 0, 0); }
+        100% { transform: scale(1.15) translate3d(-3%, 0, 0); }
+    }
+
+    @keyframes bgLighting {
+        0%   { filter: brightness(var(--brightness-normal)); }
+        12.5% { filter: brightness(var(--brightness-max)); }    
+        62.5% { filter: brightness(var(--brightness-normal)); } 
+        75%  { filter: brightness(var(--brightness-min)); }    
+        100% { filter: brightness(var(--brightness-normal)); } 
+    }
+
+    .clouds-layer {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.05);
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        /* Убрали contain: strict — именно оно ломало отрисовку слоёв при скролле на мобильных */
+    }
+
+    .cloud { position: absolute; top: 0; left: 0; will-change: transform; transform: translate3d(-9999px, 0, 0); }
+    .cloud-part { position: absolute; background: radial-gradient(circle at 35% 35%, #ffffff, #dcdcdc); border-radius: 50%; }
+    .cloud-back { filter: blur(40px); opacity: 0.5; }
+    .cloud-mid { filter: blur(25px); opacity: 0.75; }
+
+    /* Ночной оттенок для тёмного режима */
+    body.dark .cloud-part {
+        background: radial-gradient(circle at 35% 30%, #263859 0%, #17223b 55%, #0c1324 100%);
+    }
+
+
+/* ================= НОЧНОЙ РЕЖИМ ДЛЯ НЕБА, ОБЛАКОВ И ФОНА ================= */
+    body.dark .clouds-layer {
+        background: rgba(4, 9, 24, 0.55); /* Глубокий ночной полумрак поверх неба */
+        transition: background 0.5s ease;
+    }
+
+    body.dark .cloud-part {
+        /* Реалистичные тёмно-синеватые ночные облака с лёгким лунным отблеском сверху */
+        background: radial-gradient(circle at 35% 30%, #263859 0%, #17223b 55%, #0c1324 100%);
+    }
+
+    body.dark .cloud-back {
+        opacity: 0.65;
+    }
+
+    body.dark .cloud-mid {
+        opacity: 0.85;
+    }
+
+    /* Затемняем фоновую фотографию ночью (останавливая дневную вспышку яркости) */
+    body.dark .bg-layer {
+        animation: bgFlight var(--bg-speed) ease-in-out infinite alternate;
+        filter: brightness(0.5) contrast(1.08) saturate(0.85);
+        transition: filter 0.5s ease;
+    }
+
+    .content-wrapper {
+        position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+        text-align: center; padding: 40px 20px; max-width: 900px; margin: 0 auto;
+    }
+
+    .gerb {
+        width: 100px; height: auto; margin-bottom: 15px;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+        background: rgba(255,255,255,0.92); border-radius: 50%; padding: 10px;
+    }
+
+    h1 { 
+        color: var(--heading-color); margin: 0 0 5px 0; font-size: 32px; 
+        font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); 
+    }
+    
+    h2 { 
+        color: var(--subheading-color); font-size: 18px; font-weight: normal; 
+        margin-top: 0; margin-bottom: 20px; text-shadow: 0 1px 5px rgba(0,0,0,0.3); 
+    }
+    
+    p.main-desc { 
+        line-height: 1.6; max-width: 750px; font-size: 16px; 
+        color: var(--subheading-color); text-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        margin-bottom: 22px; background: var(--card-bg); 
+        padding: 20px 28px; border-radius: 18px; border: 1px solid var(--card-border); 
+        box-shadow: var(--shadow);
+    }
+
+     /* ==========================================
+       АГРЕГАТОР КАТЕГОРИЙ (ЕДИНЫЙ СТИЛЬ: СИНИЙ ДНЁМ / ЖЁЛТЫЙ НОЧЬЮ)
+       ========================================== */
+    .filter-island {
+        width: 100%;
+        max-width: 850px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 14px 18px;
+        margin-bottom: 26px;
+        box-shadow: var(--shadow);
+        box-sizing: border-box;
+        text-align: left;
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        min-height: 26px;
+    }
+
+    .filter-title {
+        font-size: 14.5px;
+        font-weight: 800;
+        color: var(--heading-color);
+    }
+
+    .filter-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Тактильная кнопка в едином стиле с верхними сервисами */
+    .tactile-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 13px;
+        border-radius: 14px;
+        border: 1.5px solid rgba(9, 132, 227, 0.38);
+        background: var(--pill-bg);
+        color: var(--pill-text);
+        font-family: inherit;
+        font-size: 13.5px;
+        font-weight: 800;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 10px rgba(0, 0, 0, 0.08);
+        transform: translateY(0);
+        transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Тёмный OLED-режим: золотисто-жёлтый контур */
+    body.dark .tactile-pill {
+        border-color: rgba(255, 209, 102, 0.35);
+    }
+
+    .tactile-pill:hover {
+        border-color: #0984e3;
+        filter: brightness(1.05);
+    }
+    body.dark .tactile-pill:hover {
+        border-color: #ffd166;
+    }
+
+    /* Момент нажатия */
+    .tactile-pill:active {
+        transform: translateY(3px) !important;
+        box-shadow: 0 0 0 transparent !important;
+    }
+
+    /* Выбранная (вдавленная) категория: синяя днём и золотисто-жёлтая ночью */
+    .tactile-pill.active {
+        background: #0984e3 !important;
+        color: #ffffff !important;
+        border-color: #74b9ff !important;
+        box-shadow: 0 1.5px 0 #065ca3, inset 0 2px 4px rgba(0, 0, 0, 0.22) !important;
+        transform: translateY(2px);
+    }
+
+    body.dark .tactile-pill.active {
+        background: #ffd166 !important;
+        color: #080808 !important;
+        border-color: #ffeaa7 !important;
+        box-shadow: 0 1.5px 0 #b88b28, inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    /* ==========================================
+       КАРТОЧКА ДОСТОПРИМЕЧАТЕЛЬНОСТИ (С РАСШИРЕНИЕМ НА ПК ПРИ КЛИКЕ)
+       ========================================== */
+    .attraction {
+        display: flex; 
+        gap: 20px; 
+        background: var(--card-bg);
+        border: 1px solid var(--card-border); 
+        padding: 20px; 
+        border-radius: 18px; 
+        box-shadow: var(--shadow);
+        max-width: 850px; 
+        width: 100%; 
+        text-align: left; 
+        box-sizing: border-box; 
+        margin-bottom: 26px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, max-width 0.38s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.35s ease;
+        cursor: pointer; 
+        position: relative;
+        z-index: 1; 
+    }
+
+    .attraction.hidden-by-filter { display: none; }
+    .attraction:hover { transform: translateY(-4px); box-shadow: 0 15px 50px rgba(0,0,0,0.25); }
+    .attraction.dropdown-open { z-index: 999 !important; }
+
+    .attraction img { 
+        width: 250px; 
+        height: 180px; 
+        object-fit: cover; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+        flex-shrink: 0;
+        transition: width 0.38s cubic-bezier(0.25, 0.8, 0.25, 1), height 0.38s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    .attraction-info { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        min-width: 0;
+    }
+    
+    .attraction-info h3 { 
+        margin-top: 0; margin-bottom: 8px; color: var(--heading-color); font-size: 20px; 
+        font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        transition: font-size 0.3s ease;
+    }
+    
+    .attraction-info > p { 
+        color: var(--subheading-color); font-weight: normal;
+        margin-bottom: 15px; font-size: 14.5px; line-height: 1.5;
+        transition: font-size 0.3s ease;
+    }
+
+    .attraction-details {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.4s ease, margin-top 0.4s ease, font-size 0.3s ease;
+        margin-top: 0; color: var(--subheading-color);
+        font-size: 14px; line-height: 1.6; border-top: 1px solid transparent;
+    }
+
+    .attraction.expanded .attraction-details {
+        max-height: 2000px; margin-top: 15px; padding-top: 15px;
+        border-top-color: var(--card-border);
+    }
+
+    .attraction.expanded .attraction-details p { margin-bottom: 0; color: var(--subheading-color); }
+
+   /* ==========================================
+       КАРТОЧКА ДОСТОПРИМЕЧАТЕЛЬНОСТИ (ПЛАВНОЕ МЕДЛЕННОЕ РАСКРЫТИЕ)
+       ========================================== */
+    .attraction {
+        display: flex; 
+        gap: 20px; 
+        background: var(--card-bg);
+        border: 1px solid var(--card-border); 
+        padding: 20px; 
+        border-radius: 18px; 
+        box-shadow: var(--shadow);
+        max-width: 850px; 
+        width: 100%; 
+        text-align: left; 
+        box-sizing: border-box; 
+        margin-bottom: 26px;
+        /* Медленное и плавное расширение карточки (0.85 секунды) */
+        transition: 
+            transform 0.35s ease, 
+            box-shadow 0.6s ease, 
+            max-width 0.85s cubic-bezier(0.22, 1, 0.36, 1), 
+            padding 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+            gap 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+        cursor: pointer; 
+        position: relative;
+        z-index: 1; 
+    }
+
+    .attraction.hidden-by-filter { display: none; }
+    .attraction:hover { transform: translateY(-4px); box-shadow: 0 15px 50px rgba(0,0,0,0.25); }
+    .attraction.dropdown-open { z-index: 999 !important; }
+
+    .attraction img { 
+        width: 250px; 
+        height: 180px; 
+        object-fit: cover; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+        flex-shrink: 0;
+        transition: 
+            width 0.85s cubic-bezier(0.22, 1, 0.36, 1), 
+            height 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    
+    .attraction-info { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        min-width: 0;
+    }
+    
+    .attraction-info h3 { 
+        margin-top: 0; margin-bottom: 8px; color: var(--heading-color); font-size: 20px; 
+        font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        transition: font-size 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    
+    .attraction-info > p { 
+        color: var(--subheading-color); font-weight: normal;
+        margin-bottom: 15px; font-size: 14.5px; line-height: 1.5;
+        transition: font-size 0.75s cubic-bezier(0.22, 1, 0.36, 1), line-height 0.75s ease;
+    }
+
+    .attraction-details {
+        max-height: 0; 
+        overflow: hidden;
+        opacity: 0;
+        /* Медленное раскрытие текста по высоте и проявление (0.85 секунды) */
+        transition: 
+            max-height 0.85s cubic-bezier(0.22, 1, 0.36, 1), 
+            margin-top 0.85s cubic-bezier(0.22, 1, 0.36, 1), 
+            padding-top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.65s ease,
+            font-size 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        margin-top: 0; 
+        color: var(--subheading-color);
+        font-size: 14px; 
+        line-height: 1.6; 
+        border-top: 1px solid transparent;
+    }
+
+    .attraction.expanded .attraction-details {
+        max-height: 1200px; /* Оптимальный запас высоты для плавной скорости раскрытия */
+        opacity: 1;
+        margin-top: 15px; 
+        padding-top: 15px;
+        border-top-color: var(--card-border);
+    }
+
+    .attraction.expanded .attraction-details p { margin-bottom: 0; color: var(--subheading-color); }
+
+    /* 🖥️ УВЕЛИЧЕНИЕ РАСКРЫТОЙ КАРТОЧКИ НА ПК (С привязкой к .expanded) */
+    @media (min-width: 1100px) {
+        .content-wrapper {
+            max-width: 1320px;
+        }
+
+        .attraction.expanded {
+            max-width: min(1160px, calc(100vw - 430px));
+            padding: 26px 28px;
+            gap: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .attraction.expanded img {
+            width: 330px;
+            height: 235px;
+        }
+
+        .attraction.expanded .attraction-info h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .attraction.expanded .attraction-info > p,
+        .attraction.expanded .attraction-details {
+            font-size: 16.5px;
+            line-height: 1.68;
+        }
+    }
+
+
+    /* ==========================================
+       ТАКТИЛЬНЫЕ КНОПКИ МАРШРУТОВ (GRID — ВАШ БЭКАП В ЕДИНОМ СТИЛЕ)
+       ========================================== */
+    .buttons { 
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px; 
+        margin-top: auto; 
+        position: relative; 
+        z-index: 10; 
+        width: 100%;
+    }
+    
+    .car-btn-wrapper { position: relative; display: flex; width: 100%; }
+
+    .action-btn {
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 6px;
+        padding: 10px 6px; 
+        border-radius: 14px; 
+        text-decoration: none;
+        font-family: inherit;
+        font-weight: 800; 
+        font-size: 13px;
+        background: var(--pill-bg);
+        color: var(--pill-text);
+        border: 1.5px solid rgba(9, 132, 227, 0.35);
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 10px rgba(0, 0, 0, 0.08);
+        cursor: pointer; 
+        width: 100%; 
+        height: 100%;
+        min-height: 42px; 
+        box-sizing: border-box; 
+        white-space: nowrap;
+        transform: translateY(0);
+        transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.dark .action-btn {
+        border-color: rgba(255, 209, 102, 0.32);
+    }
+
+    .action-btn:hover {
+        border-color: #0984e3;
+        filter: brightness(1.05);
+    }
+
+    body.dark .action-btn:hover {
+        border-color: #ffd166;
+    }
+
+    .action-btn:active {
+        transform: translateY(3px) !important;
+        box-shadow: 0 0 0 transparent !important;
+    }
+
+    .action-btn svg { width: 19px; height: 19px; fill: currentColor; flex-shrink: 0; }
+
+    /* Выпадающее меню навигатора (в едином тактильном стиле, но с цветами Яндекса и 2ГИС) */
+    .nav-dropdown {
+        position: absolute; top: calc(100% + 6px); left: 0; width: 100%; box-sizing: border-box;
+        background: var(--card-bg); border: 1px solid var(--card-border);
+        border-radius: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        display: flex; flex-direction: column; gap: 6px; padding: 7px;
+        z-index: 1000; opacity: 0; pointer-events: none; 
+        transform: translateY(-10px) scale(0.95);
+        transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    body.dark .nav-dropdown { background: #050505; border-color: #222; }
+    .nav-dropdown.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+
+    .nav-dropdown a {
+        display: block; padding: 9px; border-radius: 10px; text-decoration: none;
+        font-size: 13px; font-weight: 800; color: #fff; text-align: center;
+        transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+    }
+    .nav-dropdown a:hover { filter: brightness(1.07); }
+    .nav-dropdown a:active {
+        transform: translateY(2.5px) !important;
+        box-shadow: 0 0 0 transparent !important;
+    }
+    .nav-dropdown .yandex {
+        background: #fc3f1d;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 2.5px 0 #b3240a;
+    }
+    .nav-dropdown .dgis {
+        background: #19b000;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 2.5px 0 #0f6b00;
+    }
+
+    
+
+    /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
+     .top-right-controls {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: flex-end;
+        gap: 10px;
+        pointer-events: none;
+        /* Фиксируем композитный слой на мобильных GPU — убирает мерцание при скролле */
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    .weather-widget,
+    .top-services-widget {
+        pointer-events: auto;
+    }
+
+    .weather-widget {
+        display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border); border-radius: 14px;
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 15px rgba(0,0,0,0.1);
+        font-weight: 800; font-size: 14.5px; color: var(--heading-color);
+    }
+    #weather-icon { font-size: 18px; line-height: 1; }
+
+    .top-services-widget {
+        display: flex;
+        flex-direction: column; /* Кнопки сервисов друг под другом */
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .service-dropdown { position: relative; }
+
+    /* Плавное контурное сияние днём (без перерисовки box-shadow при скролле) */
+    @keyframes contourGlowDay {
+        0%, 100% { border-color: rgba(9, 132, 227, 0.32); }
+        50%      { border-color: #0984e3; }
+    }
+
+    /* Плавное контурное сияние ночью (без перерисовки box-shadow при скролле) */
+    @keyframes contourGlowNight {
+        0%, 100% { border-color: rgba(255, 209, 102, 0.28); }
+        50%      { border-color: #ffd166; }
+    }
+
+    .service-pill-btn {
+        display: flex; align-items: center; gap: 7px; padding: 8px 15px;
+        background: var(--card-bg);
+        border: 1.5px solid rgba(9, 132, 227, 0.35);
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 12px rgba(0, 0, 0, 0.14);
+        border-radius: 14px;
+        font-family: inherit; font-weight: 800; font-size: 13.5px;
+        color: var(--pill-text); cursor: pointer;
+        transform: translateZ(0);
+        animation: contourGlowDay 3s ease-in-out infinite;
+        transition: transform 0.08s ease, background 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.dark .service-pill-btn {
+        animation-name: contourGlowNight;
+        border-color: rgba(255, 209, 102, 0.3);
+    }
+
+    .service-pill-btn:hover {
+        filter: brightness(1.05);
+    }
+
+    /* Чёткое проваливание при нажатии */
+    .service-pill-btn:active {
+        animation: none !important;
+        transform: translateY(3px) !important;
+        box-shadow: 0 0 0 transparent !important;
+    }
+
+    /* Выпадающее меню открывается влево, чтобы не перекрывать нижнюю кнопку */
+    .service-menu {
+        position: absolute;
+        top: 0;
+        right: calc(100% + 10px);
+        min-width: 185px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        display: flex; flex-direction: column; gap: 6px; padding: 8px;
+        z-index: 1000; opacity: 0; pointer-events: none;
+        transform: translateX(10px) scale(0.95);
+        transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    body.dark .service-menu { background: #080808; border-color: #222; }
+    .service-menu.active { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
+
+    .service-menu a {
+        display: block; padding: 10px 12px; border-radius: 9px;
+        text-decoration: none; font-size: 13px; font-weight: 700;
+        color: #fff; text-align: center; transition: transform 0.08s ease;
+    }
+    .service-menu a:active { transform: translateY(2px); }
+
+    .srv-yandex   { background: #fc3f1d; box-shadow: 0 2.5px 0 #b3240a; }
+    .srv-dgis     { background: #19b000; box-shadow: 0 2.5px 0 #0f6b00; }
+    .srv-ostrovok { background: #0057ff; box-shadow: 0 2.5px 0 #0038a8; }
+
+    /* ================= МОБИЛЬНАЯ АДАПТАЦИЯ ================= */
+   @media (max-width: 768px) {
+        /* 1. Вертикальный столбик строго по правому краю (как на ПК) */
+        .top-right-controls {
+            position: relative !important;
+            z-index: 20 !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 12px 12px 0 12px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-end;
+            gap: 8px;
+            transform: none !important;
+            pointer-events: auto;
+        }
+
+        .top-services-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .service-pill-btn {
+            animation: none !important;
+            transform: none !important;
+            padding: 7px 12px;
+            font-size: 12.5px;
+            border-color: rgba(9, 132, 227, 0.55);
+        }
+
+        body.dark .service-pill-btn {
+            border-color: rgba(255, 209, 102, 0.55);
+        }
+
+        .weather-widget {
+            padding: 7px 12px;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .service-menu {
+            top: 0;
+            right: calc(100% + 8px);
+            left: auto;
+            min-width: 165px;
+            transform: translateX(8px) scale(0.96);
+        }
+
+        .service-menu.active {
+            transform: translateX(0) scale(1);
+        }
+
+        /* 2. Контейнер контента без принудительного слоя */
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            padding: 12px 12px 25px 12px;
+        }
+
+        h1 { font-size: 24px; line-height: 1.2; }
+        h2 { font-size: 14px; margin-bottom: 15px; }
+        p.main-desc { padding: 15px; font-size: 14px; margin-bottom: 16px; }
+        
+        .filter-island { padding: 12px; margin-bottom: 18px; }
+        .tactile-pill { padding: 7px 10px; font-size: 12.5px; }
+
+        /* 3. Карточка: плотный фон и облегчённая анимация раскрытия убирают мерцание на мобильном GPU */
+        .attraction {
+            flex-direction: column;
+            padding: 15px;
+            padding-bottom: 24px;
+            margin-bottom: 20px;
+            background: #ffffff !important;
+            transition: box-shadow 0.3s ease !important;
+        }
+        body.dark .attraction {
+            background: #080808 !important;
+        }
+        .attraction > img { width: 100%; height: 200px; }
+        .attraction-info h3 { font-size: 18px; line-height: 1.3; }
+        .attraction-details {
+            transition: max-height 0.4s ease, opacity 0.3s ease !important;
+        }
+
+        /* 4. Сохраняем 3 кнопки в один ряд слева направо и на смартфоне */
+        .buttons {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .action-btn {
+            padding: 7px 4px;
+            font-size: 11.5px;
+            min-height: 36px;
+            gap: 4px;
+        }
+        .action-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* 5. Убираем мерцание слайд-шоу на мобильных GPU */
+        .slideshow-dots,
+        .slideshow-hint {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(0, 0, 0, 0.72) !important;
+        }
+        .card-slideshow,
+        .card-slideshow img.slide-img {
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* 6. Мягкий градиент облаков вместо тяжёлого filter: blur() — убирает моргание при раскрытии */
+        .cloud-back, .cloud-mid { filter: none !important; }
+        .cloud-part {
+            background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.82) 0%, rgba(235, 240, 245, 0.42) 45%, rgba(220, 220, 220, 0) 72%) !important;
+        }
+        body.dark .cloud-part {
+            background: radial-gradient(circle at 40% 35%, rgba(38, 56, 89, 0.82) 0%, rgba(23, 34, 59, 0.42) 48%, rgba(12, 19, 36, 0) 74%) !important;
+        }
+    }
+
+/* ==========================================
+       СЛАЙД-ШОУ ИЗ 3 ФОТО ВНУТРИ КАРТОЧКИ (ПО КЛИКУ НА ФОТО)
+       ========================================== */
+    .attraction > img {
+        cursor: zoom-in;
+    }
+
+    .attraction.photo-mode {
+        cursor: zoom-out;
+        padding: 14px !important;
+        max-width: 850px !important; /* Оставляем стандартную ширину карточки без гигантского зума */
+    }
+
+    .attraction.photo-mode > img,
+    .attraction.photo-mode .attraction-info {
+        display: none !important;
+    }
+
+    .card-slideshow {
+        display: none;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 10; /* Сохраняет естественные пропорции фотографий */
+        max-height: 520px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #080808;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .attraction.photo-mode .card-slideshow {
+        display: block;
+        animation: slideshowFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes slideshowFadeIn {
+        from { opacity: 0; transform: scale(0.97); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+
+    .card-slideshow img.slide-img {
+        position: absolute;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 14px;
+        opacity: 0;
+        transition: opacity 0.85s ease-in-out;
+        pointer-events: none;
+    }
+
+    .card-slideshow img.slide-img.active {
+        opacity: 1;
+    }
+
+    .slideshow-dots {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    .slideshow-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .slideshow-dot.active {
+        width: 22px;
+        border-radius: 6px;
+        background: #ffffff;
+    }
+
+    body.dark .slideshow-dot.active {
+        background: #ffd166;
+    }
+
+    .slideshow-hint {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 5px 11px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        backdrop-filter: blur(6px);
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+        .card-slideshow {
+            height: 270px;
+        }
+    }
+
+
+
+
+    </style>
+</head>
+<body>
+    <div class="card-wrapper">
+        <div class="top-right-controls">
+            <div class="top-services-widget">
+                <div class="service-dropdown">
+                    <button type="button" class="service-pill-btn" onclick="toggleTopMenu('food-menu', event)">
+                        <span>🍽️</span> Где поесть
+                    </button>
+                    <div id="food-menu" class="service-menu">
+                        <a href="#" data-service="yandex-food" class="srv-yandex" target="_blank" rel="noopener">Яндекс Карты</a>
+                        <a href="#" data-service="2gis-food" class="srv-dgis" target="_blank" rel="noopener">2ГИС</a>
+                    </div>
+                </div>
+
+                <div class="service-dropdown">
+                    <button type="button" class="service-pill-btn" onclick="toggleTopMenu('stay-menu', event)">
+                        <span>🛏️</span> Где переночевать
+                    </button>
+                    <div id="stay-menu" class="service-menu">
+                        <a href="#" data-service="yandex-travel" class="srv-yandex" target="_blank" rel="noopener">Яндекс Путешествия</a>
+                        <a href="#" data-service="ostrovok" class="srv-ostrovok" target="_blank" rel="noopener">Островок</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="weather-widget" class="weather-widget">
+                <span id="weather-icon">⏳</span>
+                <span id="weather-temp">--°</span>
+            </div>
+        </div>
+
+        <div class="bg-layer"></div>
+        <div class="clouds-layer" id="clouds-container"></div>
+
+        <div class="content-wrapper">
+            <img src="gerb.jpg" alt="Герб Белорецкого района" class="gerb">
+
+            <h1>Белорецкий район</h1>
+            <h2>Жемчужина Уральских гор</h2>
+            
+            <p class="main-desc">Белорецкий район — один из самых живописных в Башкортостане. Здесь находятся высочайшие вершины Южного Урала, кристально чистые озера и густые хвойные леса. Это идеальное место для активного туризма, сплавов и треккинга.</p>
+
+            <!-- ВЕРХНИЙ АГРЕГАТОР-ФИЛЬТР КАТЕГОРИЙ -->
+            <div class="filter-island">
+                <div class="filter-header">
+                    <span class="filter-title">🧭 Чем богат район</span>
+                    <button type="button" class="tactile-pill" id="reset-cat-btn" style="display:none; padding:4px 10px; font-size:12px; color:#e74c3c;">✕ Сбросить</button>
+                </div>
+                <div class="filter-grid" id="district-filter-grid"></div>
+            </div>
+
+            <!-- КОНТЕЙНЕР КАРТОЧЕК (ЗАПОЛНЯЕТСЯ КОНСТРУКТОРОМ) -->
+            <div id="attractions-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+
+           
+                </div>
+            </div>
+        </div>
+    </div>
+ <script>
+        // Прямая синхронизация темы с основной картой (при открытии и в реальном времени)
+        (function bindParentMapTheme() {
+            function syncTheme() {
+                try {
+                    if (window.parent && window.parent !== window) {
+                        const isParentDark = window.parent.document.body.classList.contains('dark-mode');
+                        document.body.classList.toggle('dark', isParentDark);
+                    }
+                } catch (e) {}
+            }
+
+            syncTheme();
+
+            try {
+                if (window.parent && window.parent !== window) {
+                    const parentObserver = new MutationObserver(syncTheme);
+                    parentObserver.observe(window.parent.document.body, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
+                }
+            } catch (e) {}
+        })();
+
+        // =====================================================================
+        // 1. КОНСТРУКТОР ДОСТОПРИМЕЧАТЕЛЬНОСТЕЙ И КАТЕГОРИЙ БЕЛОРЕЦКОГО РАЙОНА
+        //    (Добавляйте новые места в массив ATTRACTIONS_DATA — они появятся сами!)
+        // =====================================================================
+        const DISTRICT_CATEGORIES = [
+            { id: 'mountains', icon: '🏔️', label: 'Горы и скалы', color: '#e17055', shadow: '#b34b32' },
+            { id: 'ski',       icon: '🎿', label: 'Горнолыжки',   color: '#0984e3', shadow: '#065ca3' },
+            { id: 'spa',       icon: '♨️', label: 'Санатории',    color: '#e84393', shadow: '#b32469' },
+            { id: 'rafting',   icon: '🚣', label: 'Сплавы',       color: '#00a8a3', shadow: '#007571' },
+            { id: 'nature',    icon: '🌲', label: 'Заповедники',  color: '#00b894', shadow: '#008268' }
+        ];
+
+        const ATTRACTIONS_DATA = [
+             {
+                id: 'card-iremel',
+                categories: ['mountains', 'nature'],
+                image: 'parkiremel.jpg',
+                alt: 'Природный парк Иремель',
+                title: 'Природный парк «Иремель»',
+                shortDesc: 'Вторая по величине вершина Южного Урала (1582 м) и священная гора башкир. Место силы с суровой красотой горной тундры, курумниками и панорамами на десятки километров вокруг.',
+                fullDesc: 'Природный парк «Иремель» создан для сохранения уникальных горных экосистем вокруг массива Большой Иремель (1582 м). Считается, что гора обладает мощной положительной энергетикой, а в древности башкиры считали её священной и запрещали подниматься на вершину без особой нужды. На пути к плато сменяются четыре природных пояса: от реликтовой темнохвойной тайги до альпийских лугов и горной тундры с каменными реками-курумниками. Основной заезд на автомобиле осуществляется через село Тюлюк, где расположен контрольно-пропускной пункт парка.',
+                yandexUrl: 'https://yandex.ru' + '/maps/?rtext=~54.6142,58.7845&rtt=auto',
+                dgisUrl: 'https://2gis.ru' + '/geo/58.7845,54.6142',
+                busUrl: 'https://автовокзалы-рб.рф',
+                trainUrl: 'https://rzd.ru'
+            },
+            {
+                id: 'card-aygir',
+                categories: ['mountains', 'rafting'],
+                image: 'aygir.jpg',
+                alt: 'Скалы Айгир',
+                title: 'Достопримечательность: Айгир',
+                shortDesc: 'Урочище Айгир знаменито своими живописными скалами (Инзерские зубчатки). Это место притягивает туристов со всей России кристально чистой рекой Инзер, отвесными скалами и невероятными закатами.',
+                fullDesc: 'Айгир — это не просто скалы, а настоящая «Мекка» для туристов Южного Урала. Здесь, на северном склоне хребта Караташ, возвышаются знаменитые «Зубы Шурале» (их также называют Орлиными скалами). С высоты около 689 метров открывается захватывающая панорама на изгиб реки Малый Инзер и окрестные горные хребты. Рядом с горой течёт одноимённый водопад, особенно красивый весной и летом. Место овеяно легендами: по одной из них, название происходит от башкирского «айғыр» — «жеребец». Сюда приезжают ради рассветов, фотосессий и треккинга — маршруты подходят как для новичков, так и для опытных путешественников.',
+                yandexUrl: 'https://yandex.ru/maps/?rtext=~Айгир&rtt=auto" target="_blank',
+                dgisUrl: 'https://2gis.ru/geo/57.696168,54.122716',
+                busUrl: 'https://автовокзалы-рб.рф',
+                trainUrl: 'https://автовокзалы-рб.рф'
+            },
+            {
+                id: 'card-abzakovo',
+                categories: ['ski', 'spa'],
+                image: 'Abzakovo.jpg',
+                alt: 'Горнолыжный комплекс Абзаково',
+                title: 'Горнолыжный комплекс «Абзаково»',
+                shortDesc: 'Один из самых современных курортов Башкортостана. Зимой здесь катаются на лыжах и сноуборде, а летом — гуляют, отдыхают у воды и посещают аквапарк. «Уральская Швейцария» — так называют это место за красоту гор и высокий уровень сервиса.',
+                fullDesc: 'Курорт «Абзаково» работает круглый год и предлагает 13 трасс общей протяжённостью около 18 км с перепадом высот до 320 метров. Трассы проходят через лесной массив, поэтому катание сопровождается потрясающими видами на горы. Для профессионалов подготовлены склоны, соответствующие стандартам FIS. Пять современных подъёмников доставляют на вершины до 5000 человек в час, а система искусственного заснеживания гарантирует стабильное покрытие. Помимо горнолыжного спорта, здесь есть аквапарк, спа-комплекс, зоопарк, хаски-город и развлекательный центр. Опытные инструкторы помогут новичкам, а пункты проката, кафе и медпункт работают прямо у подъёмников.',
+                yandexUrl: 'https://yandex.ru/maps/?rtext=~Абзаково&rtt=auto',
+                dgisUrl: 'https://2gis.ru/geo/58.590899,53.831546',
+                busUrl: 'https://автовокзалы-рб.рф',
+                trainUrl: 'https://ticket.rzd.ru/'
+            },
+            {
+                id: 'card-inzer',
+                categories: ['mountains', 'nature'],
+                image: 'Inzerskie-zubchatki.jpg',
+                alt: 'Инзерские зубчатки',
+                title: 'Инзерские зубчатки',
+                shortDesc: 'Живописный горный хребет в междуречье Большого Инзера и Тирляна. Главная особенность — скальный цирк из причудливых скал-«зубцов» высотой до 35 метров. Пейзажи напоминают декорации к фильму «Аватар».',
+                fullDesc: 'Инзерские Зубчатки — это хребет протяжённостью около 8 км с максимальной высотой 1161 метр (гора Маяк). Туристы обычно посещают северную часть, где находится знаменитый скальный цирк: скалы причудливых форм встают по кругу, и некоторые из них настолько необычны, что кажутся рукотворными. С некоторых точек открывается вид на высшую точку Южного Урала — гору Ямантау (1640 м), а также на священную гору Иремель. Подъём к зубцам требует осторожности: тропа идёт через курумники, а на некоторые скалы можно забраться только с верёвкой. Особенно красиво здесь осенью, когда деревья одеваются в жёлто-багряные наряды.',
+                yandexUrl: 'https://yandex.ru/maps/?rtext=~Инзерские%20зубчатки&rtt=auto',
+                dgisUrl: 'https://2gis.ru/geo/58.3622,54.2639',
+                busUrl: 'https://автовокзалы-рб.рф',
+                trainUrl: 'https://ticket.rzd.ru/'
+            }
+        ];
+
+        // Генерация кнопок агрегатора и карточек из данных
+        (function buildDistrictConstructor() {
+            const filterGrid = document.getElementById('district-filter-grid');
+            const resetBtn = document.getElementById('reset-cat-btn');
+            const container = document.getElementById('attractions-container');
+
+            DISTRICT_CATEGORIES.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'tactile-pill';
+                btn.dataset.cat = cat.id;
+                btn.innerHTML = `<span>${cat.icon}</span><span>${cat.label}</span>`;
+                filterGrid.appendChild(btn);
+            });
+
+            container.innerHTML = ATTRACTIONS_DATA.map(item => `
+                <div class="attraction" id="${item.id}" data-cats="${item.categories.join(',')}">
+                    <img src="${item.image}" alt="${item.alt}">
+                    <div class="attraction-info">
+                        <div>
+                            <h3>${item.title}</h3>
+                            <p>${item.shortDesc}</p>
+                        </div>
+                        <div class="attraction-details">
+                            <p>${item.fullDesc}</p>
+                        </div>
+                        <div class="buttons">
+                            <div class="car-btn-wrapper">
+                                <button class="action-btn car-btn" onclick="toggleDropdown(this)">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                                    </svg>
+                                    На машине
+                                </button>
+                                <div class="nav-dropdown">
+                                    <a href="${item.yandexUrl}" target="_blank" class="yandex">Яндекс</a>
+                                    <a href="${item.dgisUrl}" target="_blank" class="dgis">2ГИС</a>
+                                </div>
+                            </div>
+                            
+                            <a href="${item.busUrl}" target="_blank" class="action-btn bus-btn">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                </svg>
+                                На автобусе
+                            </a>
+                            
+                            <a href="${item.trainUrl}" target="_blank" class="action-btn train-btn">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h12v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                                </svg>
+                                На поезде
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            let activeCatId = null;
+            function applyCategoryFilter(catId) {
+                activeCatId = (activeCatId === catId) ? null : catId;
+                resetBtn.style.display = activeCatId ? 'inline-flex' : 'none';
+
+                filterGrid.querySelectorAll('.tactile-pill').forEach(btn => {
+                    const isThis = btn.dataset.cat === activeCatId;
+                    btn.classList.toggle('active', isThis);
+                    if (isThis) {
+                        const c = DISTRICT_CATEGORIES.find(x => x.id === activeCatId);
+                        btn.style.background = c.color;
+                        btn.style.boxShadow = `0 1.5px 0 ${c.shadow}, inset 0 2px 4px rgba(0,0,0,0.2)`;
+                    } else {
+btn.style.background = '';
+btn.style.boxShadow = '';
+}
+});
+container.querySelectorAll('.attraction').forEach(card => 
+{
+if (!activeCatId) 
+{
+card.classList.remove('hidden-by-filter');
+} else {
+const cats = (card.dataset.cats || '').split(',');
+card.classList.toggle('hidden-by-filter', !cats.includes(activeCatId));
+}
+});
+}
+filterGrid.querySelectorAll('.tactile-pill').forEach(btn => {
+btn.addEventListener('click', () => applyCategoryFilter(btn.dataset.cat));
+});
+resetBtn.addEventListener('click', () => applyCategoryFilter(null));
+})();
+ // ========== ПЛАВНОЕ РАСКРЫТИЕ КАРТОЧЕК (ТЕКСТ ИЛИ СЛАЙД-ШОУ ИЗ 3 ФОТО) ==========
+        document.querySelectorAll('.attraction').forEach(card => {
+            const mainImg = card.querySelector(':scope > img');
+            let slideTimer = null;
+
+            function stopPhotoMode() {
+                clearInterval(slideTimer);
+                slideTimer = null;
+                card.classList.remove('photo-mode', 'expanded');
+                const oldBox = card.querySelector('.card-slideshow');
+                if (oldBox) oldBox.remove();
+            }
+
+            function startPhotoMode() {
+                card.classList.remove('expanded');
+                card.classList.add('expanded', 'photo-mode');
+
+                const rawSrc = mainImg.getAttribute('src');
+                const dotIdx = rawSrc.lastIndexOf('.');
+                const base = dotIdx !== -1 ? rawSrc.slice(0, dotIdx) : rawSrc;
+                const ext  = dotIdx !== -1 ? rawSrc.slice(dotIdx) : '.jpg';
+                const candidates = [rawSrc, `${base}2${ext}`, `${base}3${ext}`];
+
+                const box = document.createElement('div');
+                box.className = 'card-slideshow';
+                box.innerHTML = `<div class="slideshow-hint">✕ Нажмите на фото, чтобы закрыть</div>`;
+
+                const dotsWrap = document.createElement('div');
+                dotsWrap.className = 'slideshow-dots';
+                box.appendChild(dotsWrap);
+                card.appendChild(box);
+
+                const slides = [];
+                const dots = [];
+                let currentIdx = 0;
+
+                function showSlide(idx) {
+                    if (slides.length === 0) return;
+                    currentIdx = idx % slides.length;
+                    slides.forEach((img, i) => img.classList.toggle('active', i === currentIdx));
+                    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIdx));
+                }
+
+                candidates.forEach(src => {
+                    const probe = new Image();
+                    probe.onload = () => {
+                        const slideImg = document.createElement('img');
+                        slideImg.src = src;
+                        slideImg.className = 'slide-img';
+                        box.insertBefore(slideImg, dotsWrap);
+
+                        const dot = document.createElement('span');
+                        dot.className = 'slideshow-dot';
+                        dotsWrap.appendChild(dot);
+
+                        slides.push(slideImg);
+                        dots.push(dot);
+
+                        if (slides.length === 1) showSlide(0);
+                        if (slides.length === 2 && !slideTimer) {
+                            slideTimer = setInterval(() => showSlide(currentIdx + 1), 3000);
+                        }
+                    };
+                    probe.src = src;
+                });
+            }
+
+            if (mainImg) {
+                mainImg.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    startPhotoMode();
+                });
+            }
+
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.action-btn') || e.target.closest('.nav-dropdown')) return;
+                if (card.classList.contains('photo-mode')) {
+                    stopPhotoMode();
+                    return;
+                }
+                card.classList.toggle('expanded');
+            });
+        });
+
+        // ========== ВЫПАДАЮЩЕЕ МЕНЮ НАВИГАТОРА ==========
+        function toggleDropdown(btn) {
+            document.querySelectorAll('.nav-dropdown').forEach(dd => {
+                if (dd !== btn.nextElementSibling) {
+                    dd.classList.remove('active');
+                    const parentCard = dd.closest('.attraction');
+                    if (parentCard) parentCard.classList.remove('dropdown-open');
+                }
+            });
+            const dropdown = btn.nextElementSibling;
+            dropdown.classList.toggle('active');
+            const parentCard = btn.closest('.attraction');
+            if (parentCard) parentCard.classList.toggle('dropdown-open', dropdown.classList.contains('active'));
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.car-btn-wrapper')) {
+                document.querySelectorAll('.nav-dropdown').forEach(dd => {
+                    dd.classList.remove('active');
+                    const parentCard = dd.closest('.attraction');
+                    if (parentCard) parentCard.classList.remove('dropdown-open');
+                });
+            }
+        });
+
+          // ========== ОБЛАКА ПОВЕРХ ФОНА (ОРИГИНАЛЬНЫЙ ВИД + ИСПРАВЛЕНИЕ ПРОПАДАНИЯ) ==========
+         const cloudsContainer = document.getElementById('clouds-container');
+        const TARGET_FPS = 30; 
+        const FRAME_TIME = 1000 / TARGET_FPS;
+        const cloudsData = [];
+        let lastRender = 0;
+
+        function createCloud(layerClass, speedMin, speedMax) {
+            const cloud = document.createElement('div');
+            cloud.className = `cloud ${layerClass}`;
+            const topPos = Math.random() * 50 - 10; 
+            const durationMs = (Math.random() * (speedMax - speedMin) + speedMin) * 1000;
+            const delayMs = Math.random() * -durationMs;
+            cloud.style.top = `${topPos}%`;
+
+            const numParts = Math.floor(Math.random() * 4) + 3; 
+            let currentLeftOffset = 0;
+            for (let i = 0; i < numParts; i++) {
+                const part = document.createElement('div');
+                part.className = 'cloud-part';
+                const size = Math.random() * 600 + 250; 
+                const offsetY = (Math.random() * size * 0.8) - (size * 0.4); 
+                part.style.width = `${size}px`;
+                part.style.height = `${size}px`;
+                part.style.top = `${offsetY}px`;
+                part.style.left = `${currentLeftOffset}px`;
+                currentLeftOffset += size * 0.95; 
+                cloud.appendChild(part);
+            }
+            cloudsContainer.appendChild(cloud);
+            cloudsData.push({ element: cloud, durationMs, startTime: performance.now() + delayMs });
+        }
+
+        for (let i = 0; i < 5; i++) createCloud('cloud-back', 60, 150);
+        for (let i = 0; i < 7; i++) createCloud('cloud-mid', 100, 200);
+
+        function animateAllClouds(time) {
+            requestAnimationFrame(animateAllClouds);
+            if (time - lastRender < FRAME_TIME) return;
+            lastRender = time;
+
+            for (let i = 0; i < cloudsData.length; i++) {
+                const c = cloudsData[i];
+                const elapsed = time - c.startTime;
+                if (elapsed < 0) continue; 
+                const progress = (elapsed % c.durationMs) / c.durationMs;
+                const currentX = -100 + 200 * progress;
+                c.element.style.transform = `translate3d(${currentX}vw, 0, 0)`;
+            }
+        }
+        requestAnimationFrame(animateAllClouds);
+
+        // ==========================================
+    // 1. ЛОГИКА ПОГОДЫ (wttr.in)
+    // ==========================================
+    async function fetchWeather() {
+        const iconEl = document.getElementById('weather-icon');
+        const tempEl = document.getElementById('weather-temp');
+        
+        // Координаты Белорецкого района
+        const lat = 53.96;
+        const lon = 58.40;
+
+        const url = `https://wttr.in/${lat},${lon}?format=j1`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (data.current_condition && data.current_condition[0]) {
+                const current = data.current_condition[0];
+                const temp = current.temp_C;
+                const code = current.weatherCode;
+                
+                tempEl.textContent = `${temp}°`;
+                iconEl.textContent = getWeatherIconWttr(code);
+            } else {
+                throw new Error('Нет данных о погоде');
+            }
+        } catch (error) {
+            console.error("Не удалось загрузить погоду:", error);
+            iconEl.textContent = '❌';
+            tempEl.textContent = '--°';
+        }
+    }
+
+    function getWeatherIconWttr(code) {
+        const codeNum = parseInt(code, 10);
+        if (codeNum === 113) return '☀️';
+        if (codeNum === 116) return '🌤️';
+        if (codeNum === 119 || codeNum === 122) return '☁️';
+        if (codeNum === 143 || codeNum === 248 || codeNum === 260) return '🌫️';
+        if ([176, 263, 266, 293, 296, 299, 302, 305, 308, 353, 356, 359].includes(codeNum)) return '🌧️';
+        if ([179, 182, 185, 281, 284, 311, 314, 317, 320, 350, 362, 365, 374, 377].includes(codeNum)) return '🌨️';
+        if ([200, 386, 389, 392, 395].includes(codeNum)) return '⛈️';
+        return '🌡️';
+    }
+
+        // ==========================================
+    // 2. ССЫЛКИ НА АГРЕГАТОРЫ (Еда и Жилье)
+    // ==========================================
+    function initDistrictServices() {
+        const titleEl = document.querySelector('h1');
+        const districtName = titleEl ? titleEl.textContent.trim() : 'Белорецкий район';
+        
+        const foodQuery = encodeURIComponent(`кафе и рестораны ${districtName}`);
+        const hotelQuery = encodeURIComponent(`отели ${districtName}`);
+
+        const links = {
+            'yandex-food': `https://yandex.ru/maps/?mode=search&text=${foodQuery}`,
+            '2gis-food': `https://2gis.ru/search/%D0%BA%D0%B0%D1%84%D0%B5%20%D0%B8%20%D1%80%D0%B5%D1%81%D1%82%D0%BE%D1%80%D0%B0%D0%BD%D1%8B%20%D0%91%D0%B5%D0%BB%D0%BE%D1%80%D0%B5%D1%86%D0%BA%D0%B8%D0%B9%20%D1%80%D0%B0%D0%B9%D0%BE%D0%BD?m=57.850882%2C54.047921%2F9.11`,
+            'yandex-travel': `https://travel.yandex.ru/hotels/beloretsky-district/`,
+            'ostrovok': `https://ostrovok.ru/hotel/russia/beloreck/`,
+          
+        };
+
+        for (const [key, url] of Object.entries(links)) {
+            const linkEl = document.querySelector(`a[data-service="${key}"]`);
+            if (linkEl) linkEl.href = url;
+        }
+    }
+
+        // ==========================================
+        // 4. ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ
+        // ==========================================
+        function toggleTopMenu(menuId, event) {
+            event.stopPropagation(); 
+            const targetMenu = document.getElementById(menuId);
+            const isActive = targetMenu.classList.contains('active');
+            document.querySelectorAll('.service-menu').forEach(m => m.classList.remove('active'));
+            if (!isActive) targetMenu.classList.add('active');
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.service-menu').forEach(m => m.classList.remove('active'));
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchWeather();
+            initDistrictServices();
+        });
+    </script>
+</body>
+</html>
