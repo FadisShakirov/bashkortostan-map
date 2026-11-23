@@ -542,137 +542,7 @@ html, body {
         box-shadow: 0 2.5px 0 #0f6b00;
     }
 
-    /* ==========================================
-       ГАЛЕРЕЯ (СКРОЛЛ ПЕРЕТАСКИВАНИЕМ БЕЗ ПОЛОСЫ + РАСКРЫТИЕ ФОТО В КАРТОЧКЕ)
-       ========================================== */
-    .carousel-container {
-        width: 100%;
-        max-width: 850px;
-        text-align: left;
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        padding: 20px;
-        border-radius: 18px;
-        box-shadow: var(--shadow);
-        box-sizing: border-box;
-        position: relative;
-        z-index: 1;
-        transition: padding 0.35s ease;
-    }
-
-    .carousel-container.photo-mode {
-        padding: 14px !important;
-        cursor: zoom-out;
-    }
-
-    .carousel-container.photo-mode h3,
-    .carousel-container.photo-mode .carousel {
-        display: none !important;
-    }
-
-    .carousel-container h3 { 
-        color: var(--heading-color);
-        font-weight: 800;
-        font-size: 20px; 
-        margin-top: 0;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    /* Убираем полосу прокрутки во всех браузерах, оставляя плавный свайп и перетаскивание мышкой */
-    .carousel {
-        display: flex;
-        gap: 14px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;       /* Firefox */
-        -ms-overflow-style: none;    /* IE/Edge */
-        cursor: grab;
-        user-select: none;
-        -webkit-overflow-scrolling: touch;
-    }
-    .carousel::-webkit-scrollbar {
-        display: none;               /* Chrome / Safari / Opera */
-    }
-    .carousel.dragging {
-        cursor: grabbing;
-        scroll-snap-type: none;
-    }
-
-    .carousel img {
-        height: 185px;
-        width: 265px;
-        flex-shrink: 0;
-        object-fit: cover;
-        border-radius: 12px;
-        scroll-snap-align: start;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        cursor: zoom-in;
-        -webkit-user-drag: none;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .carousel img:hover {
-        transform: scale(1.02);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Раскрытый режим просмотра внутри карточки галереи */
-    .gallery-expanded-view {
-        display: none;
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 10;
-        max-height: 520px;
-        border-radius: 14px;
-        overflow: hidden;
-        background: #080808;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
-    }
-
-    .carousel-container.photo-mode .gallery-expanded-view {
-        display: block;
-        animation: slideshowFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .gallery-expanded-view img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 14px;
-        display: block;
-        pointer-events: none;
-    }
-
-    .gallery-nav-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        background: rgba(0, 0, 0, 0.58);
-        color: #fff;
-        font-size: 20px;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 6;
-        transition: background 0.2s ease, transform 0.1s ease;
-        -webkit-tap-highlight-color: transparent;
-    }
-    .gallery-nav-btn:hover { background: rgba(0, 0, 0, 0.82); }
-    .gallery-nav-btn:active { transform: translateY(-50%) scale(0.92); }
-    .gallery-nav-prev { left: 12px; }
-    .gallery-nav-next { right: 12px; }
-
-    @media (max-width: 768px) {
-        .carousel img { height: 155px; width: 225px; }
-    }
+    
 
     /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
      .top-right-controls {
@@ -1027,6 +897,10 @@ html, body {
             height: 270px;
         }
     }
+
+
+
+
     </style>
 </head>
 <body>
@@ -1083,15 +957,7 @@ html, body {
             <!-- КОНТЕЙНЕР КАРТОЧЕК (ЗАПОЛНЯЕТСЯ КОНСТРУКТОРОМ) -->
             <div id="attractions-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
 
-            <!-- ГАЛЕРЕЯ -->
-            <div class="carousel-container">
-                <h3>Галерея</h3>
-                <div class="carousel">
-                    <img src="1.jpg" alt="Фото 1">
-                    <img src="2.jpg" alt="Фото 2">
-                    <img src="3.jpg" alt="Фото 3">
-                    <img src="4.jpg" alt="Фото 4">
-                    <img src="5.jpg" alt="Фото 5">
+           
                 </div>
             </div>
         </div>
