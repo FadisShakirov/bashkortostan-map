@@ -146,8 +146,8 @@
         box-shadow: var(--shadow);
     }
 
-    /* ==========================================
-       АГРЕГАТОР КАТЕГОРИЙ (БЕЗ ГОРИЗОНТАЛЬНОГО СКРОЛЛА)
+     /* ==========================================
+       АГРЕГАТОР КАТЕГОРИЙ (ЕДИНЫЙ СТИЛЬ: СИНИЙ ДНЁМ / ЖЁЛТЫЙ НОЧЬЮ)
        ========================================== */
     .filter-island {
         width: 100%;
@@ -182,37 +182,61 @@
         gap: 8px;
     }
 
-    /* Тактильная кнопка с физическим «проваливанием» при нажатии */
+    /* Тактильная кнопка в едином стиле с верхними сервисами */
     .tactile-pill {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
         padding: 8px 13px;
-        border-radius: 12px;
-        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        border: 1.5px solid rgba(9, 132, 227, 0.38);
         background: var(--pill-bg);
         color: var(--pill-text);
         font-family: inherit;
         font-size: 13.5px;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
         user-select: none;
-        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 10px rgba(0, 0, 0, 0.08);
         transform: translateY(0);
-        transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease;
+        transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         -webkit-tap-highlight-color: transparent;
     }
 
-    .tactile-pill:hover { filter: brightness(1.06); }
+    /* Тёмный OLED-режим: золотисто-жёлтый контур */
+    body.dark .tactile-pill {
+        border-color: rgba(255, 209, 102, 0.35);
+    }
+
+    .tactile-pill:hover {
+        border-color: #0984e3;
+        filter: brightness(1.05);
+    }
+    body.dark .tactile-pill:hover {
+        border-color: #ffd166;
+    }
+
+    /* Момент нажатия */
     .tactile-pill:active {
         transform: translateY(3px) !important;
         box-shadow: 0 0 0 transparent !important;
     }
+
+    /* Выбранная (вдавленная) категория: синяя днём и золотисто-жёлтая ночью */
     .tactile-pill.active {
+        background: #0984e3 !important;
         color: #ffffff !important;
-        border-color: rgba(255,255,255,0.25) !important;
+        border-color: #74b9ff !important;
+        box-shadow: 0 1.5px 0 #065ca3, inset 0 2px 4px rgba(0, 0, 0, 0.22) !important;
         transform: translateY(2px);
+    }
+
+    body.dark .tactile-pill.active {
+        background: #ffd166 !important;
+        color: #080808 !important;
+        border-color: #ffeaa7 !important;
+        box-shadow: 0 1.5px 0 #b88b28, inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
     }
 
     /* ==========================================
@@ -389,7 +413,6 @@
     }
     .carousel img:hover { transform: scale(1.02); }
 
-/* ================= ВЕРХНЯЯ ПАНЕЛЬ (МЯГКОЕ КОНТУРНОЕ СВЕЧЕНИЕ БЕЗ НАЛОЖЕНИЯ) ================= */
     /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
      .top-right-controls {
         position: fixed;
@@ -505,7 +528,65 @@
 
     /* ================= МОБИЛЬНАЯ АДАПТАЦИЯ ================= */
     @media (max-width: 768px) {
-        .content-wrapper { padding: 145px 12px 25px 12px; } 
+        /* 1. Статичная верхняя панель без мерцания и перекрытия карточек при скролле */
+        .top-right-controls {
+            position: static !important;
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 12px 12px 0 12px;
+            box-sizing: border-box;
+            flex-direction: row-reverse; /* Погода справа, кнопки сервисов слева */
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            transform: none !important;
+            pointer-events: auto;
+        }
+
+        .top-services-widget {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .service-pill-btn {
+            animation: none !important;
+            transform: none !important;
+            padding: 7px 10px;
+            font-size: 12px;
+            border-color: rgba(9, 132, 227, 0.55);
+        }
+
+        body.dark .service-pill-btn {
+            border-color: rgba(255, 209, 102, 0.55);
+        }
+
+        .weather-widget {
+            padding: 7px 10px;
+            font-size: 12.5px;
+            flex-shrink: 0;
+        }
+
+        /* Выпадающее меню открывается вниз под своей кнопкой */
+        .service-menu {
+            top: calc(100% + 6px);
+            left: 0;
+            right: auto;
+            min-width: 165px;
+            transform: translateY(-8px) scale(0.96);
+        }
+
+        .service-menu.active {
+            transform: translateY(0) scale(1);
+        }
+
+        /* 2. Контент страницы начинается сразу под верхней панелью */
+        .content-wrapper {
+            padding: 18px 12px 25px 12px;
+        }
+
         h1 { font-size: 24px; line-height: 1.2; }
         h2 { font-size: 14px; margin-bottom: 15px; }
         p.main-desc { padding: 15px; font-size: 14px; margin-bottom: 16px; }
@@ -522,14 +603,6 @@
         
         .cloud-back { filter: blur(30px); }
         .cloud-mid { filter: blur(20px); }
-
-        .top-right-controls { 
-            top: 10px; right: 10px; left: 10px; 
-            flex-direction: column-reverse; align-items: flex-end; gap: 8px; 
-        }
-        .top-services-widget { flex-direction: column; align-items: flex-end; gap: 8px; }
-        .service-pill-btn, .weather-widget { padding: 6px 12px; font-size: 12px; gap: 5px; }
-        .service-menu { right: 0; left: auto; min-width: 170px; }
     }
     </style>
 </head>
