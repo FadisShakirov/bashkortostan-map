@@ -80,10 +80,15 @@
         background: rgba(0, 0, 0, 0.05); contain: strict; 
     }
 
-    .cloud { position: absolute; top: 0; left: 0; will-change: transform; transform: translateZ(0); }
+    .cloud { position: absolute; top: 0; left: 0; will-change: transform; transform: translate3d(-9999px, 0, 0); }
     .cloud-part { position: absolute; background: radial-gradient(circle at 35% 35%, #ffffff, #dcdcdc); border-radius: 50%; }
     .cloud-back { filter: blur(40px); opacity: 0.5; }
     .cloud-mid { filter: blur(25px); opacity: 0.75; }
+
+    /* Ночной оттенок для тёмного режима */
+    body.dark .cloud-part {
+        background: radial-gradient(circle at 35% 30%, #263859 0%, #17223b 55%, #0c1324 100%);
+    }
 
 
 /* ================= НОЧНОЙ РЕЖИМ ДЛЯ НЕБА, ОБЛАКОВ И ФОНА ================= */
@@ -386,16 +391,21 @@
 
 /* ================= ВЕРХНЯЯ ПАНЕЛЬ (МЯГКОЕ КОНТУРНОЕ СВЕЧЕНИЕ БЕЗ НАЛОЖЕНИЯ) ================= */
     /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
-    .top-right-controls {
+     .top-right-controls {
         position: fixed;
         top: 16px;
         right: 16px;
         z-index: 100;
         display: flex;
-        flex-direction: column-reverse; /* Ставит погоду на самый верх, а кнопки под ней */
+        flex-direction: column-reverse;
         align-items: flex-end;
         gap: 10px;
-        pointer-events: none; /* Пропускает клики мимо пустых промежутков между кнопками */
+        pointer-events: none;
+        /* Фиксируем композитный слой на мобильных GPU — убирает мерцание при скролле */
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
     }
 
     .weather-widget,
@@ -421,38 +431,27 @@
 
     .service-dropdown { position: relative; }
 
-    /* Плавное контурное сияние днём (синий) */
+    /* Плавное контурное сияние днём (без перерисовки box-shadow при скролле) */
     @keyframes contourGlowDay {
-        0%, 100% {
-            border-color: rgba(9, 132, 227, 0.35);
-            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 4px rgba(9, 132, 227, 0.15);
-        }
-        50% {
-            border-color: #0984e3;
-            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 12px rgba(9, 132, 227, 0.55), inset 0 0 6px rgba(9, 132, 227, 0.18);
-        }
+        0%, 100% { border-color: rgba(9, 132, 227, 0.32); }
+        50%      { border-color: #0984e3; }
     }
 
-    /* Плавное контурное сияние ночью (жёлтый) */
+    /* Плавное контурное сияние ночью (без перерисовки box-shadow при скролле) */
     @keyframes contourGlowNight {
-        0%, 100% {
-            border-color: rgba(255, 209, 102, 0.3);
-            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 4px rgba(255, 209, 102, 0.12);
-        }
-        50% {
-            border-color: #ffd166;
-            box-shadow: 0 3px 0 var(--pill-shadow), 0 0 13px rgba(255, 209, 102, 0.5), inset 0 0 6px rgba(255, 209, 102, 0.16);
-        }
+        0%, 100% { border-color: rgba(255, 209, 102, 0.28); }
+        50%      { border-color: #ffd166; }
     }
 
     .service-pill-btn {
         display: flex; align-items: center; gap: 7px; padding: 8px 15px;
         background: var(--card-bg);
         border: 1.5px solid rgba(9, 132, 227, 0.35);
+        box-shadow: 0 3px 0 var(--pill-shadow), 0 4px 12px rgba(0, 0, 0, 0.14);
         border-radius: 14px;
         font-family: inherit; font-weight: 800; font-size: 13.5px;
         color: var(--pill-text); cursor: pointer;
-        transform: translateY(0);
+        transform: translateZ(0);
         animation: contourGlowDay 3s ease-in-out infinite;
         transition: transform 0.08s ease, background 0.2s ease;
         -webkit-tap-highlight-color: transparent;
@@ -817,12 +816,16 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
             }
         });
 
-        // ========== ОБЛАКА ПОВЕРХ ФОНА (ВАШ ОРИГИНАЛЬНЫЙ ЭФФЕКТ ПОЛЁТА) ==========
+          // ========== ОБЛАКА ПОВЕРХ ФОНА (ОРИГИНАЛЬНЫЙ ВИД + ИСПРАВЛЕНИЕ ПРОПАДАНИЯ) ==========
         const cloudsContainer = document.getElementById('clouds-container');
-        const TARGET_FPS = 30; 
+        const isMobile = window.innerWidth <= 768;
+        const TARGET_FPS = isMobile ? 16 : 24; // 16 FPS для телефонов, 24 FPS для ПК — глазу плавно, батарее легко
         const FRAME_TIME = 1000 / TARGET_FPS;
         const cloudsData = [];
         let lastRender = 0;
+        let viewportW = window.innerWidth;
+
+        window.addEventListener('resize', () => { viewportW = window.innerWidth; });
 
         function createCloud(layerClass, speedMin, speedMax) {
             const cloud = document.createElement('div');
@@ -834,6 +837,8 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
 
             const numParts = Math.floor(Math.random() * 4) + 3; 
             let currentLeftOffset = 0;
+            let maxRightEdge = 0;
+
             for (let i = 0; i < numParts; i++) {
                 const part = document.createElement('div');
                 part.className = 'cloud-part';
@@ -843,11 +848,19 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
                 part.style.height = `${size}px`;
                 part.style.top = `${offsetY}px`;
                 part.style.left = `${currentLeftOffset}px`;
+
+                maxRightEdge = Math.max(maxRightEdge, currentLeftOffset + size);
                 currentLeftOffset += size * 0.95; 
                 cloud.appendChild(part);
             }
+
             cloudsContainer.appendChild(cloud);
-            cloudsData.push({ element: cloud, durationMs, startTime: performance.now() + delayMs });
+            cloudsData.push({
+                element: cloud,
+                widthPx: maxRightEdge + 120, // Учитываем ширину облака + размытие blur(40px)
+                durationMs,
+                startTime: performance.now() + delayMs
+            });
         }
 
         for (let i = 0; i < 5; i++) createCloud('cloud-back', 60, 150);
@@ -862,9 +875,11 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
                 const c = cloudsData[i];
                 const elapsed = time - c.startTime;
                 if (elapsed < 0) continue; 
+
                 const progress = (elapsed % c.durationMs) / c.durationMs;
-                const currentX = -100 + 200 * progress;
-                c.element.style.transform = `translate3d(${currentX}vw, 0, 0)`;
+                // Облако гарантированно заходит из-за левого края и полностью уходит за правый
+                const currentX = -c.widthPx + (viewportW + c.widthPx) * progress;
+                c.element.style.transform = `translate3d(${currentX}px, 0, 0)`;
             }
         }
         requestAnimationFrame(animateAllClouds);
