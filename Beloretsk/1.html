@@ -543,29 +543,136 @@ html, body {
     }
 
     /* ==========================================
-       ГАЛЕРЕЯ
+       ГАЛЕРЕЯ (СКРОЛЛ ПЕРЕТАСКИВАНИЕМ БЕЗ ПОЛОСЫ + РАСКРЫТИЕ ФОТО В КАРТОЧКЕ)
        ========================================== */
     .carousel-container {
-        width: 100%; max-width: 850px; text-align: left; background: var(--card-bg);
-        border: 1px solid var(--card-border); padding: 20px; border-radius: 18px; box-shadow: var(--shadow);
+        width: 100%;
+        max-width: 850px;
+        text-align: left;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 20px;
+        border-radius: 18px;
+        box-shadow: var(--shadow);
         box-sizing: border-box;
-    }
-    
-    .carousel-container h3 { 
-        color: var(--heading-color); font-weight: 800; font-size: 20px; 
-        margin-top: 0; margin-bottom: 15px; 
+        position: relative;
+        z-index: 1;
+        transition: padding 0.35s ease;
     }
 
-    .carousel { display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; }
-    .carousel::-webkit-scrollbar { height: 6px; }
-    .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
-    .carousel::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-    
-    .carousel img {
-        height: 180px; width: 260px; flex-shrink: 0; object-fit: cover; border-radius: 12px;
-        scroll-snap-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s;
+    .carousel-container.photo-mode {
+        padding: 14px !important;
+        cursor: zoom-out;
     }
-    .carousel img:hover { transform: scale(1.02); }
+
+    .carousel-container.photo-mode h3,
+    .carousel-container.photo-mode .carousel {
+        display: none !important;
+    }
+
+    .carousel-container h3 { 
+        color: var(--heading-color);
+        font-weight: 800;
+        font-size: 20px; 
+        margin-top: 0;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* Убираем полосу прокрутки во всех браузерах, оставляя плавный свайп и перетаскивание мышкой */
+    .carousel {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;       /* Firefox */
+        -ms-overflow-style: none;    /* IE/Edge */
+        cursor: grab;
+        user-select: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .carousel::-webkit-scrollbar {
+        display: none;               /* Chrome / Safari / Opera */
+    }
+    .carousel.dragging {
+        cursor: grabbing;
+        scroll-snap-type: none;
+    }
+
+    .carousel img {
+        height: 185px;
+        width: 265px;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 12px;
+        scroll-snap-align: start;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: zoom-in;
+        -webkit-user-drag: none;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .carousel img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Раскрытый режим просмотра внутри карточки галереи */
+    .gallery-expanded-view {
+        display: none;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        max-height: 520px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #080808;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .carousel-container.photo-mode .gallery-expanded-view {
+        display: block;
+        animation: slideshowFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .gallery-expanded-view img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 14px;
+        display: block;
+        pointer-events: none;
+    }
+
+    .gallery-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(0, 0, 0, 0.58);
+        color: #fff;
+        font-size: 20px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 6;
+        transition: background 0.2s ease, transform 0.1s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .gallery-nav-btn:hover { background: rgba(0, 0, 0, 0.82); }
+    .gallery-nav-btn:active { transform: translateY(-50%) scale(0.92); }
+    .gallery-nav-prev { left: 12px; }
+    .gallery-nav-next { right: 12px; }
+
+    @media (max-width: 768px) {
+        .carousel img { height: 155px; width: 225px; }
+    }
 
     /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
      .top-right-controls {
@@ -739,7 +846,7 @@ html, body {
             transform: translateX(0) scale(1);
         }
 
-        /* 2. Убрали transform: translateZ(0) с общего контейнера — это убирает мерцание при скролле на смартфоне */
+        /* 2. Контейнер контента без принудительного слоя */
         .content-wrapper {
             position: relative;
             z-index: 10;
@@ -753,11 +860,25 @@ html, body {
         .filter-island { padding: 12px; margin-bottom: 18px; }
         .tactile-pill { padding: 7px 10px; font-size: 12.5px; }
 
-        .attraction { flex-direction: column; padding: 15px; padding-bottom: 24px; margin-bottom: 20px; }
+        /* 3. Карточка: плотный фон и облегчённая анимация раскрытия убирают мерцание на мобильном GPU */
+        .attraction {
+            flex-direction: column;
+            padding: 15px;
+            padding-bottom: 24px;
+            margin-bottom: 20px;
+            background: #ffffff !important;
+            transition: box-shadow 0.3s ease !important;
+        }
+        body.dark .attraction {
+            background: #080808 !important;
+        }
         .attraction > img { width: 100%; height: 200px; }
         .attraction-info h3 { font-size: 18px; line-height: 1.3; }
+        .attraction-details {
+            transition: max-height 0.4s ease, opacity 0.3s ease !important;
+        }
 
-        /* 3. Сохраняем 3 кнопки в один ряд слева направо и на смартфоне */
+        /* 4. Сохраняем 3 кнопки в один ряд слева направо и на смартфоне */
         .buttons {
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
@@ -773,7 +894,7 @@ html, body {
             height: 15px;
         }
 
-        /* 4. Убираем мерцание слайд-шоу на мобильных GPU */
+        /* 5. Убираем мерцание слайд-шоу на мобильных GPU */
         .slideshow-dots,
         .slideshow-hint {
             backdrop-filter: none !important;
@@ -787,9 +908,14 @@ html, body {
             backface-visibility: hidden;
         }
 
-        /* 5. Уменьшаем размытие облаков на мобильных для плавного скролла без морганий */
-        .cloud-back { filter: blur(18px); }
-        .cloud-mid { filter: blur(12px); }
+        /* 6. Мягкий градиент облаков вместо тяжёлого filter: blur() — убирает моргание при раскрытии */
+        .cloud-back, .cloud-mid { filter: none !important; }
+        .cloud-part {
+            background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.82) 0%, rgba(235, 240, 245, 0.42) 45%, rgba(220, 220, 220, 0) 72%) !important;
+        }
+        body.dark .cloud-part {
+            background: radial-gradient(circle at 40% 35%, rgba(38, 56, 89, 0.82) 0%, rgba(23, 34, 59, 0.42) 48%, rgba(12, 19, 36, 0) 74%) !important;
+        }
     }
 
 /* ==========================================
