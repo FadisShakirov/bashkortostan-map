@@ -37,25 +37,32 @@
         --pill-text: #c8cdd5;
         --pill-shadow: #1c1c1c;
     }
-
-    body {
-        margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: var(--text-color); background-color: var(--bg-color); box-sizing: border-box; min-height: 100vh;
-        overflow-x: hidden; 
+html, body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        width: 100%;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        box-sizing: border-box;
     }
 
     .card-wrapper {
         position: relative;
         width: 100%;
         min-height: 100vh;
-        overflow-x: clip;
-        isolation: isolate;
     }
     
     .bg-layer {
-        position: fixed; inset: 0; background-image: url('blank.jpg'); 
-        background-size: cover; background-position: center; z-index: 0;
-        transform: scale(1.15);
+        position: fixed;
+        inset: 0;
+        background-image: url('blank.jpg'); 
+        background-size: cover;
+        background-position: center;
+        z-index: 0;
+        transform: scale(1.15) translateZ(0);
+        -webkit-transform: scale(1.15) translateZ(0);
         animation: 
             bgFlight var(--bg-speed) ease-in-out infinite alternate,
             bgLighting var(--lighting-cycle) ease-in-out infinite;
@@ -63,8 +70,8 @@
     }
 
     @keyframes bgFlight {
-        0% { transform: scale(1.15) translateX(0%); }
-        100% { transform: scale(1.15) translateX(-3%); }
+        0% { transform: scale(1.15) translate3d(0%, 0, 0); }
+        100% { transform: scale(1.15) translate3d(-3%, 0, 0); }
     }
 
     @keyframes bgLighting {
@@ -76,8 +83,14 @@
     }
 
     .clouds-layer {
-        position: fixed; inset: 0; z-index: 1; pointer-events: none;
-        background: rgba(0, 0, 0, 0.05); contain: strict; 
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.05);
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        /* Убрали contain: strict — именно оно ломало отрисовку слоёв при скролле на мобильных */
     }
 
     .cloud { position: absolute; top: 0; left: 0; will-change: transform; transform: translate3d(-9999px, 0, 0); }
@@ -528,15 +541,20 @@
 
     /* ================= МОБИЛЬНАЯ АДАПТАЦИЯ ================= */
     @media (max-width: 768px) {
-        /* 1. Статичная верхняя панель без мерцания и перекрытия карточек при скролле */
+        /* 1. Поднимаем верхнюю панель над фоном и облаками через position: relative + z-index: 20 */
         .top-right-controls {
-            position: static !important;
+            position: relative !important;
+            z-index: 20 !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
             width: 100%;
             max-width: 850px;
             margin: 0 auto;
             padding: 12px 12px 0 12px;
             box-sizing: border-box;
-            flex-direction: row-reverse; /* Погода справа, кнопки сервисов слева */
+            display: flex;
+            flex-direction: row-reverse;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
@@ -582,9 +600,12 @@
             transform: translateY(0) scale(1);
         }
 
-        /* 2. Контент страницы начинается сразу под верхней панелью */
         .content-wrapper {
-            padding: 18px 12px 25px 12px;
+            position: relative;
+            z-index: 10;
+            padding: 16px 12px 25px 12px;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
 
         h1 { font-size: 24px; line-height: 1.2; }
