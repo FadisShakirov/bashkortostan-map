@@ -923,7 +923,137 @@ html, body {
         }
     }
 
+/* ==========================================
+       ГАЛЕРЕЯ (СКРОЛЛ ПЕРЕТАСКИВАНИЕМ БЕЗ ПОЛОСЫ + РАСКРЫТИЕ ФОТО В КАРТОЧКЕ)
+       ========================================== */
+    .carousel-container {
+        width: 100%;
+        max-width: 850px;
+        text-align: left;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 20px;
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        box-sizing: border-box;
+        position: relative;
+        z-index: 1;
+        transition: padding 0.35s ease;
+    }
 
+    .carousel-container.photo-mode {
+        padding: 14px !important;
+        cursor: zoom-out;
+    }
+
+    .carousel-container.photo-mode h3,
+    .carousel-container.photo-mode .carousel {
+        display: none !important;
+    }
+
+    .carousel-container h3 { 
+        color: var(--heading-color);
+        font-weight: 800;
+        font-size: 20px; 
+        margin-top: 0;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* Убираем полосу прокрутки во всех браузерах, оставляя плавный свайп и перетаскивание мышкой */
+    .carousel {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;       /* Firefox */
+        -ms-overflow-style: none;    /* IE/Edge */
+        cursor: grab;
+        user-select: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .carousel::-webkit-scrollbar {
+        display: none;               /* Chrome / Safari / Opera */
+    }
+    .carousel.dragging {
+        cursor: grabbing;
+        scroll-snap-type: none;
+    }
+
+    .carousel img {
+        height: 185px;
+        width: 265px;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 12px;
+        scroll-snap-align: start;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: zoom-in;
+        -webkit-user-drag: none;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .carousel img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Раскрытый режим просмотра внутри карточки галереи */
+    .gallery-expanded-view {
+        display: none;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        max-height: 520px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #080808;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .carousel-container.photo-mode .gallery-expanded-view {
+        display: block;
+        animation: slideshowFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .gallery-expanded-view img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 14px;
+        display: block;
+        pointer-events: none;
+    }
+
+    .gallery-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(0, 0, 0, 0.58);
+        color: #fff;
+        font-size: 20px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 6;
+        transition: background 0.2s ease, transform 0.1s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .gallery-nav-btn:hover { background: rgba(0, 0, 0, 0.82); }
+    .gallery-nav-btn:active { transform: translateY(-50%) scale(0.92); }
+    .gallery-nav-prev { left: 12px; }
+    .gallery-nav-next { right: 12px; }
+
+    @media (max-width: 768px) {
+        .carousel img { height: 155px; width: 225px; }
+    }
 
 
     </style>
@@ -1432,6 +1562,137 @@ resetBtn.addEventListener('click', () => applyCategoryFilter(null));
             fetchWeather();
             initDistrictServices();
         });
+
+// ========== НИЖНЯЯ ГАЛЕРЕЯ: СКРОЛЛ БЕЗ ПОЛОСЫ + РАСКРЫТИЕ ФОТО В КАРТОЧКЕ ==========
+        (function initBottomGallery() {
+            const galleryCard = document.querySelector('.carousel-container');
+            const track = galleryCard ? galleryCard.querySelector('.carousel') : null;
+            if (!galleryCard || !track) return;
+
+            const images = Array.from(track.querySelectorAll('img'));
+            if (images.length === 0) return;
+
+            // 1. Удобное перетаскивание ленты мышкой на ПК (вместо полосы прокрутки)
+            let isDown = false;
+            let startX = 0;
+            let scrollLeftStart = 0;
+            let hasDragged = false;
+
+            track.addEventListener('mousedown', (e) => {
+                isDown = true;
+                hasDragged = false;
+                track.classList.add('dragging');
+                startX = e.pageX - track.offsetLeft;
+                scrollLeftStart = track.scrollLeft;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isDown) return;
+                isDown = false;
+                track.classList.remove('dragging');
+            });
+
+            track.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - track.offsetLeft;
+                const walk = (x - startX) * 1.4;
+                if (Math.abs(walk) > 6) hasDragged = true;
+                track.scrollLeft = scrollLeftStart - walk;
+            });
+
+            // Прокрутка колёсиком мыши по горизонтали при наведении на галерею
+            track.addEventListener('wheel', (e) => {
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    e.preventDefault();
+                    track.scrollLeft += e.deltaY;
+                }
+            }, { passive: false });
+
+            // 2. Раскрытие выбранной фотографии внутри самой карточки галереи
+            let currentIdx = 0;
+            let expandedView = null;
+
+            function closeGalleryPhoto() {
+                galleryCard.classList.remove('photo-mode');
+                if (expandedView) {
+                    expandedView.remove();
+                    expandedView = null;
+                }
+            }
+
+            function openGalleryPhoto(idx) {
+                currentIdx = (idx + images.length) % images.length;
+                closeGalleryPhoto();
+
+                galleryCard.classList.add('photo-mode');
+                expandedView = document.createElement('div');
+                expandedView.className = 'gallery-expanded-view';
+
+                const bigImg = document.createElement('img');
+                bigImg.src = images[currentIdx].getAttribute('src');
+                bigImg.alt = images[currentIdx].alt || '';
+
+                const hint = document.createElement('div');
+                hint.className = 'slideshow-hint';
+                hint.textContent = `✕ Закрыть (${currentIdx + 1} / ${images.length})`;
+
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'gallery-nav-btn gallery-nav-prev';
+                prevBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'gallery-nav-btn gallery-nav-next';
+                nextBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+
+                function switchPhoto(step, e) {
+                    e.stopPropagation();
+                    currentIdx = (currentIdx + step + images.length) % images.length;
+                    bigImg.src = images[currentIdx].getAttribute('src');
+                    hint.textContent = `✕ Закрыть (${currentIdx + 1} / ${images.length})`;
+                }
+
+                prevBtn.addEventListener('click', (e) => switchPhoto(-1, e));
+                nextBtn.addEventListener('click', (e) => switchPhoto(1, e));
+
+                // Свайп влево/вправо на смартфоне в раскрытом режиме
+                let touchStartX = 0;
+                expandedView.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                expandedView.addEventListener('touchend', (e) => {
+                    const diff = e.changedTouches[0].screenX - touchStartX;
+                    if (Math.abs(diff) > 40) {
+                        switchPhoto(diff < 0 ? 1 : -1, e);
+                    }
+                });
+
+                expandedView.appendChild(bigImg);
+                expandedView.appendChild(hint);
+                expandedView.appendChild(prevBtn);
+                expandedView.appendChild(nextBtn);
+                galleryCard.appendChild(expandedView);
+            }
+
+            images.forEach((img, index) => {
+                img.addEventListener('click', (e) => {
+                    if (hasDragged) return; // Не открываем фото, если пользователь просто тянул ленту
+                    e.stopPropagation();
+                    openGalleryPhoto(index);
+                });
+            });
+
+            galleryCard.addEventListener('click', (e) => {
+                if (e.target.closest('.gallery-nav-btn')) return;
+                if (galleryCard.classList.contains('photo-mode')) {
+                    closeGalleryPhoto();
+                }
+            });
+        })();
+
     </script>
 </body>
 </html>
