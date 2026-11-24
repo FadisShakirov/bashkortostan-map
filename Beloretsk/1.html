@@ -542,6 +542,31 @@ html, body {
         box-shadow: 0 2.5px 0 #0f6b00;
     }
 
+/* ==========================================
+       ГАЛЕРЕЯ
+       ========================================== */
+    .carousel-container {
+        width: 100%; max-width: 850px; text-align: left; background: var(--card-bg);
+        border: 1px solid var(--card-border); padding: 20px; border-radius: 18px; box-shadow: var(--shadow);
+        box-sizing: border-box;
+    }
+    
+    .carousel-container h3 { 
+        color: var(--heading-color); font-weight: 800; font-size: 20px; 
+        margin-top: 0; margin-bottom: 15px; 
+    }
+
+    .carousel { display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; }
+    .carousel::-webkit-scrollbar { height: 6px; }
+    .carousel::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    .carousel::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+    
+    .carousel img {
+        height: 180px; width: 260px; flex-shrink: 0; object-fit: cover; border-radius: 12px;
+        scroll-snap-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s;
+    }
+    .carousel img:hover { transform: scale(1.02); }
+
     
 
     /* ================= ФИКСИРОВАННАЯ ПРАВАЯ ПАНЕЛЬ (ПОГОДА СВЕРХУ, КНОПКИ СТОЛБИКОМ) ================= */
@@ -956,6 +981,16 @@ html, body {
 
             <!-- КОНТЕЙНЕР КАРТОЧЕК (ЗАПОЛНЯЕТСЯ КОНСТРУКТОРОМ) -->
             <div id="attractions-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+
+ <!-- ГАЛЕРЕЯ -->
+            <div class="carousel-container">
+                <h3>Галерея</h3>
+                <div class="carousel">
+                    <img src="1.jpg" alt="Фото 1">
+                    <img src="2.jpg" alt="Фото 2">
+                    <img src="3.jpg" alt="Фото 3">
+                    <img src="4.jpg" alt="Фото 4">
+                    <img src="5.jpg" alt="Фото 5">
 
            
                 </div>
