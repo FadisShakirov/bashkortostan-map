@@ -683,7 +683,7 @@ html, body {
     .srv-ostrovok { background: #0057ff; box-shadow: 0 2.5px 0 #0038a8; }
 
     /* ================= МОБИЛЬНАЯ АДАПТАЦИЯ ================= */
-   @media (max-width: 768px) {
+  @media (max-width: 768px) {
         /* 1. Вертикальный столбик строго по правому краю (как на ПК) */
         .top-right-controls {
             position: relative !important;
@@ -741,7 +741,6 @@ html, body {
             transform: translateX(0) scale(1);
         }
 
-        /* 2. Контейнер контента без принудительного слоя */
         .content-wrapper {
             position: relative;
             z-index: 10;
@@ -755,25 +754,28 @@ html, body {
         .filter-island { padding: 12px; margin-bottom: 18px; }
         .tactile-pill { padding: 7px 10px; font-size: 12.5px; }
 
-        /* 3. Карточка: плотный фон и облегчённая анимация раскрытия убирают мерцание на мобильном GPU */
+        /* 2. Убираем анимацию пересчёта геометрии карточки при нажатии (исключает моргание на мобильных) */
         .attraction {
             flex-direction: column;
             padding: 15px;
             padding-bottom: 24px;
             margin-bottom: 20px;
-            background: #ffffff !important;
-            transition: box-shadow 0.3s ease !important;
+            transition: none !important;
         }
-        body.dark .attraction {
-            background: #080808 !important;
+        .attraction:hover {
+            transform: none !important;
         }
-        .attraction > img { width: 100%; height: 200px; }
+        .attraction > img {
+            width: 100%;
+            height: 200px;
+            transition: none !important;
+        }
         .attraction-info h3 { font-size: 18px; line-height: 1.3; }
         .attraction-details {
-            transition: max-height 0.4s ease, opacity 0.3s ease !important;
+            transition: none !important;
         }
 
-        /* 4. Сохраняем 3 кнопки в один ряд слева направо и на смартфоне */
+        /* 3. Сохраняем 3 кнопки в один ряд слева направо */
         .buttons {
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
@@ -789,7 +791,11 @@ html, body {
             height: 15px;
         }
 
-        /* 5. Убираем мерцание слайд-шоу на мобильных GPU */
+        /* 4. Убираем анимацию появления слайд-шоу и снимаем принудительные GPU-слои с картинок */
+        .attraction.photo-mode .card-slideshow,
+        .carousel-container.photo-mode .gallery-expanded-view {
+            animation: none !important;
+        }
         .slideshow-dots,
         .slideshow-hint {
             backdrop-filter: none !important;
@@ -798,19 +804,13 @@ html, body {
         }
         .card-slideshow,
         .card-slideshow img.slide-img {
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            backface-visibility: hidden;
+            transform: none !important;
+            -webkit-transform: none !important;
         }
 
-        /* 6. Мягкий градиент облаков вместо тяжёлого filter: blur() — убирает моргание при раскрытии */
-        .cloud-back, .cloud-mid { filter: none !important; }
-        .cloud-part {
-            background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.82) 0%, rgba(235, 240, 245, 0.42) 45%, rgba(220, 220, 220, 0) 72%) !important;
-        }
-        body.dark .cloud-part {
-            background: radial-gradient(circle at 40% 35%, rgba(38, 56, 89, 0.82) 0%, rgba(23, 34, 59, 0.42) 48%, rgba(12, 19, 36, 0) 74%) !important;
-        }
+        /* 5. Возвращаем оригинальные пушистые облака с размытием */
+        .cloud-back { filter: blur(30px) !important; }
+        .cloud-mid  { filter: blur(20px) !important; }
     }
 
 /* ==========================================
